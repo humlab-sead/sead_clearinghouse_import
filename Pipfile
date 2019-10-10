@@ -1,0 +1,19 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "==2.3.1"
+pytest = "*"
+
+[packages]
+pytidylib = "==0.3.2"
+numpy = "*"
+pandas = "*"
+psycopg2-binary = "*"
+xlrd = "*"
+lxml = "*"
+
+[requires]
+python_version = "3.7"

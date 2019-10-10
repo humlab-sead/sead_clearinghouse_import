@@ -1,0 +1,26 @@
+{
+    "editor.rulers": [90],
+    "editor.roundedSelection": false,
+    "explorer.openEditors.visible": 0,
+    "files.exclude": {
+        "**/.git": true,
+        "**/.DS_Store": true,
+        //".vscode": true,
+        "**/__pycache__": true,
+        "**/**/*.pyc": true
+    },
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.pycodestyleEnabled": false,
+    "python.linting.pylintArgs": [
+        "--rcfile=${workspaceFolder}\\.pylintrc"
+    ],
+    "python.dataScience.enableAutoMoveToNextCell": false,
+    "python.dataScience.ignoreVscodeTheme": true,
+    "workbench.sideBar.location": "left",
+    "python.pythonPath": "C:\\Users\\roma0050\\.virtualenvs\\sead_clearinghouse_import-dLHtNNd4\\Scripts\\python.exe"
+}
