@@ -66,6 +66,8 @@ class XmlProcessor:
 
                 fields = data.MetaData.table_fields(table_name)
 
+                column_id_not_PK_FK_log = set({})
+
                 for index, record in data_table.iterrows():
 
                     try:
@@ -98,7 +100,10 @@ class XmlProcessor:
 
                                 # TODO Move to Specification
                                 if column_name[-3:] == '_id' and not (is_fk or is_pk):
-                                    logger.warning('Table %s, FK? column %s: Column ending with _id not marked as PK/FK', table_name, column_name)
+                                    log_key = "{}.{}".format(table_name, column_name)
+                                    if log_key not in column_id_not_PK_FK_log:
+                                        column_id_not_PK_FK_log.add(log_key)
+                                        logger.warning('Table %s, FK? column %s: Column ending with _id not marked as PK/FK', table_name, column_name)
 
                                 # TODO Move to Specification
                                 if column_name not in data_row.keys():
@@ -199,10 +204,19 @@ class XmlProcessor:
         self.specification.is_satisfied_by(data)
 
         if len(self.specification.warnings) > 0:
-            logger.info("\n".join(self.specification.warnings))
+            for warning in self.specification.warnings:
+                try: logger.info(warning)
+                except UnicodeEncodeError as ex:
+                    logger.warning('WARNING! Failed to output warning message')
+                    logger.exception(ex)
 
         if len(self.specification.errors) > 0:
-            logger.error("\n".join(self.specification.errors))
+            for error in self.specification.errors:
+                try: logger.error(error)
+                except UnicodeEncodeError as ex:
+                    logger.warning('WARNING! Failed to output error message')
+                    logger.exception(ex)
+
             raise model.DataImportError("Process ABORTED since data does not conform to SPECIFICATION")
 
         data_tablenames = data.data_tablenames if table_names is None else table_names
