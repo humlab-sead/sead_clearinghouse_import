@@ -85,9 +85,9 @@ class AppService:
         except: # pylint: disable=bare-except
             logger.exception('ABORTED CRITICAL ERROR %s ', basename)
 
-def main():
+def main(cmd_args=None):
 
-    opts = options.parse_args()
+    opts = options.parse_args(cmd_args)
 
     logger.warning("Deploy target is %s on %s", opts.dbname, opts.dbhost)
 
