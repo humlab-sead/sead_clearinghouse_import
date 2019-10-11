@@ -9,7 +9,7 @@
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS,.git,.ipynb_checkpoints
+ignore=CVS,.git,.ipynb_checkpoints, .pytest_cache, lib, data
 
 # Pickle collected data for later comparisons.
 persistent=yes
