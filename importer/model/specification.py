@@ -95,11 +95,24 @@ class DataTableSpecification:
                 }
 
                 for _, item in fields.loc[(~fields.column_name.isin(self.ignore_columns))].iterrows():
+
                     column = item.to_dict()
-                    if column['column_name'] in data_table.columns:
-                        data_column_type = data_table.dtypes[column['column_name']].name
+
+                    column_name = column['column_name']
+
+                    if column_name in data_table.columns:
+
+                        data_column_type = data_table.dtypes[column_name].name
+
                         if not type_compatibility_matrix.get((column['type'], data_column_type), False):
-                            self.warnings.append("WARNING Type clash: {}.{} {}<=>{}".format(table_name, column['column_name'], column['type'], data_column_type))
+                            self.warnings.append("WARNING Type clash: {}.{} {}<=>{}".format(table_name, column_name, column['type'], data_column_type))
+
+                        is_fk = data.MetaData.is_fk(table_name, column_name)
+                        is_pk = data.MetaData.is_pk(table_name, column_name)
+
+                        if column_name[-3:] == '_id' and not (is_fk or is_pk):
+                            self.warnings.append('WARNING! Table %s, column %s ends with _id but NOT marked as PK/FK', table_name, column_name)
 
         except Exception as e:
             self.errors.append('Error occurred when validating {}: {}'.format(table_name, str(e)))
+
