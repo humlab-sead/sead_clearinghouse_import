@@ -81,7 +81,6 @@ class ValueData:
 
         for table_name in self.data_tablenames:
             try:
-                print(table_name)
                 data_table = self.DataTables[table_name]
                 table_definition = self.MetaData.get_table(table_name)
 
@@ -100,6 +99,7 @@ class ValueData:
                 # Change 20180628: Set system_id as index for fast
                 # data_table.set_index('system_id', drop=False, inplace=True)
             except DataImportError as _:
+                logger.error("ERROR {} when updating system_id ".format(table_name))
                 logger.exception('update_system_id')
                 continue
         return self
