@@ -1,11 +1,9 @@
 import io
-import tidylib
 import base64
-import zlib
 import logging
-import time
-from lxml import etree
 from xml.dom import minidom
+import time
+import zlib
 
 def setup_logger(logger, filename=None, level=logging.DEBUG):
     '''
@@ -48,7 +46,7 @@ def tidy_xml(path, suffix='_tidy'):
         tidy_path = path[:-4] + '{}.xml'.format(suffix)
         with io.open(tidy_path, 'wb') as outstream:
             outstream.write(tidy_doc)
-    except OSError as ex:
+    except OSError as _:
         print("fatal: Tidy XML failed. Is tidy installed? (sudo apt-get install tidy)")
         return path
 
