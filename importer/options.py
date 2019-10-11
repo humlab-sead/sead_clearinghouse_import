@@ -22,7 +22,11 @@ def setup_parser():
 
     return parser
 
-def parse_args():
+def parse_args(args=None):
     parser = setup_parser()
-    opts = parser.parse_args()
+    if args is not None:
+        argv = args.split() if isinstance(args, str) else argv
+        opts = parser.parse_args(argv)
+    else:
+        opts = parser.parse_args()
     return opts
