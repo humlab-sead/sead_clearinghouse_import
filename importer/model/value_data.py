@@ -1,7 +1,9 @@
 import logging
+import functools
 import pandas as pd
 import numpy as np
 from importer import utility
+from . exceptions import DataImportError
 
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
@@ -16,31 +18,36 @@ class ValueData:
         self.DataTables = None
         self.DataTableIndex = None
 
+    def load_sheet(self, reader, sheetname):
+        df = None
+        try:
+            df = reader.parse(sheetname)
+        except: # pylint: disable=bare-except
+            pass
+        logger.info('SHEET %s: %s', sheetname, 'READ' if df is not None else 'NOT FOUND')
+        return df
+
     def load(self, source):
 
         reader = pd.ExcelFile(source) if isinstance(source, str) else source
-
-        def load_sheet(sheetname):
-            df = None
-            try:
-                df = reader.parse(sheetname)
-            except: # pylint: disable=W0702
-                pass
-            logger.info('SHEET %s: %s', sheetname, 'READ' if df is not None else 'NOT FOUND')
-            return df
+        for j, y in self.MetaData.Tables.iterrows():
+            print("{} - {}".format(y['table_name'], y['excel_sheet']))
 
         self.DataTables = {
-            x['table_name']: load_sheet(x['excel_sheet']) for i, x in self.MetaData.Tables.iterrows()
+            x['table_name']: self.load_sheet(reader, x['excel_sheet']) for i, x in self.MetaData.Tables.iterrows()
         }
-        self.DataTableIndex = load_sheet('data_table_index')
+
+        self.DataTableIndex = self.load_sheet(reader, 'data_table_index')
+
         if self.DataTableIndex is None:
-            logger.exception('Data file has no data table index')
+            logger.exception('Data file has no data_table_index')
+
         reader.close()
         self.update_system_id()
         return self
 
     def store(self, filename):
-        writer = pd.ExcelWriter(filename)
+        writer = pd.ExcelWriter(filename) # pylint: disable=abstract-class-instantiated
         for (table_name, df) in self.DataTables:
             df.to_excel(writer, table_name)  # , index=False)
         writer.save()
@@ -74,6 +81,7 @@ class ValueData:
 
         for table_name in self.data_tablenames:
             try:
+                print(table_name)
                 data_table = self.DataTables[table_name]
                 table_definition = self.MetaData.get_table(table_name)
 
@@ -86,12 +94,12 @@ class ValueData:
                     continue
 
                 if 'system_id' not in data_table.columns:
-                    raise model.DataImportError('CRITICAL ERROR Table {} has no column named "system_id"'.format(table_name))
+                    raise DataImportError('CRITICAL ERROR Table {} has no column named "system_id"'.format(table_name))
 
                 data_table.loc[np.isnan(data_table.system_id), 'system_id'] = data_table.loc[np.isnan(data_table.system_id), pk_name]
                 # Change 20180628: Set system_id as index for fast
                 # data_table.set_index('system_id', drop=False, inplace=True)
-            except model.DataImportError as _:
+            except DataImportError as _:
                 logger.exception('update_system_id')
                 continue
         return self
@@ -105,4 +113,4 @@ class ValueData:
             set(self.DataTables[foreign_name][pk_name].loc[~np.isnan(self.DataTables[foreign_name][pk_name])].tolist())
             for foreign_name in ref_tablenames if not self.DataTables[foreign_name] is None
         ]
-        return reduce(utility.flatten_sets, sets_of_keys or [], [])
+        return functools.reduce(utility.flatten_sets, sets_of_keys or [], [])
