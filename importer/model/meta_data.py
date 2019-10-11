@@ -1,17 +1,10 @@
 import pandas as pd
-import numpy as np
 import logging
-from functools import reduce
 from importer import utility
+from functools import reduce
 
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
-
-class DataImportError(Exception):
-    '''
-    Base class for other exceptions
-    '''
-    pass
 
 class MetaData:
 
@@ -72,6 +65,8 @@ class MetaData:
         self.ForeignKeys = pd.merge(self.Columns, self.PrimaryKeys, how='inner', left_on=['column_name', 'class'], right_on=['column_name', 'class_name'])[['table_name_x', 'table_name_y', 'column_name', 'class_name' ]]
         self.ForeignKeys = self.ForeignKeys[self.ForeignKeys.table_name_x != self.ForeignKeys.table_name_y]
 
+        # self.CandidateForeignKeys = self.Columns[self.Columns.str.endsWith('_id')]
+
         self._ForeignKey_Hash = {
             x: True for x in list(self.ForeignKeys.table_name_x + '#' + self.ForeignKeys.column_name)
         }
@@ -130,4 +125,6 @@ class MetaData:
 
     def get_tablenames_referencing(self, table_name):
         return self.ForeignKeys.loc[(self.ForeignKeys.table_name_y == table_name)]['table_name_x'].tolist()
+
+# FIXME: class CandidateKeySpecification():
 
