@@ -30,8 +30,6 @@ class ValueData:
     def load(self, source):
 
         reader = pd.ExcelFile(source) if isinstance(source, str) else source
-        for j, y in self.MetaData.Tables.iterrows():
-            print("{} - {}".format(y['table_name'], y['excel_sheet']))
 
         self.DataTables = {
             x['table_name']: self.load_sheet(reader, x['excel_sheet']) for i, x in self.MetaData.Tables.iterrows()
