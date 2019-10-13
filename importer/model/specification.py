@@ -149,6 +149,11 @@ class DataTableSpecification:
         if data_table.system_id.isnull().values.any():
             self.errors.append("CRITICAL ERROR {0} has missing system id values".format(table_name))
 
+        duplicate_mask = data_table[~data_table.system_id.isna()].duplicated('system_id')
+        duplicates = [ int(x) for x in set(data_table[duplicate_mask].system_id) ]
+        if len(duplicates) > 0:
+            error_values = " ".join([ str(x) for x in duplicates])[:200]
+            self.errors.append("CRITICAL ERROR Table {} has DUPLICATE system ids: {}".format(table_name, error_values))
 
     def is_satisfied_by_id_is_fk_convention(self, data, table_name, column):
 
