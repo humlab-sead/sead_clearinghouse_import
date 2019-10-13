@@ -9,6 +9,8 @@ import logging
 import importer.utility as utility
 import importer.model as model
 
+from . import preprocess
+
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
 
@@ -240,6 +242,8 @@ def process_excel_to_xml(option, basename, timestamp):
     meta_data = model.MetaData().load(meta_filename)
 
     data = model.ValueData(meta_data).load(data_filename)
+
+    data = preprocess.update_system_id(data)
 
     with io.open(output_filename, 'w', encoding='utf8') as outstream:
         service = XmlProcessor(outstream)
