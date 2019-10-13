@@ -7,11 +7,13 @@ import logging
 from . import model
 from . import options
 from . import utility
+from . import preprocess
 from . import parser
 
 logger = logging.getLogger('Excel XML processor')
 
 jj = os.path.join
+
 
 class AppService:
 
@@ -26,6 +28,33 @@ class AppService:
              port=opts.port
          )
         self.repository = model.SubmissionRepository(db_opts)
+
+    def process_excel_to_xml(self, option, basename, timestamp):
+        '''
+        Reads Excel files and convert content to an CH XML-file.
+        Stores data in output_filename and returns filename for a cleaned up version of the XML
+        '''
+        meta_filename = jj(option.input_folder, option.meta_filename)
+        data_filename = jj(option.input_folder, option.data_filename)
+
+        output_filename = jj(option.output_folder, '{}_{}.xml'.format(basename, timestamp))
+
+        meta_data = model.MetaData().load(meta_filename)
+
+        data = model.ValueData(meta_data).load(data_filename)
+
+        data = preprocess.update_system_id(data)
+
+        with io.open(output_filename, 'w', encoding='utf8') as outstream:
+            service = parser.XmlProcessor(outstream)
+            service.process(data, option.table_names)
+
+        tidy_output_filename = utility.tidy_xml(output_filename)
+
+        if tidy_output_filename != output_filename:
+            os.remove(output_filename)
+
+        return tidy_output_filename
 
     def upload_xml(self, xml_filename, data_types=''):
 
@@ -61,7 +90,7 @@ class AppService:
                     logger.info(' ---> UPLOADING EXISTING FILE {}'.format(option.xml_filename))
                 else:
                     logger.info(' ---> PARSING EXCEL EXCEL')
-                    option.xml_filename = parser.process_excel_to_xml(option, basename, timestamp)
+                    option.xml_filename = self.process_excel_to_xml(option, basename, timestamp)
 
                 logger.info(' ---> UPLOAD STARTED!')
                 option.submission_id = self.upload_xml(option.xml_filename, data_types=option.data_types)

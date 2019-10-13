@@ -9,8 +9,6 @@ import logging
 import importer.utility as utility
 import importer.model as model
 
-from . import preprocess
-
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
 
@@ -229,30 +227,4 @@ class XmlProcessor:
         self.process_lookups(data, extra_names)
         self.process_data(data, data_tablenames)
         self.emit('</sead-data-upload>')
-
-def process_excel_to_xml(option, basename, timestamp):
-    '''
-    Reads Excel files and convert content to an CH XML-file.
-    Stores data in output_filename and returns filename for a cleaned up version of the XML
-    '''
-    meta_filename = jj(option.input_folder, option.meta_filename)
-    data_filename = jj(option.input_folder, option.data_filename)
-    output_filename = jj(option.output_folder, '{}_{}.xml'.format(basename, timestamp))
-
-    meta_data = model.MetaData().load(meta_filename)
-
-    data = model.ValueData(meta_data).load(data_filename)
-
-    data = preprocess.update_system_id(data)
-
-    with io.open(output_filename, 'w', encoding='utf8') as outstream:
-        service = XmlProcessor(outstream)
-        service.process(data, option.table_names)
-
-    tidy_output_filename = utility.tidy_xml(output_filename)
-
-    if tidy_output_filename != output_filename:
-        os.remove(output_filename)
-
-    return tidy_output_filename
 
