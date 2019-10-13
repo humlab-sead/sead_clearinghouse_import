@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pylint = "==2.3.1"
 pytest = "*"
+rope = "*"
 
 [packages]
 pytidylib = "==0.3.2"
