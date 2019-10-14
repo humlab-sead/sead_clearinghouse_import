@@ -38,67 +38,67 @@ NUMERIC_TYPES = [ 'numeric', 'integer', 'smallint' ]
 class DataTableSpecification:
 
     '''
-    Specification class that tests validity of data
+    Specification class that tests validity of submission
     '''
     def __init__(self):
         self.errors = []
         self.warnings = []
         self.ignore_columns = [ 'date_updated' ]
 
-    def _get_table_metadata_fields(self, data, table_name):
-        fields = data.MetaData.table_fields(table_name)
+    def _get_table_metadata_fields(self, submission, table_name):
+        fields = submission.MetaData.table_fields(table_name)
         fields = fields.loc[(~fields.column_name.isin(self.ignore_columns))].iterrows()
         return fields
 
-    def is_satisfied_by(self, data):
+    def is_satisfied_by(self, submission):
 
         self.errors = []
         self.warnings = []
 
-        for table_name in data.data_tablenames:
-            self.is_satisfied_by_table(data, table_name)
+        for table_name in submission.data_tablenames:
+            self.is_satisfied_by_table(submission, table_name)
 
         return len(self.errors) == 0
 
-    def is_satisfied_by_table(self, data, table_name):
+    def is_satisfied_by_table(self, submission, table_name):
 
         try:
             # Must exist as data table in metadata
-            self.is_satisfied_by_table_must_exist_policy(data, table_name)
+            self.is_satisfied_by_table_must_exist_policy(submission, table_name)
 
-            if not data.exists(table_name):
+            if not submission.exists(table_name):
                 return
 
-            data_table = data.DataTables[table_name]
+            data_table = submission.DataTables[table_name]
 
-            self.is_satisfied_by_system_id_policy(data, table_name, data_table)
-            self.is_satisfied_by_no_missing_columns_policy(data, table_name, data_table)
-            self.is_satisfied_by_has_pk_policy(data, table_name, data_table)
+            self.is_satisfied_by_system_id_policy(submission, table_name, data_table)
+            self.is_satisfied_by_no_missing_columns_policy(submission, table_name, data_table)
+            self.is_satisfied_by_has_pk_policy(submission, table_name, data_table)
 
-            for _, field in self._get_table_metadata_fields(data, table_name):
+            for _, field in self._get_table_metadata_fields(submission, table_name):
 
                 column = field.to_dict()
 
                 self.is_satisfied_by_type_match_policy(data_table, table_name, column)
                 self.is_satisfied_by_is_numeric_policy(data_table, table_name, column)
-                self.is_satisfied_by_id_is_fk_convention(data, table_name, column)
+                self.is_satisfied_by_id_is_fk_convention(submission, table_name, column)
 
 
         except Exception as e:
             raise
             self.errors.append('CRITICAL ERROR occurred when validating {}: {}'.format(table_name, str(e)))
 
-    def is_satisfied_by_table_must_exist_policy(self, data, table_name):
+    def is_satisfied_by_table_must_exist_policy(self, submission, table_name):
 
-        if table_name not in data.tablenames:
-            """ Not in data table index sheet """
-            self.errors.append("CRITICAL ERROR Table {0} not defined as data table".format(table_name))
+        if table_name not in submission.tablenames:
+            """ Not in submission table index sheet """
+            self.errors.append("CRITICAL ERROR Table {0} not defined as submission table".format(table_name))
 
-        if not data.MetaData.is_table(table_name):
+        if not submission.MetaData.is_table(table_name):
             """ Not defined in metadata """
             self.errors.append("{0} not found in meta data".format(table_name))
 
-        if not data.exists(table_name):
+        if not submission.exists(table_name):
             """ No data sheet """
             self.errors.append("{0} has NO DATA!".format(table_name))
 
@@ -132,16 +132,16 @@ class DataTableSpecification:
             error_values = " ".join(list(set(series[~ok_mask])))[:200]
             self.errors.append("CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(table_name, column['column_name'], error_values))
 
-    def is_satisfied_by_has_pk_policy(self, data, table_name, data_table):
+    def is_satisfied_by_has_pk_policy(self, submission, table_name, data_table):
 
-        pk_name = data.MetaData.get_pk_name(table_name)
+        pk_name = submission.MetaData.get_pk_name(table_name)
 
         if pk_name not in data_table.columns:
             self.errors.append('CRITICAL ERROR Table {} has no PK named "{}"'.format(table_name, pk_name))
 
-    def is_satisfied_by_system_id_policy(self, data, table_name, data_table): # pylint: disable=unused-argument
+    def is_satisfied_by_system_id_policy(self, submission, table_name, data_table): # pylint: disable=unused-argument
         # Must have a system identity
-        # if not data.has_system_id(table_name):
+        # if not submission.has_system_id(table_name):
         if 'system_id' not in data_table.columns:
             self.errors.append("{0} has no system id data column".format(table_name))
             return
@@ -155,22 +155,22 @@ class DataTableSpecification:
             error_values = " ".join([ str(x) for x in duplicates])[:200]
             self.errors.append("CRITICAL ERROR Table {} has DUPLICATE system ids: {}".format(table_name, error_values))
 
-    def is_satisfied_by_id_is_fk_convention(self, data, table_name, column):
+    def is_satisfied_by_id_is_fk_convention(self, submission, table_name, column):
 
         column_name = column['column_name']
 
-        is_fk = data.MetaData.is_fk(table_name, column_name)
-        is_pk = data.MetaData.is_pk(table_name, column_name)
+        is_fk = submission.MetaData.is_fk(table_name, column_name)
+        is_pk = submission.MetaData.is_pk(table_name, column_name)
 
         if column_name[-3:] == '_id' and not (is_fk or is_pk):
             self.warnings.append('WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(table_name, column_name))
 
-    def is_satisfied_by_no_missing_columns_policy(self, data, table_name, data_table): # pylint: disable=unused-argument
+    def is_satisfied_by_no_missing_columns_policy(self, submission, table_name, data_table): # pylint: disable=unused-argument
         """ All fields in MetaData.Table.Fields MUST exist in DataTable.columns
         """
-        meta_column_names = sorted(data.MetaData.table_fields(table_name)['column_name'].values.tolist())
-        data_column_names = sorted(data.DataTables[table_name].columns.values.tolist()) \
-            if data.exists(table_name) and data.MetaData.is_table(table_name) else []
+        meta_column_names = sorted(submission.MetaData.table_fields(table_name)['column_name'].values.tolist())
+        data_column_names = sorted(submission.DataTables[table_name].columns.values.tolist()) \
+            if submission.exists(table_name) and submission.MetaData.is_table(table_name) else []
 
         missing_column_names = list(set(meta_column_names) - set(data_column_names) - set(self.ignore_columns))
         extra_column_names = list(set(data_column_names) - set(meta_column_names) - set(self.ignore_columns) - set(['system_id']))
@@ -180,4 +180,3 @@ class DataTableSpecification:
 
         if len(extra_column_names) > 0:
             self.warnings.append("WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names)))
-

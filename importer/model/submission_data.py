@@ -8,10 +8,10 @@ from . exceptions import DataImportError
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
 
-class ValueData:
+class SubmissionData:
 
     '''
-    Logic dealing with the data (load etc)
+    Logic dealing with the submission (load etc)
     '''
     def __init__(self, metaData):
         self.MetaData = metaData
@@ -38,7 +38,7 @@ class ValueData:
         self.DataTableIndex = self.load_sheet(reader, 'data_table_index')
 
         if self.DataTableIndex is None:
-            logger.exception('Data file has no data_table_index')
+            logger.exception('submission file has no data_table_index')
 
         reader.close()
 

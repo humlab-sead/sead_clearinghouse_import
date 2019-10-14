@@ -38,22 +38,22 @@ class XmlProcessor:
         first, *rest = undescore_name.split('_')
         return first + ''.join(word.capitalize() for word in rest)
 
-    def process_data(self, data, table_names, max_rows=0):
+    def process_data(self, submission, table_names, max_rows=0):
         '''
         Import assumes that all FK references points to a local "system_id" in referenced table
-        All data tables MUST have a non null "system_id"
-        All data tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
+        All submission tables MUST have a non null "system_id"
+        All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
         '''
         date_updated = ''.format(time.strftime("%Y-%m-%d %H%M")) # pylint: disable=E1305
         for table_name in table_names:
             try:
 
-                referenced_keyset = set(data.get_referenced_keyset(table_name))
+                referenced_keyset = set(submission.get_referenced_keyset(table_name))
 
                 logger.info("Processing %s...", table_name)
 
-                data_table = data.DataTables[table_name]
-                table_definition = data.MetaData.get_table(table_name)
+                data_table = submission.DataTables[table_name]
+                table_definition = submission.MetaData.get_table(table_name)
                 pk_name = table_definition['pk_name']
 
                 table_namespace = "com.sead.database.{}".format(table_definition['java_class'])
@@ -64,7 +64,7 @@ class XmlProcessor:
                 self.emit('<{} length="{}">'.format(table_definition['java_class'], data_table.shape[0]), 1)  # data_table.length
                 # self.emit_tag(table_definition['java_class'], dict(length=data_table.shape[0]), close=False, indent=1)
 
-                fields = data.MetaData.table_fields(table_name)
+                fields = submission.MetaData.table_fields(table_name)
 
                 column_id_not_PK_FK_log = set({})
 
@@ -94,8 +94,8 @@ class XmlProcessor:
                             for _, item in fields.loc[(~fields.column_name.isin(self.ignore_columns))].iterrows():
                                 column = item.to_dict()
                                 column_name = column['column_name']
-                                is_fk = data.MetaData.is_fk(table_name, column_name)
-                                is_pk = data.MetaData.is_pk(table_name, column_name)
+                                is_fk = submission.MetaData.is_fk(table_name, column_name)
+                                is_pk = submission.MetaData.is_pk(table_name, column_name)
                                 class_name = column['class']
 
                                 # TODO Move to Specification
@@ -107,7 +107,7 @@ class XmlProcessor:
 
                                 # TODO Move to Specification
                                 if column_name not in data_row.keys():
-                                    logger.warning('Table %s, FK column %s: META field name not found in DATA', table_name, column_name)
+                                    logger.warning('Table %s, FK column %s: META field name not found in submission', table_name, column_name)
                                     continue
 
                                 camel_case_column_name = self.camel_case_name(column_name)
@@ -121,12 +121,12 @@ class XmlProcessor:
                                 else:  # value is a fk system_id
                                     try:
 
-                                        fk_table_name = data.MetaData.get_tablename_by_classname(class_name)
+                                        fk_table_name = submission.MetaData.get_tablename_by_classname(class_name)
                                         if fk_table_name is None:
                                             logger.warning('Table %s, FK column %s: unable to resolve FK class %s', table_name, column_name, class_name)
                                             continue
 
-                                        fk_data_table = data.DataTables[fk_table_name]
+                                        fk_data_table = submission.DataTables[fk_table_name]
 
                                         if np.isnan(value):
                                             # CHANGE: Cannot allow id="NULL" as foreign key
@@ -173,8 +173,8 @@ class XmlProcessor:
                         raise
 
                 if len(referenced_keyset) > 0 and max_rows == 0:
-                    logger.warning('Warning: %s has %s referenced keys not found in data', table_name, len(referenced_keyset))
-                    class_name = data.MetaData.get_classname_by_tablename(table_name)
+                    logger.warning('Warning: %s has %s referenced keys not found in submission', table_name, len(referenced_keyset))
+                    class_name = submission.MetaData.get_classname_by_tablename(table_name)
                     for key in referenced_keyset:
                         self.emit('<com.sead.database.{} id="{}" clonedId="{}"/>'.format(class_name, int(key), int(key)), 2)
                 self.emit('</{}>'.format(table_definition['java_class']), 1)
@@ -183,25 +183,25 @@ class XmlProcessor:
                 logger.exception('CRITICAL ERROR')
                 raise
 
-    def process_lookups(self, data, table_names):
+    def process_lookups(self, submission, table_names):
 
         for table_name in table_names:
 
-            referenced_keyset = set(data.get_referenced_keyset(table_name))
+            referenced_keyset = set(submission.get_referenced_keyset(table_name))
 
             if len(referenced_keyset) == 0:
                 logger.info("Skipping %s: not referenced", table_name)
                 continue
 
-            class_name = data.MetaData.get_classname_by_tablename(table_name)
+            class_name = submission.MetaData.get_classname_by_tablename(table_name)
             rows = list(map(lambda x: '<com.sead.database.{} id="{}" clonedId="{}"/>'.format(class_name, int(x), int(x)), referenced_keyset))
             xml = '<{} length="{}">\n    {}\n</{}>\n'.format(class_name, len(rows), "\n    ".join(rows), class_name)
 
             self.emit(xml)
 
-    def process(self, data, table_names=None, extra_names=None):
+    def process(self, submission, table_names=None, extra_names=None):
 
-        self.specification.is_satisfied_by(data)
+        self.specification.is_satisfied_by(submission)
 
         if len(self.specification.warnings) > 0:
             for warning in self.specification.warnings:
@@ -217,14 +217,14 @@ class XmlProcessor:
                     logger.warning('WARNING! Failed to output error message')
                     logger.exception(ex)
 
-            raise model.DataImportError("Process ABORTED since data does not conform to SPECIFICATION")
+            raise model.DataImportError("Process ABORTED since submission does not conform to SPECIFICATION")
 
-        data_tablenames = data.data_tablenames if table_names is None else table_names
-        extra_names = set(data.MetaData.tablenames) - set(data.tablenames) if extra_names is None else extra_names
+        data_tablenames = submission.data_tablenames if table_names is None else table_names
+        extra_names = set(submission.MetaData.tablenames) - set(submission.tablenames) if extra_names is None else extra_names
 
         self.emit('<?xml version="1.0" ?>')
         self.emit('<sead-data-upload>')
-        self.process_lookups(data, extra_names)
-        self.process_data(data, data_tablenames)
+        self.process_lookups(submission, extra_names)
+        self.process_data(submission, data_tablenames)
         self.emit('</sead-data-upload>')
 

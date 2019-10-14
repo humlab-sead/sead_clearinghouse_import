@@ -5,12 +5,12 @@ import numpy as np
 
 logger = logging.getLogger('Excel XML processor')
 
-def update_system_id(data):
+def update_system_id(submission):
 
-    for table_name in data.data_tablenames:
+    for table_name in submission.data_tablenames:
         try:
-            data_table = data.DataTables[table_name]
-            table_definition = data.MetaData.get_table(table_name)
+            data_table = submission.DataTables[table_name]
+            table_definition = submission.MetaData.get_table(table_name)
 
             pk_name = table_definition['pk_name']
 
@@ -32,7 +32,7 @@ def update_system_id(data):
             logger.exception('update_system_id')
             continue
 
-    return data
+    return submission
 
 # def cast_table(self, table_name):
 #     data_table = self.ValueData.Tables[table_name]

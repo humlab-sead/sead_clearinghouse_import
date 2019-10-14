@@ -32,7 +32,7 @@ class AppService:
     def process_excel_to_xml(self, option, basename, timestamp):
         '''
         Reads Excel files and convert content to an CH XML-file.
-        Stores data in output_filename and returns filename for a cleaned up version of the XML
+        Stores submission in output_filename and returns filename for a cleaned up version of the XML
         '''
         meta_filename = jj(option.input_folder, option.meta_filename)
         data_filename = jj(option.input_folder, option.data_filename)
@@ -41,13 +41,13 @@ class AppService:
 
         meta_data = model.MetaData().load(meta_filename)
 
-        data = model.ValueData(meta_data).load(data_filename)
+        submission = model.SubmissionData(meta_data).load(data_filename)
 
-        data = preprocess.update_system_id(data)
+        submission = preprocess.update_system_id(submission)
 
         with io.open(output_filename, 'w', encoding='utf8') as outstream:
             service = parser.XmlProcessor(outstream)
-            service.process(data, option.table_names)
+            service.process(submission, option.table_names)
 
         tidy_output_filename = utility.tidy_xml(output_filename)
 
