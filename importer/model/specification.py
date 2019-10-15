@@ -74,6 +74,7 @@ class DataTableSpecification:
             self.is_satisfied_by_system_id_policy(submission, table_name, data_table)
             self.is_satisfied_by_no_missing_columns_policy(submission, table_name, data_table)
             self.is_satisfied_by_has_pk_policy(submission, table_name, data_table)
+            self.is_satisfied_by_lookup_data_policy(submission, table_name)
 
             for _, field in self._get_table_metadata_fields(submission, table_name):
 
@@ -180,3 +181,18 @@ class DataTableSpecification:
 
         if len(extra_column_names) > 0:
             self.warnings.append("WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names)))
+
+    def is_satisfied_by_lookup_data_policy(self, submission, table_name):
+
+        if not submission.exists(table_name):
+            return
+
+        if not submission.MetaData.is_lookup_table(table_name):
+            return
+
+        data_table = submission.DataTables[table_name]
+        pk_name = submission.MetaData.get_pk_name(table_name)
+
+        if data_table[pk_name].isnull().any():
+            self.errors.append("CRITICAL ERROR {} new values not allowed for lookup table.".format(table_name))
+

@@ -34,12 +34,12 @@ def update_system_id(submission):
 
     return submission
 
-# def cast_table(self, table_name):
-#     data_table = self.ValueData.Tables[table_name]
-#     fields = self.MetaData.table_fields(table_name)
+# def cast_table(submission, table_name):
+#     data_table = submission.DataTables[table_name]
+#     fields = submission.MetaData.table_fields(table_name)
 #     for _, item in fields.iterrows():
 #         column = item.to_dict()
 #         if column['column_name'] in data_table.columns:
 #             if column['type'] in ['integer']:
-#                 self.ValueData.Tables[table_name].astype(np.int64)
+#                 submission.DataTables[table_name].astype(np.int64)
 

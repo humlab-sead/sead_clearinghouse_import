@@ -6,6 +6,28 @@ from functools import reduce
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger)
 
+# FIXME MOVE TO meta-excel
+LOOKUP_TABLENAMES = [
+    'tbl_feature_types',
+    'tbl_locations',
+    'tbl_sample_group_sampling_contexts',
+    'tbl_sample_location_types',
+    'tbl_feature_types',
+    'tbl_data_type_groups',
+    'tbl_data_types',
+    'tbl_dataset_masters',
+    'tbl_error_uncertainties',
+    'tbl_age_types',
+    'tbl_season_or_qualifier',
+    'tbl_sample_description_types',
+    'tbl_biblio',
+    'tbl_contacts',
+    'tbl_project_types',
+    'tbl_project_stages',
+    'tbl_isotope_standars',
+    'tbl_isotope_types'
+];
+
 class MetaData:
 
     '''
@@ -76,6 +98,7 @@ class MetaData:
         }
 
         self._Classname_Cache = self.Tables.set_index('java_class')['table_name'].to_dict()
+
         return self
 
     @property
@@ -125,6 +148,9 @@ class MetaData:
 
     def get_tablenames_referencing(self, table_name):
         return self.ForeignKeys.loc[(self.ForeignKeys.table_name_y == table_name)]['table_name_x'].tolist()
+
+    def is_lookup_table(self, table_name):
+        return table_name in LOOKUP_TABLENAMES
 
 # FIXME: class CandidateKeySpecification():
 
