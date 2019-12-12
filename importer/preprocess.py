@@ -23,8 +23,7 @@ def update_system_id(submission):
             if 'system_id' not in data_table.columns:
                 raise model.DataImportError('CRITICAL ERROR Table {} has no column named "system_id"'.format(table_name))
 
-            # FIXME: Update system_id to public_id? Thids can't be right???
-            # TODO: Add unique test on system_id??
+            # Update system_id to public_id if isnan. This should be avoided though.
             data_table.loc[np.isnan(data_table.system_id), 'system_id'] = data_table.loc[np.isnan(data_table.system_id), pk_name]
 
         except model.DataImportError as _:
