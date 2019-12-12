@@ -23,5 +23,6 @@
     "python.dataScience.enableAutoMoveToNextCell": false,
     "python.dataScience.ignoreVscodeTheme": true,
     "workbench.sideBar.location": "left",
-    "python.pythonPath": "C:\\Users\\roma0050\\.virtualenvs\\sead_clearinghouse_import-dLHtNNd4\\Scripts\\python.exe"
+    "python.pythonPath": "C:\\Users\\roma0050\\.virtualenvs\\sead_clearinghouse_import-dLHtNNd4\\Scripts\\python.exe",
+    "editor.detectIndentation": false
 }
