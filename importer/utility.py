@@ -10,7 +10,7 @@ def setup_logger(logger, filename=None, level=logging.DEBUG):
     Setup logging of import messages to both file and console
     '''
 
-    filename = filename or '/tmp/explode_{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
+    filename = filename or './explode_{}.log'.format(time.strftime("%Y%m%d-%H%M%S"))
     logger.handlers = []
 
     logger.setLevel(level)
