@@ -11,7 +11,7 @@ from . import preprocess
 from . import parser
 
 logger = logging.getLogger('Excel XML processor')
-
+utility.setup_logger(logger, )
 jj = os.path.join
 
 
