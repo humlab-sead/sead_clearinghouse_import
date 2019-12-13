@@ -4,7 +4,7 @@ import time
 import numpy as np
 import numbers
 import logging
-
+from xml.sax.saxutils import escape
 import importer.utility as utility
 import importer.model as model
 
@@ -106,7 +106,12 @@ class XmlProcessor:
                                         value = int(public_id) if not np.isnan(public_id) else system_id
                                     elif isinstance(value, numbers.Number) and np.isnan(value):
                                         value = 'NULL'
+                                    # else:
+                                    #     if any((c in "<>&") for c in value):
+                                    #         value = escape(value)
+
                                     self.emit('<{0} class="{1}">{2}</{0}>'.format(camel_case_column_name, class_name, value), 3)
+
                                 else:  # value is a fk system_id
                                     try:
 
