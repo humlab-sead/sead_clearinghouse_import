@@ -8,7 +8,7 @@ from . import model
 from . import options
 from . import utility
 from . import preprocess
-from . import parser
+from . import xml_processor
 
 logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger, )
@@ -45,7 +45,7 @@ class AppService:
         submission = preprocess.update_system_id(submission)
 
         with io.open(output_filename, 'w', encoding='utf8') as outstream:
-            service = parser.XmlProcessor(outstream)
+            service = xml_processor.XmlProcessor(outstream)
             service.process(submission, option.table_names)
 
         tidy_output_filename = utility.tidy_xml(output_filename)
