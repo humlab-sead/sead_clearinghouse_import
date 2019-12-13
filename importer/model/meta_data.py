@@ -24,7 +24,7 @@ LOOKUP_TABLENAMES = [
     'tbl_contacts',
     'tbl_project_types',
     'tbl_project_stages',
-    'tbl_isotope_standars',
+    'tbl_isotope_standards',
     'tbl_isotope_types'
 ];
 
