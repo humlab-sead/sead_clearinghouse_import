@@ -100,7 +100,7 @@ class DataTableSpecification:
 
         if not submission.exists(table_name):
             """ No data sheet """
-            self.errors.append("{0} has NO DATA!".format(table_name))
+            self.errors.append("CRITICAL ERROR {0} has NO DATA!".format(table_name))
 
     def is_satisfied_by_type_match_policy(self, data_table, table_name, column):
 
