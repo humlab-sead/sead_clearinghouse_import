@@ -3,7 +3,6 @@ import os
 import time
 import numpy as np
 import numbers
-import io
 import logging
 
 import importer.utility as utility
@@ -66,8 +65,6 @@ class XmlProcessor:
 
                 fields = submission.MetaData.table_fields(table_name)
 
-                column_id_not_PK_FK_log = set({})
-
                 for index, record in data_table.iterrows():
 
                     try:
@@ -98,14 +95,6 @@ class XmlProcessor:
                                 is_pk = submission.MetaData.is_pk(table_name, column_name)
                                 class_name = column['class']
 
-                                # TODO Move to Specification
-                                if column_name[-3:] == '_id' and not (is_fk or is_pk):
-                                    log_key = "{}.{}".format(table_name, column_name)
-                                    if log_key not in column_id_not_PK_FK_log:
-                                        column_id_not_PK_FK_log.add(log_key)
-                                        logger.warning('Table %s, FK? column %s: Column ending with _id not marked as PK/FK', table_name, column_name)
-
-                                # TODO Move to Specification
                                 if column_name not in data_row.keys():
                                     logger.warning('Table %s, FK column %s: META field name not found in submission', table_name, column_name)
                                     continue
@@ -129,8 +118,6 @@ class XmlProcessor:
                                         fk_data_table = submission.DataTables[fk_table_name]
 
                                         if np.isnan(value):
-                                            # CHANGE: Cannot allow id="NULL" as foreign key
-                                            # logger.error("Warning: table {}, id {} FK {} is NULL. Skipping property!".format(table_name, system_id, column_name))
                                             self.emit('<{} class="com.sead.database.{}" id="NULL"/>'.format(camel_case_column_name, class_name), 3)
                                             continue
 
@@ -141,8 +128,6 @@ class XmlProcessor:
                                             if column_name not in fk_data_table.columns:
                                                 logger.warning('Table %s, FK column %s: FK column not found in %s, id=%s', table_name, column_name, fk_table_name, fk_system_id)
                                                 continue
-                                            #if 'system_id' not in fk_data_table.columns:
-                                            #    logger.error('FATAL ERROR while processing {}. FK table {} has not "system_id" column'.format(table_name, fk_table_name))
                                             fk_data_row = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]
                                             if fk_data_row.empty or len(fk_data_row) != 1:
                                                 fk_public_id = fk_system_id
