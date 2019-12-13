@@ -14,7 +14,6 @@ logger = logging.getLogger('Excel XML processor')
 utility.setup_logger(logger, )
 jj = os.path.join
 
-
 class AppService:
 
     def __init__(self, opts):
@@ -114,7 +113,7 @@ class AppService:
         except: # pylint: disable=bare-except
             logger.exception('ABORTED CRITICAL ERROR %s ', basename)
 
-def main(cmd_args=None):
+def process(cmd_args=None):
 
     opts = options.parse_args(cmd_args)
 
@@ -123,4 +122,4 @@ def main(cmd_args=None):
     AppService(opts).process()
 
 if __name__ == "__main__":
-    main()
+    process()
