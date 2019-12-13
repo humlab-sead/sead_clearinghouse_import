@@ -90,13 +90,13 @@ class DataTableSpecification:
 
     def is_satisfied_by_table_must_exist_policy(self, submission, table_name):
 
-        if table_name not in submission.tablenames:
-            """ Not in submission table index sheet """
-            self.errors.append("CRITICAL ERROR Table {0} not defined as submission table".format(table_name))
-
-        if not submission.MetaData.is_table(table_name):
-            """ Not defined in metadata """
-            self.errors.append("{0} not found in meta data".format(table_name))
+        if submission.exists(table_name) and table_name not in submission.tablenames:
+            # Check if it has an alias
+            meta = submission.MetaData.get_table(table_name)
+            alias_name = meta['excel_sheet'] or 'no_alias'
+            if alias_name not in submission.tablenames:
+                """ Not in submission table index sheet """
+                self.errors.append("CRITICAL ERROR Table {0} not defined as submission table".format(table_name))
 
         if not submission.exists(table_name):
             """ No data sheet """
