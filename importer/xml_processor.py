@@ -107,7 +107,7 @@ class XmlProcessor:
                                     elif isinstance(value, numbers.Number) and np.isnan(value):
                                         value = 'NULL'
                                     else:
-                                        if any((c in "<>&") for c in value):
+                                        if isinstance(value, str) and any((c in "<>&") for c in value):
                                             value = escape(value)
 
                                     self.emit('<{0} class="{1}">{2}</{0}>'.format(camel_case_column_name, class_name, value), 3)
