@@ -70,14 +70,14 @@ class SubmissionRepository():
             self.commit()
 
     def explode_submission(self, submission_id, p_dry_run=False, p_add_missing_columns=False):
-        for table_name_underscored in self.get_table_names(submission_id):
-            with self.open().cursor() as cursor:
+        with self.open().cursor() as cursor:
+            for table_name_underscored in self.get_table_names(submission_id):
                 logger.info('   --> Processing table %s', table_name_underscored)
                 if p_add_missing_columns:
                     cursor.callproc('clearing_house.fn_add_new_public_db_columns', (submission_id, table_name_underscored))
                 if not p_dry_run:
                     cursor.callproc('clearing_house.fn_copy_extracted_values_to_entity_table', (submission_id, table_name_underscored))
-            self.commit()
+        self.commit()
 
     def delete_submission(self, submission_id, clear_header=False, clear_exploded=True):
         logger.info('   --> Cleaning up existing data for submission...')
