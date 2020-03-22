@@ -1,5 +1,7 @@
 import pandas as pd
 import logging
+import functools
+
 from importer import utility
 from functools import reduce
 
