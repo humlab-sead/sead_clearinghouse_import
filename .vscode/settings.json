@@ -1,28 +1,36 @@
 {
-    "editor.rulers": [90],
-    "editor.roundedSelection": false,
-    "explorer.openEditors.visible": 0,
-    "files.exclude": {
-        "**/.git": true,
-        "**/.DS_Store": true,
-        //".vscode": true,
-        "**/__pycache__": true,
-        "**/**/*.pyc": true,
-        "**/.pytest_cache/": true
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        },
+        "editor.defaultFormatter": null,
+        "editor.formatOnPaste": true,
+        "editor.formatOnSave": true,
+        "editor.formatOnType": false,
+        "editor.rulers": [
+            140
+        ]
     },
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
+    "black-formatter.args": [
+        "--line-length",
+        "140"
     ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.nosetestsEnabled": false,
-    "python.linting.flake8Enabled": false,
-    "python.linting.pycodestyleEnabled": false,
-    "python.linting.pylintArgs": [
-        "--rcfile=${workspaceFolder}\\.pylintrc"
+    "black-formatter.interpreter": [
+        "/home/roger/.cache/pypoetry/virtualenvs/sead-clearinghouse-import-OH0GXtQP-py3.11/bin/python"
     ],
-    "python.dataScience.enableAutoMoveToNextCell": false,
-    "python.dataScience.ignoreVscodeTheme": true,
-    "workbench.sideBar.location": "left",
-    "python.pythonPath": "C:\\Users\\roma0050\\.virtualenvs\\sead_clearinghouse_import-dLHtNNd4\\Scripts\\python.exe",
-    "editor.detectIndentation": false
+    "black-formatter.path": [
+        "black"
+    ],
+    "black-formatter.importStrategy": "useBundled",
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "files.exclude": {
+        "**/**/*.pyc": true,
+        "**/.DS_Store": true,
+        "**/.git": true,
+        "**/.pytest_cache/": true,
+        "**/__pycache__": true
+    },
+    "python.defaultInterpreterPath": "/home/roger/.cache/pypoetry/virtualenvs/sead-clearinghouse-import-OH0GXtQP-py3.11/bin/python",
+    "python.testing.pytestArgs": [],
+    "python.testing.pytestEnabled": true
 }

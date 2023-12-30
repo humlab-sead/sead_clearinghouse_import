@@ -10,4 +10,4 @@ set -e  # Exit script on any error
 #     ln -s /mnt/c/Users/roma0050/Google\ Drive\ \(roma0050\@gapps.umu.se\)/Project/Public/VISEAD\ \(Humlab\)/SEAD\ Ceramics\ \&\ Dendro/output output
 # fi
 
-pipenv run python src/process.py --host 130.239.1.181 --dbuser clearinghouse_worker --input-folder ./input --output-folder ./output $@
+poetry run python src/process.py --host 130.239.1.181 --dbuser clearinghouse_worker --input-folder ./data/input --output-folder ./output $@

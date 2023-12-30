@@ -1,4 +1,8 @@
-from . meta_data import *
-from . submission_data import *
-from . repository import *
-from . specification import *
+from .metadata import *
+from .repository import *
+from .specification import *
+from .tables_with_data import *
+
+
+class DataImportError(Exception):
+    ...

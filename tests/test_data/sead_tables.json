@@ -1,0 +1,30 @@
+[
+    {
+        "table_name": "tbl_locations",
+        "pk_name": "location_id",
+        "java_class": "TblLocations",
+        "excel_sheet": "tbl_locations",
+        "is_lookup_table": true
+    },
+    {
+        "table_name": "tbl_record_types",
+        "pk_name": "record_type_id",
+        "java_class": "TblRecordTypes",
+        "excel_sheet": "tbl_record_types",
+        "is_lookup_table": true
+    },
+    {
+        "table_name": "tbl_sample_group_sampling_contexts",
+        "pk_name": "sampling_context_id",
+        "java_class": "TblSampleGroupSamplingContexts",
+        "excel_sheet": "tbl_s_g_sampling_contexts",
+        "is_lookup_table": false
+    },
+    {
+        "table_name": "tbl_sites",
+        "pk_name": "site_id",
+        "java_class": "TblSites",
+        "excel_sheet": "tbl_sites",
+        "is_lookup_table": true
+    }
+]
