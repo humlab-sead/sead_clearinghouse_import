@@ -1,13 +1,11 @@
 import json
 from os.path import isfile
-from unittest.mock import patch
 
 import pandas as pd
 import pytest
 
-import importer
 from importer.model.metadata import Metadata
-from importer.utility import dburi_from_env, load_sead_data, load_sql_from_file  # Assuming Metadata is the class name
+from importer.utility import dburi_from_env, load_sql_from_file  # Assuming Metadata is the class name
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -40,24 +38,7 @@ TEST_TABLES: list[str] = [
 ]
 
 
-@pytest.fixture
-def metadata() -> Metadata:
-    instance = importer.model.metadata.Metadata("a-dummy-db-uri")
-    instance.__dict__['sead_tables'] = load_sead_data(
-        "",
-        pd.read_json('tests/test_data/sead_tables.json'),
-        ["table_name"],
-    )
-    instance.__dict__['sead_columns'] = load_sead_data(
-        "",
-        pd.read_json('tests/test_data/sead_columns.json'),
-        ["table_name", "column_name"],
-        ["table_name", "position"],
-    )
-
-    return instance
-
-
+@pytest.mark.skipif(True, reason='Used for generating test data only')
 def test_load_metadata_from_postgres():
     metadata: Metadata = Metadata(dburi_from_env())
 
