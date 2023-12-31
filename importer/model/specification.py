@@ -74,14 +74,12 @@ class DataTableSpecification:
             self.is_satisfied_by_has_pk_policy(table_name, data_table)
             self.is_satisfied_by_lookup_data_policy(submission, table_name)
 
-            for _, field in self.metadata.sead_table_columns(
-                submission, table_name, ignore_columns=self.ignore_columns
-            ).iterrows():
-                column: dict = field.to_dict()
+            table_spec: dict[str, str] = self.metadata[table_name]
+            for _, column_spec in table_spec["columns"].items():
 
-                self.is_satisfied_by_type_match_policy(data_table, table_name, column)
-                self.is_satisfied_by_is_numeric_policy(data_table, table_name, column)
-                self.is_satisfied_by_id_is_fk_convention(table_name, column)
+                self.is_satisfied_by_type_match_policy(data_table, table_name, column_spec)
+                self.is_satisfied_by_is_numeric_policy(data_table, table_name, column_spec)
+                self.is_satisfied_by_id_is_fk_convention(table_name, column_spec)
 
         except Exception as e:
             self.errors.append("CRITICAL ERROR occurred when validating {}: {}".format(table_name, str(e)))
@@ -221,7 +219,7 @@ class DataTableSpecification:
         if not submission.exists(table_name):
             return
 
-        if not self.metadata.is_lookup_table(table_name):
+        if not self.metadata[table_name]["is_lookup_table"]:
             return
 
         data_table: pd.DataFrame = submission.data_tables[table_name]

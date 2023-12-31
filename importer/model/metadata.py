@@ -1,4 +1,5 @@
 from functools import cached_property
+import types
 from typing import Any
 
 import pandas as pd
@@ -65,13 +66,6 @@ class Metadata:
         return self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'f_table_name', 'class_name']]
 
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
+        """Returns a list of tablenames referencing the given table"""
         return self.foreign_keys.loc[(self.foreign_keys.f_table_name == table_name)]["table_name"].tolist()
 
-    def is_lookup_table(self, table_name: str) -> bool:
-        return self[table_name]["is_lookup_table"]
-
-    def sead_table_columns(self, table_name: str, ignore_columns: list[str] = None) -> pd.DataFrame:
-        columns: pd.DataFrame = self.sead_columns[(self.sead_columns.table_name == table_name)]
-        if ignore_columns is not None:
-            columns = columns.loc[(~columns.column_name.isin(ignore_columns))]
-        return columns
