@@ -26,74 +26,49 @@ class Metadata:
         return load_sead_data(self.db_uri, "sead_columns", ["table_name", "column_name"], ["table_name", "position"])
 
     @cached_property
-    def sead_table_specifications(self) -> dict[str, Any]:
+    def sead_schema(self) -> dict[str, Any]:
         """Returns a dictionary of table attributes i.e. a row from sead_tables as a dictionary"""
         specification: dict[str, Any] = self.sead_tables.to_dict(orient='index')
         for k, v in specification.items():
-            v['columns'] = self.sead_columns[self.sead_columns.table_name == k].set_index('column_name', drop=False).to_dict(orient='index')
+            v['columns'] = (
+                self.sead_columns[self.sead_columns.table_name == k]
+                .set_index('column_name', drop=False)
+                .to_dict(orient='index')
+            )
         return specification
 
-    @cached_property
-    def primary_keys(self) -> pd.DataFrame:
-        primary_keys: pd.DataFrame = pd.merge(
-            self.sead_tables,
-            self.sead_columns,
-            how="inner",
-            left_on=["table_name", "pk_name"],
-            right_on=["table_name", "column_name"],
-        )[["table_name", "column_name", "java_class"]]
-        primary_keys.columns = ["table_name", "column_name", "class_name"]
-        return primary_keys
-
-    @cached_property
-    def foreign_keys(self) -> pd.DataFrame:
-        foreign_keys: pd.DataFrame = pd.merge(
-            self.sead_columns,
-            self.primary_keys,
-            how="inner",
-            left_on=["column_name", "class"],
-            right_on=["column_name", "class_name"],
-        )[["table_name", "column_name", "referenced_table_name", "class_name"]]
-        foreign_keys.columns = ["table_name", "column_name", "referenced_table_name", "class_name"]
-        foreign_keys = foreign_keys[foreign_keys.table_name != foreign_keys.referenced_table_name]
-        return foreign_keys
-
-    @cached_property
-    def foreign_keys_lookup(self) -> set[str]:
-        return {x for x in list(self.foreign_keys.table_name + "#" + self.foreign_keys.column_name)}
-
-    @cached_property
-    def primary_keys_lookup(self) -> set[str]:
-        return {x for x in self.sead_tables.table_name + "#" + self.sead_tables.pk_name}
-
-    @cached_property
-    def class_name_lookup(self) -> dict[str, str]:
-        return self.sead_tables.set_index("java_class")["table_name"].to_dict()
-
-    def __getitem__(self, table_name: str) -> dict[str, Any]:
-        if table_name not in self.sead_table_specifications:
-            raise KeyError("Table {} not found in metadata".format(table_name))
-        return self.sead_table_specifications[table_name]
+    def __getitem__(self, what: str) -> dict[str, Any]:
+        table_name, column_name = what if isinstance(what, tuple) else (what, None)
+        if table_name not in self.sead_schema:
+            raise KeyError(f"Table {table_name} not found in metadata")
+        table: dict[str, Any] = self.sead_schema[table_name]
+        if column_name is not None:
+            if column_name not in table['columns']:
+                raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
+            return table['columns'][column_name]
+        return table
 
     def __contains__(self, table_name: str) -> bool:
-        return table_name in self.sead_table_specifications
+        return table_name in self.sead_schema
 
     def is_fk(self, table_name: str, column_name: str) -> bool:
         if column_name in self.foreign_key_aliases:
             return True
-        return self.sead_table_specifications[table_name][column_name]["is_fk"]
+        return self[table_name, column_name]["is_fk"]
 
     def is_pk(self, table_name: str, column_name: str) -> bool:
-        return self.sead_table_specifications[table_name][column_name]["is_pk"]
+        return self[table_name, column_name]['is_pk']
+
+    @cached_property
+    def foreign_keys(self) -> pd.DataFrame:
+        """Returns foreign key columns from SEAD columns (performance only)."""
+        return self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'f_table_name', 'class_name']]
 
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
-        return self.foreign_keys.loc[(self.foreign_keys.referenced_table_name == table_name)]["table_name"].tolist()
+        return self.foreign_keys.loc[(self.foreign_keys.f_table_name == table_name)]["table_name"].tolist()
 
     def is_lookup_table(self, table_name: str) -> bool:
-        return self.sead_table_specifications[table_name]["is_lookup_table"]
-
-    def table_fields(self, table_name: str) -> pd.DataFrame:
-        return self.sead_columns[(self.sead_columns.table_name == table_name)]
+        return self[table_name]["is_lookup_table"]
 
     def sead_table_columns(self, table_name: str, ignore_columns: list[str] = None) -> pd.DataFrame:
         columns: pd.DataFrame = self.sead_columns[(self.sead_columns.table_name == table_name)]
