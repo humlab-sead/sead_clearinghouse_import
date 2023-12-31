@@ -15,12 +15,11 @@ select 	table_name,
             when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(f_table_name)
             when data_type = 'integer' then 'java.lang.Integer'
             when data_type = 'smallint' then 'java.lang.Short'
-            when data_type = 'date' then 'java.sql.Date'
             when data_type = 'boolean' then	'java.lang.Boolean'
             when data_type = 'character varying' then 'java.lang.String'
             when data_type = 'text' then 'java.lang.String'
             when data_type like 'timestamp%' then 'java.util.Date'
-            when data_type = 'date' then 'java.sql.Date'
+            when data_type = 'date' then 'java.util.Date'
             when data_type = 'numeric' then 'java.math.BigDecimal'
             else '???' end as class_name
 from sead_utility.table_columns
