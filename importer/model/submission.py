@@ -16,31 +16,33 @@ def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
         return reader.parse(sheetname)
 
 
+def load_excel(metadata: Metadata, source: str | pd.ExcelFile) -> Self:
+    """Loads the submission file into a SubmissionData object"""
+    reader: pd.ExcelFile = pd.ExcelFile(source) if isinstance(source, str) else source
+
+    data_tables: dict[str, pd.DataFrame] = {
+        x["table_name"]: load_excel_sheet(reader, x["excel_sheet"]) for i, x in metadata.sead_tables.iterrows()
+    }
+
+    logger.info(f"read sheets: {','.join(k for k,v in data_tables.items() if v is not None)}")
+    logger.info(f"missing sheets: {','.join(k for k,v in data_tables.items() if v is None) or 'none'}")
+
+    data_table_index: pd.DataFrame = load_excel_sheet(reader, "data_table_index")
+
+    if data_table_index is None:
+        logger.exception("submission file has no data_table_index")
+
+    reader.close()
+
+    return SubmissionData(data_tables, data_table_index)
+
+
 class SubmissionData:
-    """Logic dealing with the submission (load etc)"""
+    """Logic dealing with the submission data"""
 
-    def __init__(self) -> None:
-        self.data_tables: dict[str, pd.DataFrame] = None
-        self.data_table_index: pd.DataFrame = None
-
-    def load(self, metadata: Metadata, source: str | pd.ExcelFile) -> Self:
-        reader: pd.ExcelFile = pd.ExcelFile(source) if isinstance(source, str) else source
-
-        self.data_tables = {
-            x["table_name"]: load_excel_sheet(reader, x["excel_sheet"]) for i, x in metadata.sead_tables.iterrows()
-        }
-
-        logger.info(f"read sheets: {','.join(k for k,v in self.data_tables.items() if v is not None)}")
-        logger.info(f"missing sheets: {','.join(k for k,v in self.data_tables.items() if v is None) or 'none'}")
-
-        self.data_table_index = load_excel_sheet(reader, "data_table_index")
-
-        if self.data_table_index is None:
-            logger.exception("submission file has no data_table_index")
-
-        reader.close()
-
-        return self
+    def __init__(self, data_tables: dict[str, pd.DataFrame], data_table_index: pd.DataFrame) -> None:
+        self.data_tables: dict[str, pd.DataFrame] = data_tables
+        self.data_table_index: pd.DataFrame = data_table_index
 
     def __getitem__(self, key: str) -> pd.DataFrame:
         return self.data_tables[key]

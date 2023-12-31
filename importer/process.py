@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from importer.model import DataImportError, Metadata, SubmissionData, SubmissionRepository
+from importer.model import DataImportError, Metadata, SubmissionData, SubmissionRepository, load_excel
 
 from . import process_xml, utility
 
@@ -62,7 +62,7 @@ class ImportService:
 
         metadata: Metadata = Metadata(option.db_uri())
 
-        submission: SubmissionData = SubmissionData().load(metadata, data_filename)
+        submission: SubmissionData = load_excel(metadata, data_filename)
 
         update_missing_system_id_to_public_id(metadata, submission)
 
