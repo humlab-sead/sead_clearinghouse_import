@@ -63,7 +63,11 @@ def load_sead_data(db_uri: str, sql_id: str | pd.DataFrame, index: list[str], so
     index = index if isinstance(index, list) else [index]
     sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
     tables: pd.DataFrame = (
-        (sql_id if isinstance(sql_id, pd.DataFrame) else load_dataframe_from_postgres(load_sql_from_file(sql_id), db_uri, index_col=None))
+        (
+            sql_id
+            if isinstance(sql_id, pd.DataFrame)
+            else load_dataframe_from_postgres(load_sql_from_file(sql_id), db_uri, index_col=None)
+        )
         .set_index(index, drop=False)
         .rename_axis([f'index_{x}' for x in index])
         .sort_values(by=sortby if sortby else index)

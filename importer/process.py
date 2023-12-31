@@ -40,7 +40,9 @@ class ImportService:
 
     def __init__(self, opts: Options) -> None:
         self.opts: ImportService.Options = opts
-        assert os.environ.get("SEAD_CH_PASSWORD", None) is not None, "fatal: environment variable SEAD_CH_PASSWORD not set!"
+        assert (
+            os.environ.get("SEAD_CH_PASSWORD", None) is not None
+        ), "fatal: environment variable SEAD_CH_PASSWORD not set!"
         db_opts: dict[str] = dict(
             database=opts.dbname,
             user=opts.dbuser,
@@ -114,7 +116,9 @@ class ImportService:
                 logger.info(" ---> USING EXISTING DATA ID=%s", self.opts.submission_id)
 
             logger.info(" ---> EXPLODE STARTED")
-            self.repository.explode_to_public_tables(self.opts.submission_id, p_dry_run=False, p_add_missing_columns=False)
+            self.repository.explode_to_public_tables(
+                self.opts.submission_id, p_dry_run=False, p_add_missing_columns=False
+            )
             logger.info(" ---> EXPLODE DONE")
 
             self.repository.set_pending(self.opts.submission_id)
@@ -129,7 +133,7 @@ def update_missing_system_id_to_public_id(metadata: Metadata, submission: Submis
     for table_name in submission.index_tablenames:
         try:
             data_table: pd.DataFrame = submission.data_tables[table_name]
-            table_definition: dict[str, Any] = metadata.sead_table_specifications[table_name]
+            table_definition: dict[str, Any] = metadata[table_name]
 
             pk_name: str = table_definition["pk_name"]
 
@@ -143,7 +147,9 @@ def update_missing_system_id_to_public_id(metadata: Metadata, submission: Submis
                 raise DataImportError('CRITICAL ERROR Table {} has no column named "system_id"'.format(table_name))
 
             # Update system_id to public_id if isnan. This should be avoided though.
-            data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[np.isnan(data_table.system_id), pk_name]
+            data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
+                np.isnan(data_table.system_id), pk_name
+            ]
 
         except DataImportError as _:
             logger.error("ERROR {} when updating system_id ".format(table_name))
