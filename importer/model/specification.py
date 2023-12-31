@@ -3,7 +3,7 @@ import pandas as pd
 
 from importer.model.metadata import Metadata
 
-from .tables_with_data import SubmissionData
+from .submission import SubmissionData
 
 TYPE_COMPATIBILITY_MATRIX = {
     ("integer", "float64"): True,
@@ -74,7 +74,9 @@ class DataTableSpecification:
             self.is_satisfied_by_has_pk_policy(table_name, data_table)
             self.is_satisfied_by_lookup_data_policy(submission, table_name)
 
-            for _, field in self.metadata.sead_table_columns(submission, table_name, ignore_columns=self.ignore_columns).iterrows():
+            for _, field in self.metadata.sead_table_columns(
+                submission, table_name, ignore_columns=self.ignore_columns
+            ).iterrows():
                 column: dict = field.to_dict()
 
                 self.is_satisfied_by_type_match_policy(data_table, table_name, column)
@@ -88,7 +90,7 @@ class DataTableSpecification:
     def is_satisfied_by_table_must_exist_policy(self, submission: SubmissionData, table_name) -> None:
         if submission.exists(table_name) and table_name not in submission.tables_with_data:
             # Check if it has an alias
-            table_specification = self.metadata.sead_table_specifications[table_name]
+            table_specification = self.metadata[table_name]
             alias_name = table_specification["excel_sheet"] or "no_alias"
             if alias_name not in submission.tables_with_data:
                 """Not in submission table index sheet"""
@@ -137,11 +139,13 @@ class DataTableSpecification:
         if not ok_mask.all():
             error_values = " ".join(list(set(series[~ok_mask])))[:200]
             self.errors.append(
-                "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(table_name, column["column_name"], error_values)
+                "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(
+                    table_name, column["column_name"], error_values
+                )
             )
 
     def is_satisfied_by_has_pk_policy(self, table_name: str, data_table: pd.DataFrame) -> None:
-        primary_key_name: str = self.metadata.sead_table_specifications[table_name]["pk_name"]
+        primary_key_name: str = self.metadata[table_name]["pk_name"]
 
         if primary_key_name not in data_table.columns:
             self.errors.append('CRITICAL ERROR Table {} has no PK named "{}"'.format(table_name, primary_key_name))
@@ -164,7 +168,9 @@ class DataTableSpecification:
             duplicates: list[int] = [int(x) for x in set(data_table[duplicate_mask].system_id)]
             if len(duplicates) > 0:
                 error_values: str = " ".join([str(x) for x in duplicates])[:200]
-                self.errors.append("CRITICAL ERROR Table {} has DUPLICATE system ids: {}".format(table_name, error_values))
+                self.errors.append(
+                    "CRITICAL ERROR Table {} has DUPLICATE system ids: {}".format(table_name, error_values)
+                )
         except Exception as _:
             self.warnings.append("WARNING! Duplicate check of {}.{} failed".format(table_name, "system_id"))
 
@@ -179,7 +185,9 @@ class DataTableSpecification:
         is_pk: bool = self.metadata.is_pk(table_name, column_name)
 
         if column_name[-3:] == "_id" and not (is_fk or is_pk):
-            self.warnings.append('WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(table_name, column_name))
+            self.warnings.append(
+                'WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(table_name, column_name)
+            )
 
     def is_satisfied_by_no_missing_columns_policy(
         self,
@@ -187,7 +195,7 @@ class DataTableSpecification:
         table_name: str,
     ) -> None:  # pylint: disable=unused-argument
         """All fields in metadata.Table.Fields MUST exist in DataTable.columns"""
-        meta_column_names: list[str] = sorted(self.metadata.sead_table_specifications[table_name]['columns'].keys())
+        meta_column_names: list[str] = sorted(self.metadata[table_name]['columns'].keys())
         data_column_names: list[str] = (
             sorted(submission.data_tables[table_name].columns.values.tolist())
             if submission.exists(table_name) and table_name in self.metadata
@@ -195,13 +203,19 @@ class DataTableSpecification:
         )
 
         missing_column_names = list(set(meta_column_names) - set(data_column_names) - set(self.ignore_columns))
-        extra_column_names = list(set(data_column_names) - set(meta_column_names) - set(self.ignore_columns) - set(["system_id"]))
+        extra_column_names = list(
+            set(data_column_names) - set(meta_column_names) - set(self.ignore_columns) - set(["system_id"])
+        )
 
         if len(missing_column_names) > 0:
-            self.errors.append("ERROR {0} has MISSING DATA columns: ".format(table_name) + (", ".join(missing_column_names)))
+            self.errors.append(
+                "ERROR {0} has MISSING DATA columns: ".format(table_name) + (", ".join(missing_column_names))
+            )
 
         if len(extra_column_names) > 0:
-            self.warnings.append("WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names)))
+            self.warnings.append(
+                "WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names))
+            )
 
     def is_satisfied_by_lookup_data_policy(self, submission: SubmissionData, table_name: str) -> None:
         if not submission.exists(table_name):
@@ -211,7 +225,7 @@ class DataTableSpecification:
             return
 
         data_table: pd.DataFrame = submission.data_tables[table_name]
-        pk_name: str = self.metadata.sead_table_specifications[table_name]["pk_name"]
+        pk_name: str = self.metadata[table_name]["pk_name"]
 
         if data_table[pk_name].isnull().any():
             self.errors.append("CRITICAL ERROR {} new values not allowed for lookup table.".format(table_name))

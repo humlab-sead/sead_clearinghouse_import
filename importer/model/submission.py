@@ -26,7 +26,9 @@ class SubmissionData:
     def load(self, metadata: Metadata, source: str | pd.ExcelFile) -> Self:
         reader: pd.ExcelFile = pd.ExcelFile(source) if isinstance(source, str) else source
 
-        self.data_tables = {x["table_name"]: load_excel_sheet(reader, x["excel_sheet"]) for i, x in metadata.sead_tables.iterrows()}
+        self.data_tables = {
+            x["table_name"]: load_excel_sheet(reader, x["excel_sheet"]) for i, x in metadata.sead_tables.iterrows()
+        }
 
         logger.info(f"read sheets: {','.join(k for k,v in self.data_tables.items() if v is not None)}")
         logger.info(f"missing sheets: {','.join(k for k,v in self.data_tables.items() if v is None) or 'none'}")
@@ -61,12 +63,14 @@ class SubmissionData:
         return self.data_table_index["table_name"].tolist()
 
     def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> list[str]:
-        pk_name: str = metadata.sead_table_specifications[table_name]["pk_name"]
+        pk_name: str = metadata[table_name]["pk_name"]
         if pk_name is None:
             return []
         ref_tablenames: list[str] = metadata.get_tablenames_referencing(table_name)
         sets_of_keys: list[set] = [
-            set(self.data_tables[foreign_name][pk_name].loc[~np.isnan(self.data_tables[foreign_name][pk_name])].tolist())
+            set(
+                self.data_tables[foreign_name][pk_name].loc[~np.isnan(self.data_tables[foreign_name][pk_name])].tolist()
+            )
             for foreign_name in ref_tablenames
             if not self.data_tables[foreign_name] is None
         ]
