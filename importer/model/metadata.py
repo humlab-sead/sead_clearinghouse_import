@@ -29,14 +29,14 @@ class Metadata:
     @cached_property
     def sead_schema(self) -> dict[str, Any]:
         """Returns a dictionary of table attributes i.e. a row from sead_tables as a dictionary"""
-        specification: dict[str, Any] = self.sead_tables.to_dict(orient='index')
-        for k, v in specification.items():
+        schema: dict[str, Any] = self.sead_tables.to_dict(orient='index')
+        for k, v in schema.items():
             v['columns'] = (
                 self.sead_columns[self.sead_columns.table_name == k]
                 .set_index('column_name', drop=False)
                 .to_dict(orient='index')
             )
-        return specification
+        return schema
 
     def __getitem__(self, what: str) -> dict[str, Any]:
         table_name, column_name = what if isinstance(what, tuple) else (what, None)
