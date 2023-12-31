@@ -63,32 +63,30 @@ class XmlProcessor:
             try:
                 logger.info("Processing %s...", table_name)
 
-                if table_name not in metadata.sead_table_specifications:
+                if table_name not in metadata:
                     raise ValueError(f"Table {table_name}: not found in metadata")
 
-                table_specification: dict[str, Any] = metadata.sead_table_specifications[table_name]
+                table_spec: dict[str, Any] = metadata[table_name]
 
                 referenced_keyset: set[str] = set(submission.get_referenced_keyset(metadata, table_name))
 
                 data_table: str = submission.data_tables[table_name]
 
-                table_namespace: str = "com.sead.database.{}".format(table_specification["java_class"])
+                table_namespace: str = "com.sead.database.{}".format(table_spec["java_class"])
 
                 if data_table is None:
                     continue
 
                 self.emit(
-                    '<{} length="{}">'.format(table_specification["java_class"], data_table.shape[0]),
+                    '<{} length="{}">'.format(table_spec["java_class"], data_table.shape[0]),
                     1,
                 )  # data_table.length
                 # self.emit_tag(table_specification['java_class'], dict(length=data_table.shape[0]), close=False, indent=1)
 
-                fields: pd.DataFrame = metadata.sead_table_columns(table_name)
-
                 for index, record in data_table.iterrows():
                     try:
                         data_row: dict = record.to_dict()
-                        public_id = data_row[table_specification["pk_name"]] if table_specification["pk_name"] in data_row else np.NAN
+                        public_id = data_row[table_spec["pk_name"]] if table_spec["pk_name"] in data_row else np.NAN
 
                         if np.isnan(public_id) and np.isnan(data_row["system_id"]):
                             logger.warning(
@@ -105,19 +103,18 @@ class XmlProcessor:
 
                         if not np.isnan(public_id):
                             public_id = int(public_id)
-                            self.emit(
-                                '<{} id="{}" clonedId="{}"/>'.format(table_namespace, system_id, public_id),
-                                2,
-                            )
+                            self.emit('<{} id="{}" clonedId="{}"/>'.format(table_namespace, system_id, public_id), 2)
                         else:
                             self.emit('<{} id="{}">'.format(table_namespace, system_id), 2)
 
-                            for _, item in fields.loc[(~fields.column_name.isin(self.ignore_columns))].iterrows():
-                                column_specification: dict[str, Any] = item.to_dict()
-                                column_name: str = column_specification["column_name"]
-                                is_fk: bool = submission.MetaData.is_fk(table_name, column_name)
-                                is_pk: bool = submission.MetaData.is_pk(table_name, column_name)
-                                class_name: str = column_specification["class_name"]
+                            for column_name, column_spec in table_spec["columns"].items():
+                                if column_name in self.ignore_columns:
+                                    continue
+
+                                is_fk: bool = column_spec["is_fk"]
+                                is_pk: bool = column_spec["is_pk"]
+
+                                class_name: str = column_spec["class_name"]
 
                                 if column_name not in data_row.keys():
                                     logger.warning(
@@ -145,7 +142,7 @@ class XmlProcessor:
 
                                 else:  # value is a fk system_id
                                     try:
-                                        fk_table_name: str = submission.MetaData.get_tablename_by_classname(class_name)
+                                        fk_table_name: str = metadata.get_tablename_by_classname(class_name)
                                         if fk_table_name is None:
                                             logger.warning(
                                                 "Table %s, FK column %s: unable to resolve FK class %s",
@@ -155,11 +152,13 @@ class XmlProcessor:
                                             )
                                             continue
 
-                                        fk_data_table: str = submission.DataTables[fk_table_name]
+                                        fk_data_table: str = submission.data_tables[fk_table_name]
 
                                         if np.isnan(value):
                                             self.emit(
-                                                '<{} class="com.sead.database.{}" id="NULL"/>'.format(camel_case_column_name, class_name),
+                                                '<{} class="com.sead.database.{}" id="NULL"/>'.format(
+                                                    camel_case_column_name, class_name
+                                                ),
                                                 3,
                                             )
                                             continue
@@ -240,13 +239,13 @@ class XmlProcessor:
                         table_name,
                         len(referenced_keyset),
                     )
-                    class_name = metadata.sead_table_specifications[table_name]["java_class"]
+                    class_name = metadata[table_name]["java_class"]
                     for key in referenced_keyset:
                         self.emit(
                             '<com.sead.database.{} id="{}" clonedId="{}"/>'.format(class_name, int(key), int(key)),
                             2,
                         )
-                self.emit("</{}>".format(table_specification["java_class"]), 1)
+                self.emit("</{}>".format(table_spec["java_class"]), 1)
 
             except:
                 logger.exception("CRITICAL ERROR")
@@ -269,7 +268,7 @@ class XmlProcessor:
                 logger.info("Skipping %s: not referenced", table_name)
                 continue
 
-            class_name: str = metadata.sead_table_specifications[table_name]["java_class"]
+            class_name: str = metadata[table_name]["java_class"]
             xml: str = template.render(
                 lookups=referenced_keyset,
                 class_name=class_name,
@@ -277,8 +276,16 @@ class XmlProcessor:
             )
             self.emit(xml)
 
-    def process(self, metadata: Metadata, submission: SubmissionData, table_names: list[str] = None, extra_names: list[str] = None) -> None:
-        specification: DataTableSpecification = DataTableSpecification(metadata=metadata, ignore_columns=self.ignore_columns)
+    def process(
+        self,
+        metadata: Metadata,
+        submission: SubmissionData,
+        table_names: list[str] = None,
+        extra_names: list[str] = None,
+    ) -> None:
+        specification: DataTableSpecification = DataTableSpecification(
+            metadata=metadata, ignore_columns=self.ignore_columns
+        )
 
         specification.is_satisfied_by(submission)
 
@@ -302,7 +309,7 @@ class XmlProcessor:
 
         tables_to_process: list[str] = submission.index_tablenames if table_names is None else table_names
         extra_names: set[str] = (
-            set(metadata.sead_table_specifications.keys()) - set(submission.tables_with_data) if extra_names is None else extra_names
+            set(metadata.sead_schema.keys()) - set(submission.tables_with_data) if extra_names is None else extra_names
         )
 
         self.emit('<?xml version="1.0" ?>')
