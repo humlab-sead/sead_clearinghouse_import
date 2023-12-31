@@ -1,3 +1,4 @@
+from typing import Any
 import numpy as np
 import pandas as pd
 
@@ -67,25 +68,24 @@ class DataTableSpecification:
             if not submission.exists(table_name):
                 return
 
-            data_table: pd.DataFrame = submission.data_tables[table_name]
+            table_data: pd.DataFrame = submission.data_tables[table_name]
 
-            self.is_satisfied_by_system_id_policy(submission, table_name, data_table)
+            self.is_satisfied_by_system_id_policy(submission, table_name, table_data)
             self.is_satisfied_by_no_missing_columns_policy(submission, table_name)
-            self.is_satisfied_by_has_pk_policy(table_name, data_table)
+            self.is_satisfied_by_has_pk_policy(table_name, table_data)
             self.is_satisfied_by_lookup_data_policy(submission, table_name)
 
             table_spec: dict[str, str] = self.metadata[table_name]
             for _, column_spec in table_spec["columns"].items():
-
-                self.is_satisfied_by_type_match_policy(data_table, table_name, column_spec)
-                self.is_satisfied_by_is_numeric_policy(data_table, table_name, column_spec)
+                self.is_satisfied_by_type_match_policy(table_data, table_name, column_spec)
+                self.is_satisfied_by_is_numeric_policy(table_data, table_name, column_spec)
                 self.is_satisfied_by_id_is_fk_convention(table_name, column_spec)
 
         except Exception as e:
             self.errors.append("CRITICAL ERROR occurred when validating {}: {}".format(table_name, str(e)))
             raise
 
-    def is_satisfied_by_table_must_exist_policy(self, submission: SubmissionData, table_name) -> None:
+    def is_satisfied_by_table_must_exist_policy(self, submission: SubmissionData, table_name: str) -> None:
         if submission.exists(table_name) and table_name not in submission.tables_with_data:
             # Check if it has an alias
             table_specification = self.metadata[table_name]
@@ -100,20 +100,20 @@ class DataTableSpecification:
 
     def is_satisfied_by_type_match_policy(
         self,
-        data_table: pd.DataFrame,
+        table_data: pd.DataFrame,
         table_name: str,
         column_specification: dict[str, str],
     ) -> None:
         column_name: str = column_specification["column_name"]
 
-        if column_name not in data_table.columns:
+        if column_name not in table_data.columns:
             return
 
-        if len(data_table) == 0:
+        if len(table_data) == 0:
             """Cannot determine type if table is empty"""
             return
 
-        data_column_type: str = data_table.dtypes[column_name].name
+        data_column_type: str = table_data.dtypes[column_name].name
         if not TYPE_COMPATIBILITY_MATRIX.get((column_specification["type"], data_column_type), False):
             self.warnings.append(
                 "WARNING type clash: {}.{} {}<=>{}".format(
@@ -124,46 +124,48 @@ class DataTableSpecification:
                 )
             )
 
-    def is_satisfied_by_is_numeric_policy(self, data_table, table_name, column) -> None:
-        if column["column_name"] not in data_table.columns:
+    def is_satisfied_by_is_numeric_policy(
+        self, table_data: dict[str, Any], table_name: str, column_spec: dict[str, Any]
+    ) -> None:
+        if column_spec["column_name"] not in table_data.columns:
             return
 
-        if column["type"] not in NUMERIC_TYPES:
+        if column_spec["type"] not in NUMERIC_TYPES:
             return
 
-        series: pd.Series = data_table[column["column_name"]]
+        series: pd.Series = table_data[column_spec["column_name"]]
         series = series[~series.isna()]
         ok_mask: pd.Series = series.apply(np.isreal)
         if not ok_mask.all():
             error_values = " ".join(list(set(series[~ok_mask])))[:200]
             self.errors.append(
                 "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(
-                    table_name, column["column_name"], error_values
+                    table_name, column_spec["column_name"], error_values
                 )
             )
 
-    def is_satisfied_by_has_pk_policy(self, table_name: str, data_table: pd.DataFrame) -> None:
+    def is_satisfied_by_has_pk_policy(self, table_name: str, table_data: pd.DataFrame) -> None:
         primary_key_name: str = self.metadata[table_name]["pk_name"]
 
-        if primary_key_name not in data_table.columns:
+        if primary_key_name not in table_data.columns:
             self.errors.append('CRITICAL ERROR Table {} has no PK named "{}"'.format(table_name, primary_key_name))
 
     def is_satisfied_by_system_id_policy(
-        self, submission: SubmissionData, table_name: str, data_table: pd.DataFrame
+        self, submission: SubmissionData, table_name: str, table_data: pd.DataFrame
     ):  # pylint: disable=unused-argument
         # Must have a system identity
         # if not submission.has_system_id(table_name):
-        if "system_id" not in data_table.columns:
+        if "system_id" not in table_data.columns:
             self.errors.append("{0} has no system id data column".format(table_name))
             return
 
-        if data_table.system_id.isnull().values.any():
+        if table_data.system_id.isnull().values.any():
             self.errors.append("CRITICAL ERROR {0} has missing system id values".format(table_name))
 
         try:
             # duplicate_mask = data_table[~data_table.system_id.isna()].duplicated('system_id')
-            duplicate_mask: pd.Series = data_table.duplicated("system_id")
-            duplicates: list[int] = [int(x) for x in set(data_table[duplicate_mask].system_id)]
+            duplicate_mask: pd.Series = table_data.duplicated("system_id")
+            duplicates: list[int] = [int(x) for x in set(table_data[duplicate_mask].system_id)]
             if len(duplicates) > 0:
                 error_values: str = " ".join([str(x) for x in duplicates])[:200]
                 self.errors.append(
@@ -175,9 +177,9 @@ class DataTableSpecification:
     def is_satisfied_by_id_is_fk_convention(
         self,
         table_name: str,
-        column_specification: dict[str, str],
+        column_spec: dict[str, str],
     ) -> None:
-        column_name: str = column_specification["column_name"]
+        column_name: str = column_spec["column_name"]
 
         is_fk: bool = self.metadata.is_fk(table_name, column_name)
         is_pk: bool = self.metadata.is_pk(table_name, column_name)
