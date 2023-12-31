@@ -51,13 +51,13 @@ class SubmissionData:
         return self.exists(key)
 
     def exists(self, table_name: str) -> bool:
-        return table_name in self.data_tables.keys() and self.data_tables[table_name] is not None
+        return table_name in self.data_tables.keys() and self[table_name] is not None
 
     def has_system_id(self, table_name: str) -> bool:
-        return self.exists(table_name) and "system_id" in self.data_tables[table_name].columns
+        return self.exists(table_name) and "system_id" in self[table_name].columns
 
     @property
-    def tables_with_data(self) -> list[str]:
+    def data_tablenames(self) -> list[str]:
         return [x for x in self.data_tables.keys() if self.exists(x)]
 
     @property
@@ -65,6 +65,7 @@ class SubmissionData:
         return self.data_table_index["table_name"].tolist()
 
     def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> list[str]:
+        """Returns a set of keys from the referenced table"""
         pk_name: str = metadata[table_name]["pk_name"]
         if pk_name is None:
             return []

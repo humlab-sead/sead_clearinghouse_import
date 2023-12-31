@@ -309,7 +309,7 @@ class XmlProcessor:
 
         tables_to_process: list[str] = submission.index_tablenames if table_names is None else table_names
         extra_names: set[str] = (
-            set(metadata.sead_schema.keys()) - set(submission.tables_with_data) if extra_names is None else extra_names
+            set(metadata.sead_schema.keys()) - set(submission.data_tablenames) if extra_names is None else extra_names
         )
 
         self.emit('<?xml version="1.0" ?>')
