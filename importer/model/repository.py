@@ -1,9 +1,12 @@
 import contextlib
+import io
 from typing import Any
 
 import psycopg2
 from loguru import logger
 from psycopg2 import extensions as pgext
+
+from importer.utility import log_decorator
 
 
 class SubmissionRepository:
@@ -28,6 +31,7 @@ class SubmissionRepository:
                 self.connection.close()
         self.connection = None
 
+    @log_decorator(enter_message=" ---> committing work...", exit_message=" ---> committed")
     def commit(self) -> None:
         if self.connection is not None:
             try:
@@ -52,6 +56,7 @@ class SubmissionRepository:
             table_names: list[tuple[Any, ...]] = cursor.fetchall()
         return table_names
 
+    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted")
     def extract_to_staging_tables(self, submission_id: int) -> None:
         """Extract submission into staging tables."""
         with self.open().cursor() as cursor:
@@ -82,6 +87,7 @@ class SubmissionRepository:
             logger.info("   --> extraction done!")
             self.commit()
 
+    @log_decorator(enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded")
     def explode_to_public_tables(
         self,
         submission_id: int,
@@ -104,6 +110,7 @@ class SubmissionRepository:
                     )
         self.commit()
 
+    @log_decorator(enter_message=" ---> removing submission...", exit_message=" ---> submission removed")
     def remove(
         self,
         submission_id: int,
@@ -119,6 +126,9 @@ class SubmissionRepository:
             )
             self.commit()
 
+    @log_decorator(
+        enter_message=" ---> setting submission to pending...", exit_message=" ---> submission set to pending"
+    )
     def set_pending(self, submission_id: int) -> None:
         with self.open().cursor() as cursor:
             sql: str = """
@@ -129,7 +139,15 @@ class SubmissionRepository:
             cursor.execute(sql, (2, "Pending", submission_id))
             self.commit()
 
-    def register(self, xml: str, data_types: str = "") -> int:
+    @log_decorator(enter_message=" ---> registering submission...", exit_message=" ---> submission registered")
+    def register(self, *, xml: str = None, filename=None, data_types: str = "") -> int:
+        if xml is None and filename is None:
+            raise ValueError("Either xml or filename must be provided")
+
+        if xml is None:
+            with io.open(filename, mode="r", encoding="utf-8") as f:
+                xml: str = f.read()
+
         with self.open().cursor() as cursor:
             sql = """
                 insert into clearing_house.tbl_clearinghouse_submissions(submission_state_id, data_types, upload_user_id, xml, status_text)
