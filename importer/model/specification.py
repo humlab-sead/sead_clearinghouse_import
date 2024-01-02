@@ -1,96 +1,77 @@
-from typing import Any
+import abc
+from dataclasses import dataclass, field
+
 import numpy as np
 import pandas as pd
 
-from importer.model.metadata import Metadata
-
+from ..utility import Registry
+from .metadata import Metadata, TableSpec
 from .submission import SubmissionData
 
-TYPE_COMPATIBILITY_MATRIX = {
-    ("integer", "float64"): True,
-    ("timestamp with time zone", "float64"): False,
-    ("text", "float64"): False,
-    ("character varying", "float64"): False,
-    ("numeric", "float64"): True,
-    ("timestamp without time zone", "float64"): False,
-    ("boolean", "float64"): False,
-    ("date", "float64"): False,
-    ("smallint", "float64"): True,
-    ("integer", "object"): False,
-    ("timestamp with time zone", "object"): True,
-    ("text", "object"): True,
-    ("character varying", "object"): True,
-    ("numeric", "object"): False,
-    ("timestamp without time zone", "object"): True,
-    ("boolean", "object"): False,
-    ("date", "object"): True,
-    ("smallint", "object"): False,
-    ("integer", "int64"): True,
-    ("timestamp with time zone", "int64"): False,
-    ("text", "int64"): False,
-    ("character varying", "int64"): False,
-    ("numeric", "int64"): True,
-    ("timestamp without time zone", "int64"): False,
-    ("boolean", "int64"): False,
-    ("date", "int64"): False,
-    ("smallint", "int64"): True,
-    ("timestamp with time zone", "datetime64[ns]"): True,
-    ("date", "datetime64[ns]"): True,
-    #  ('character varying', 'datetime64[ns]'): True
-}
 
-NUMERIC_TYPES: list[str] = ["numeric", "integer", "smallint"]
+class SpecificationRegistry(Registry):
+    ...
 
 
-class DataTableSpecification:
+@dataclass
+class SpecificationMessages:
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
+
+
+class SpecificationBase(abc.ABC):
+    def __init__(self, metadata: Metadata, messages: SpecificationMessages, ignore_columns: list[str]) -> None:
+        self.metadata: Metadata = metadata
+        self.messages: SpecificationMessages = messages
+        self.ignore_columns: list[str] = ignore_columns or ["date_updated"]
+
+    @property
+    def errors(self) -> list[str]:
+        return self.messages.errors
+
+    @property
+    def warnings(self) -> list[str]:
+        return self.messages.warnings
+
+    def clear(self) -> None:
+        self.messages.errors = []
+        self.messages.warnings = []
+
+    @abc.abstractmethod
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        ...
+
+
+class SubmissionSpecification(SpecificationBase):
     """Specification class that tests validity of submission"""
 
-    def __init__(self, metadata: Metadata, ignore_columns: list[str]) -> None:
-        self.errors: list[str] = []
-        self.warnings: list[str] = []
-        self.ignore_columns: list[str] = ignore_columns or ["date_updated"]
-        self.metadata: Metadata = metadata
+    def __init__(
+        self, metadata: Metadata, *, messages: SpecificationMessages = None, ignore_columns: list[str] = None
+    ) -> None:
+        super().__init__(metadata, messages or SpecificationMessages(), ignore_columns)
 
-    def is_satisfied_by(self, submission: SubmissionData) -> bool:
-        self.errors = []
-        self.warnings = []
-
-        for table_name in submission.index_tablenames:
-            self.is_satisfied_by_table(submission, table_name)
+    def is_satisfied_by(self, submission: SubmissionData, _: str = None) -> bool:
+        self.clear()
+        for cls in SpecificationRegistry.items.values():
+            specification: SpecificationBase = cls(
+                self.metadata, messages=self.messages, ignore_columns=self.ignore_columns
+            )
+            for table_name in submission.index_table_names:
+                specification.is_satisfied_by(submission, table_name)
 
         return len(self.errors) == 0
 
-    def is_satisfied_by_table(self, submission: SubmissionData, table_name: str) -> None:
-        try:
-            # Must exist as data table in metadata
-            self.is_satisfied_by_table_must_exist_policy(submission, table_name)
 
-            if not submission.exists(table_name):
-                return
+@SpecificationRegistry.register()
+class SubmissionTableExistsSpecification(SpecificationBase):
+    """Specification class that tests if table exists in submission"""
 
-            table_data: pd.DataFrame = submission.data_tables[table_name]
-
-            self.is_satisfied_by_system_id_policy(submission, table_name, table_data)
-            self.is_satisfied_by_no_missing_columns_policy(submission, table_name)
-            self.is_satisfied_by_has_pk_policy(table_name, table_data)
-            self.is_satisfied_by_lookup_data_policy(submission, table_name)
-
-            table_spec: dict[str, str] = self.metadata[table_name]
-            for _, column_spec in table_spec["columns"].items():
-                self.is_satisfied_by_type_match_policy(table_data, table_name, column_spec)
-                self.is_satisfied_by_is_numeric_policy(table_data, table_name, column_spec)
-                self.is_satisfied_by_id_is_fk_convention(table_name, column_spec)
-
-        except Exception as e:
-            self.errors.append("CRITICAL ERROR occurred when validating {}: {}".format(table_name, str(e)))
-            raise
-
-    def is_satisfied_by_table_must_exist_policy(self, submission: SubmissionData, table_name: str) -> None:
-        if submission.exists(table_name) and table_name not in submission.data_tablenames:
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        if submission.exists(table_name) and table_name not in submission.data_table_names:
             # Check if it has an alias
-            table_specification = self.metadata[table_name]
-            alias_name = table_specification["excel_sheet"] or "no_alias"
-            if alias_name not in submission.data_tablenames:
+            table_spec: TableSpec = self.metadata[table_name]
+            alias_name: str = table_spec.excel_sheet or "no_alias"
+            if alias_name not in submission.data_table_names:
                 """Not in submission table index sheet"""
                 self.errors.append("CRITICAL ERROR Table {0} not defined as submission table".format(table_name))
 
@@ -98,74 +79,122 @@ class DataTableSpecification:
             """No data sheet"""
             self.errors.append("CRITICAL ERROR {0} has NO DATA!".format(table_name))
 
-    def is_satisfied_by_type_match_policy(
-        self,
-        table_data: pd.DataFrame,
-        table_name: str,
-        column_specification: dict[str, str],
-    ) -> None:
-        column_name: str = column_specification["column_name"]
 
-        if column_name not in table_data.columns:
-            return
+@SpecificationRegistry.register()
+class ColumnTypesSpecification(SpecificationBase):
+    TYPE_COMPATIBILITY_MATRIX = {
+        ("integer", "float64"): True,
+        ("timestamp with time zone", "float64"): False,
+        ("text", "float64"): False,
+        ("character varying", "float64"): False,
+        ("numeric", "float64"): True,
+        ("timestamp without time zone", "float64"): False,
+        ("boolean", "float64"): False,
+        ("date", "float64"): False,
+        ("smallint", "float64"): True,
+        ("integer", "object"): False,
+        ("timestamp with time zone", "object"): True,
+        ("text", "object"): True,
+        ("character varying", "object"): True,
+        ("numeric", "object"): False,
+        ("timestamp without time zone", "object"): True,
+        ("boolean", "object"): False,
+        ("date", "object"): True,
+        ("smallint", "object"): False,
+        ("integer", "int64"): True,
+        ("timestamp with time zone", "int64"): False,
+        ("text", "int64"): False,
+        ("character varying", "int64"): False,
+        ("numeric", "int64"): True,
+        ("timestamp without time zone", "int64"): False,
+        ("boolean", "int64"): False,
+        ("date", "int64"): False,
+        ("smallint", "int64"): True,
+        ("timestamp with time zone", "datetime64[ns]"): True,
+        ("date", "datetime64[ns]"): True,
+        #  ('character varying', 'datetime64[ns]'): True
+    }
 
-        if len(table_data) == 0:
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+        if len(data_table) == 0:
             """Cannot determine type if table is empty"""
             return
 
-        data_column_type: str = table_data.dtypes[column_name].name
-        if not TYPE_COMPATIBILITY_MATRIX.get((column_specification["type"], data_column_type), False):
-            self.warnings.append(
-                "WARNING type clash: {}.{} {}<=>{}".format(
-                    table_name,
-                    column_name,
-                    column_specification["type"],
-                    data_column_type,
+        for _, column_spec in self.metadata[table_name].columns.items():
+            if column_spec.column_name not in data_table.columns:
+                continue
+
+            data_column_type: str = data_table.dtypes[column_spec.column_name].name
+            if not self.TYPE_COMPATIBILITY_MATRIX.get((column_spec.data_type, data_column_type), False):
+                self.warnings.append(
+                    "WARNING type clash: {}.{} {}<=>{}".format(
+                        table_name,
+                        column_spec.column_name,
+                        column_spec.data_type,
+                        data_column_type,
+                    )
                 )
-            )
 
-    def is_satisfied_by_is_numeric_policy(
-        self, table_data: dict[str, Any], table_name: str, column_spec: dict[str, Any]
-    ) -> None:
-        if column_spec["column_name"] not in table_data.columns:
-            return
 
-        if column_spec["type"] not in NUMERIC_TYPES:
-            return
+@SpecificationRegistry.register()
+class SubmissionTableTypesSpecification(SpecificationBase):
+    NUMERIC_TYPES: list[str] = ["numeric", "integer", "smallint"]
 
-        series: pd.Series = table_data[column_spec["column_name"]]
-        series = series[~series.isna()]
-        ok_mask: pd.Series = series.apply(np.isreal)
-        if not ok_mask.all():
-            error_values = " ".join(list(set(series[~ok_mask])))[:200]
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+        for _, column_spec in self.metadata[table_name].columns.items():
+            if column_spec.column_name not in data_table.columns:
+                continue
+
+            if column_spec.data_type not in self.NUMERIC_TYPES:
+                continue
+
+            series: pd.Series = data_table[column_spec.column_name]
+            series = series[~series.isna()]
+            ok_mask: pd.Series = series.apply(np.isreal)
+            if not ok_mask.all():
+                error_values = " ".join(list(set(series[~ok_mask])))[:200]
+                self.errors.append(
+                    "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(
+                        table_name, column_spec.column_name, error_values
+                    )
+                )
+
+
+@SpecificationRegistry.register()
+class HasPrimaryKeySpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+        if self.metadata[table_name].pk_name not in data_table.columns:
             self.errors.append(
-                "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(
-                    table_name, column_spec["column_name"], error_values
+                'CRITICAL ERROR PK {}.{} (table metadata) not found in data columns.'.format(
+                    table_name, self.metadata[table_name].pk_name
                 )
             )
 
-    def is_satisfied_by_has_pk_policy(self, table_name: str, table_data: pd.DataFrame) -> None:
-        primary_key_name: str = self.metadata[table_name]["pk_name"]
+        if not any(c.is_pk for c in self.metadata[table_name].columns.values()):
+            self.errors.append("Table {} has no column with PK constraint".format(table_name))
 
-        if primary_key_name not in table_data.columns:
-            self.errors.append('CRITICAL ERROR Table {} has no PK named "{}"'.format(table_name, primary_key_name))
 
-    def is_satisfied_by_system_id_policy(
-        self, submission: SubmissionData, table_name: str, table_data: pd.DataFrame
-    ):  # pylint: disable=unused-argument
+@SpecificationRegistry.register()
+class HasSystemIdSpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
         # Must have a system identity
         # if not submission.has_system_id(table_name):
-        if "system_id" not in table_data.columns:
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+
+        if "system_id" not in data_table.columns:
             self.errors.append("{0} has no system id data column".format(table_name))
             return
 
-        if table_data.system_id.isnull().values.any():
+        if data_table.system_id.isnull().values.any():
             self.errors.append("CRITICAL ERROR {0} has missing system id values".format(table_name))
 
         try:
             # duplicate_mask = data_table[~data_table.system_id.isna()].duplicated('system_id')
-            duplicate_mask: pd.Series = table_data.duplicated("system_id")
-            duplicates: list[int] = [int(x) for x in set(table_data[duplicate_mask].system_id)]
+            duplicate_mask: pd.Series = data_table.duplicated("system_id")
+            duplicates: list[int] = [int(x) for x in set(data_table[duplicate_mask].system_id)]
             if len(duplicates) > 0:
                 error_values: str = " ".join([str(x) for x in duplicates])[:200]
                 self.errors.append(
@@ -174,28 +203,24 @@ class DataTableSpecification:
         except Exception as _:
             self.warnings.append("WARNING! Duplicate check of {}.{} failed".format(table_name, "system_id"))
 
-    def is_satisfied_by_id_is_fk_convention(
-        self,
-        table_name: str,
-        column_spec: dict[str, str],
-    ) -> None:
-        column_name: str = column_spec["column_name"]
 
-        is_fk: bool = self.metadata.is_fk(table_name, column_name)
-        is_pk: bool = self.metadata.is_pk(table_name, column_name)
+@SpecificationRegistry.register()
+class IdColumnHasConstraintSpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        for _, column_spec in self.metadata[table_name].columns.items():
+            if column_spec.column_name[-3:] == "_id" and not (column_spec.is_fk or column_spec.is_pk):
+                self.warnings.append(
+                    'WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(
+                        table_name, column_spec.column_name
+                    )
+                )
 
-        if column_name[-3:] == "_id" and not (is_fk or is_pk):
-            self.warnings.append(
-                'WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(table_name, column_name)
-            )
 
-    def is_satisfied_by_no_missing_columns_policy(
-        self,
-        submission: SubmissionData,
-        table_name: str,
-    ) -> None:  # pylint: disable=unused-argument
+@SpecificationRegistry.register()
+class NoMissingColumnSpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
         """All fields in metadata.Table.Fields MUST exist in DataTable.columns"""
-        meta_column_names: list[str] = sorted(self.metadata[table_name]['columns'].keys())
+        meta_column_names: list[str] = sorted(self.metadata[table_name].columns.keys())
         data_column_names: list[str] = (
             sorted(submission.data_tables[table_name].columns.values.tolist())
             if submission.exists(table_name) and table_name in self.metadata
@@ -217,15 +242,18 @@ class DataTableSpecification:
                 "WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names))
             )
 
-    def is_satisfied_by_lookup_data_policy(self, submission: SubmissionData, table_name: str) -> None:
+
+@SpecificationRegistry.register()
+class LookupDataSpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
         if not submission.exists(table_name):
             return
 
-        if not self.metadata[table_name]["is_lookup_table"]:
+        if not self.metadata[table_name].is_lookup_table:
             return
 
         data_table: pd.DataFrame = submission.data_tables[table_name]
-        pk_name: str = self.metadata[table_name]["pk_name"]
+        pk_name: str = self.metadata[table_name].pk_name
 
         if data_table[pk_name].isnull().any():
             self.errors.append("CRITICAL ERROR {} new values not allowed for lookup table.".format(table_name))
