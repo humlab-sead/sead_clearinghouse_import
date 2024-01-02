@@ -1,6 +1,5 @@
 import contextlib
 import functools
-from typing import Self
 
 import numpy as np
 import pandas as pd
@@ -16,7 +15,7 @@ def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
         return reader.parse(sheetname)
 
 
-def load_excel(metadata: Metadata, source: str | pd.ExcelFile) -> Self:
+def load_excel(*, metadata: Metadata, source: str | pd.ExcelFile) -> "SubmissionData":
     """Loads the submission file into a SubmissionData object"""
     reader: pd.ExcelFile = pd.ExcelFile(source) if isinstance(source, str) else source
 
@@ -25,12 +24,14 @@ def load_excel(metadata: Metadata, source: str | pd.ExcelFile) -> Self:
     }
 
     logger.info(f"read sheets: {','.join(k for k,v in data_tables.items() if v is not None)}")
-    logger.info(f"missing sheets: {','.join(k for k,v in data_tables.items() if v is None) or 'none'}")
+    # logger.info(f"missing sheets: {','.join(k for k,v in data_tables.items() if v is None) or 'none'}")
 
     data_table_index: pd.DataFrame = load_excel_sheet(reader, "data_table_index")
-
     if data_table_index is None:
         logger.exception("submission file has no data_table_index")
+    else:
+        data_table_index['only_new_data'] = data_table_index['only_new_data'] == "YES"
+        data_table_index['new_data'] = data_table_index['new_data'] == "YES"
 
     reader.close()
 
@@ -45,7 +46,7 @@ class SubmissionData:
         self.data_table_index: pd.DataFrame = data_table_index
 
     def __getitem__(self, key: str) -> pd.DataFrame:
-        return self.data_tables[key]
+        return self.data_tables[key] if key in self.data_tables else None
 
     def __contains__(self, key: str) -> bool:
         return self.exists(key)
@@ -57,24 +58,25 @@ class SubmissionData:
         return self.exists(table_name) and "system_id" in self[table_name].columns
 
     @property
-    def data_tablenames(self) -> list[str]:
+    def data_table_names(self) -> list[str]:
         return [x for x in self.data_tables.keys() if self.exists(x)]
 
     @property
-    def index_tablenames(self) -> list[str]:
+    def index_table_names(self) -> list[str]:
         return self.data_table_index["table_name"].tolist()
 
-    def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> list[str]:
-        """Returns a set of keys from the referenced table"""
-        pk_name: str = metadata[table_name]["pk_name"]
+    def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[str]:
+        """Returns all unique system ids in `table_name` that are referenced by any foreign key in any other table.
+        NOTE: This function assumes PK and FK names are the same."""
+        pk_name: str = metadata[table_name].pk_name
         if pk_name is None:
             return []
-        ref_tablenames: list[str] = metadata.get_tablenames_referencing(table_name)
-        sets_of_keys: list[set] = [
+        fk_tables: list[str] = metadata.get_tablenames_referencing(table_name)
+        referenced_pk_ids: list[set] = [
             set(
-                self.data_tables[foreign_name][pk_name].loc[~np.isnan(self.data_tables[foreign_name][pk_name])].tolist()
+                self.data_tables[foreign_name][pk_name].loc[~self.data_tables[foreign_name][pk_name].isnull()].tolist()
             )
-            for foreign_name in ref_tablenames
+            for foreign_name in fk_tables
             if not self.data_tables[foreign_name] is None
         ]
-        return functools.reduce(flatten_sets, sets_of_keys or [], [])
+        return set(functools.reduce(flatten_sets, referenced_pk_ids or [], []))
