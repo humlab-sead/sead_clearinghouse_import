@@ -1,10 +1,13 @@
+import os
 from datetime import datetime
 
 import click
 import dotenv
 from loguru import logger
 
-from importer.process import ImportService
+from importer.model.metadata import Metadata
+from importer.model.submission import SubmissionData, load_excel
+from importer.process import ImportService, Options
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -45,11 +48,29 @@ def import_file(
     table_names: str,
     xml_filename: str,
 ):
-    log_file: str = f"logs/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-    logger.add(log_file)
+    logger.add(f"logs/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
-    opts: ImportService.Options = ImportService.Options(locals())
-    ImportService(opts).process()
+    opts: Options = Options(locals())
+    return workflow(opts)
+
+
+def workflow(opts: Options) -> None:
+    metadata: Metadata = Metadata(opts.db_uri())
+
+    if isinstance(opts.xml_filename, str):
+        if not os.path.isfile(opts.xml_filename):
+            logger.error(f" ---> file '{opts.xml_filename}' does not exist")
+            return
+
+        logger.info(f"Uploading existing file {opts.xml_filename}")
+
+        submission: SubmissionData | str = opts.xml_filename
+
+    else:
+        logger.info("Generating new XML file ...")
+        submission: SubmissionData | str = load_excel(metadata=metadata, source=opts.source())
+
+    ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
 
 if __name__ == "__main__":
