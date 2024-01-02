@@ -74,7 +74,7 @@
         "pk_name": "project_id",
         "java_class": "TblProjects",
         "excel_sheet": "tbl_projects",
-        "is_lookup_table": true
+        "is_lookup_table": false
     },
     {
         "table_name": "tbl_record_types",
@@ -151,20 +151,20 @@
         "pk_name": "site_location_id",
         "java_class": "TblSiteLocations",
         "excel_sheet": "tbl_site_locations",
-        "is_lookup_table": true
+        "is_lookup_table": false
     },
     {
         "table_name": "tbl_site_references",
         "pk_name": "site_reference_id",
         "java_class": "TblSiteReferences",
         "excel_sheet": "tbl_site_references",
-        "is_lookup_table": true
+        "is_lookup_table": false
     },
     {
         "table_name": "tbl_sites",
         "pk_name": "site_id",
         "java_class": "TblSites",
         "excel_sheet": "tbl_sites",
-        "is_lookup_table": true
+        "is_lookup_table": false
     }
 ]

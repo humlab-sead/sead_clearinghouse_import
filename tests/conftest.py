@@ -1,5 +1,6 @@
 import pandas as pd
 import pytest
+
 from importer.model import Metadata
 from importer.utility import load_sead_data
 

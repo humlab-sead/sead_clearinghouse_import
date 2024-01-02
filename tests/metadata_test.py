@@ -5,7 +5,8 @@ import pandas as pd
 import pytest
 
 from importer.model.metadata import Metadata
-from importer.utility import dburi_from_env, load_sql_from_file  # Assuming Metadata is the class name
+from importer.utility import dburi_from_env, load_sql_from_file
+from tests.utility import load_excel_by_regression  # Assuming Metadata is the class name
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -38,7 +39,7 @@ TEST_TABLES: list[str] = [
 ]
 
 
-@pytest.mark.skipif(True, reason='Used for generating test data only')
+# @pytest.mark.skipif(True, reason='Used for generating test data only')
 def test_load_metadata_from_postgres():
     metadata: Metadata = Metadata(dburi_from_env())
 
@@ -73,15 +74,15 @@ def test_tables_specifications(metadata: Metadata):
     assert set(metadata.sead_tables.columns) | {'columns'} == set(metadata.sead_schema['tbl_sites'].keys())
 
     assert 'columns' in metadata.sead_schema['tbl_sites'].keys()
-    assert 'site_id' in metadata.sead_schema['tbl_sites']['columns'].keys()
-    assert len(metadata.sead_schema['tbl_sites']['columns']) == len(
+    assert 'site_id' in metadata.sead_schema['tbl_sites'].columns.keys()
+    assert len(metadata.sead_schema['tbl_sites'].columns) == len(
         metadata.sead_columns[metadata.sead_columns.table_name == 'tbl_sites']
     )
-    assert metadata.sead_schema['tbl_sites']['columns']['site_id']['is_pk'] is True
-    assert metadata.sead_schema['tbl_sites']['columns']['site_name']['is_pk'] is False
-    assert metadata.sead_schema['tbl_locations']['columns']['location_type_id']['is_fk'] is True
-    assert metadata.sead_schema['tbl_locations']['columns']['location_id']['is_fk'] is False
-    assert metadata.sead_schema['tbl_locations']['columns']['location_id']['is_pk'] is True
+    assert metadata.sead_schema['tbl_sites'].columns['site_id'].is_pk is True
+    assert metadata.sead_schema['tbl_sites'].columns['site_name'].is_pk is False
+    assert metadata.sead_schema['tbl_locations'].columns['location_type_id'].is_fk is True
+    assert metadata.sead_schema['tbl_locations'].columns['location_id'].is_fk is False
+    assert metadata.sead_schema['tbl_locations'].columns['location_id'].is_pk is True
 
 
 def test_is_pk(metadata: Metadata):
@@ -96,6 +97,20 @@ def test_is_fk(metadata: Metadata):
     assert metadata.is_fk('tbl_sites', 'site_name') is False
     assert metadata.is_fk('tbl_locations', 'location_type_id') is True
     assert metadata.is_fk('tbl_locations', 'location_id') is False
+
+
+def test_get_tablenames_referencing():
+    metadata: Metadata = Metadata(dburi_from_env())
+
+    assert set(metadata.get_tablenames_referencing('tbl_sites')) == {
+        'tbl_sample_groups',
+        'tbl_site_images',
+        'tbl_site_locations',
+        'tbl_site_natgridrefs',
+        'tbl_site_other_records',
+        'tbl_site_preservation_status',
+        'tbl_site_references',
+    }
 
 
 @pytest.mark.parametrize(
@@ -115,7 +130,7 @@ def test_foreign_keys(metadata: Metadata, values: list[str]):
 
 @pytest.mark.skipif(not isfile('data/metadata_20231223.xlsx'), reason='metadata_20231223.xlsx not found')
 def test_regression_of_foreign_keys(metadata: Metadata):
-    excel_columns: pd.DataFrame = regression_load('data/metadata_20231223.xlsx')
+    excel_columns: pd.DataFrame = load_excel_by_regression('data/metadata_20231223.xlsx')
     expected_foreign_keys: pd.DataFrame = excel_columns['foreign_keys']
     expected_foreign_keys.columns = metadata.foreign_keys.columns
 
@@ -136,7 +151,7 @@ def test_regression_of_foreign_keys(metadata: Metadata):
 ###### REMOVE CODE BELOW WHEN DONE
 @pytest.mark.skipif(not isfile('data/metadata_20231223.xlsx'), reason='metadata_20231223.xlsx not found')
 def test_load_by_sql_is_same_as_load_by_excel(metadata: Metadata):
-    excel_columns: pd.DataFrame = regression_load('data/metadata_20231223.xlsx')['columns']
+    excel_columns: pd.DataFrame = load_excel_by_regression('data/metadata_20231223.xlsx').get('columns')
     excel_columns = excel_columns[excel_columns.table_name.isin(TEST_TABLES)]
 
     assert isinstance(metadata.sead_columns, pd.DataFrame)
@@ -168,71 +183,3 @@ def test_load_by_sql_is_same_as_load_by_excel(metadata: Metadata):
         assert actual_columns.xml_column_name.tolist() == expected_columns.xml_version.tolist(), table_name
 
     assert True
-
-
-def regression_load(filename):
-    def recode_excel_sheet_name(row):
-        value = row['excel_sheet']
-        if pd.notnull(value) and len(value) > 0 and value != 'nan':
-            return value
-        return row['table_name']
-
-    tables: pd.DataFrame = pd.read_excel(
-        filename,
-        'Tables',
-        dtype={'table_name': 'str', 'java_class': 'str', 'pk_name': 'str', 'excel_sheet': 'str', 'notes': 'str'},
-    )
-
-    columns: pd.DataFrame = pd.read_excel(
-        filename,
-        'Columns',
-        dtype={
-            'table_name': 'str',
-            'column_name': 'str',
-            'nullable': 'str',
-            'type': 'str',
-            'type2': 'str',
-            'class': 'str',
-        },
-    )
-
-    tables['table_name_index'] = tables['table_name']
-    tables = tables.set_index('table_name_index')
-
-    tables['excel_sheet'] = tables.apply(recode_excel_sheet_name, axis=1)
-
-    primary_keys: pd.DataFrame = pd.merge(
-        tables,
-        columns,
-        how='inner',
-        left_on=['table_name', 'pk_name'],
-        right_on=['table_name', 'column_name'],
-    )[['table_name', 'column_name', 'java_class']]
-    primary_keys.columns = ['table_name', 'column_name', 'class_name']
-
-    foreign_keys: pd.DataFrame = pd.merge(
-        columns,
-        primary_keys,
-        how='inner',
-        left_on=['column_name', 'class'],
-        right_on=['column_name', 'class_name'],
-    )[['table_name_x', 'column_name', 'table_name_y', 'class_name']]
-    foreign_keys = foreign_keys[foreign_keys.table_name_x != foreign_keys.table_name_y]
-
-    foreign_keys_lookup: dict[str, bool] = {
-        x: True for x in list(foreign_keys.table_name_x + '#' + foreign_keys.column_name)
-    }
-
-    primary_keys_lookup: dict[str, bool] = {x: True for x in tables.table_name + '#' + tables.pk_name}
-
-    classname_cache: dict[str, dict] = tables.set_index('java_class')['table_name'].to_dict()
-
-    return {
-        'tables': tables,
-        'columns': columns,
-        'primary_keys': primary_keys,
-        'foreign_keys': foreign_keys,
-        'foreign_keys_lookup': foreign_keys_lookup,
-        'primary_keys_lookup': primary_keys_lookup,
-        'classname_cache': classname_cache,
-    }
