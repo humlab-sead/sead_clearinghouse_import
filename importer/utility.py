@@ -1,5 +1,7 @@
 import base64
+import functools
 import io
+import logging
 import os
 import zlib
 from os.path import abspath, dirname, join
@@ -8,7 +10,22 @@ from xml.dom import minidom
 
 import dotenv
 import pandas as pd
+from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+
+def log_decorator(enter_message='Entering', exit_message='Exiting', level=logging.INFO):
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            logger.log(level, f'{enter_message}: {func.__name__}')
+            result = func(*args, **kwargs)
+            logger.log(level, f'{exit_message}: {func.__name__}')
+            return result
+
+        return wrapper
+
+    return decorator
 
 
 def load_sql_from_file(identifier: str) -> str:
@@ -89,7 +106,7 @@ def flatten_sets(x, y) -> set:
     return set(list(x) + list(y))
 
 
-def tidy_xml(path: str, suffix: str = "_tidy") -> str:
+def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
     try:
         doc = minidom.parse(path)
         tidy_doc = doc.toprettyxml(encoding="UTF-8")
@@ -97,8 +114,11 @@ def tidy_xml(path: str, suffix: str = "_tidy") -> str:
         with io.open(tidy_path, "wb") as outstream:
             outstream.write(tidy_doc)
     except OSError as _:
-        print("fatal: Tidy XML failed. Is tidy installed? (sudo apt-get install tidy)")
+        logger.error("fatal: Tidy XML failed. Is tidy installed? (sudo apt-get install tidy)")
         return path
+
+    if remove_source:
+        os.remove(path)
 
     return tidy_path
 
