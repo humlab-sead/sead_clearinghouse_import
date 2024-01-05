@@ -25,14 +25,10 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--output-folder", envvar="OUTPUT_FOLDER", help="Output folder")
 @click.option("--port", default=5432, help="Server port number.")
 @click.option("--skip", default=False, help="Skip the import (do nothing)")
-@click.option(
-    "--id",
-    "submission_id",
-    default=None,
-    help="Overwrite (replace) existing submission id.",
-)
+@click.option("--id", "submission_id", default=None, help="Replace existing submission.")
 @click.option("--table-names", default=None, help="Only load specified tables.")
 @click.option("--xml-filename", default=None, help="Name of existing XML file to use.")
+@click.option("--check-only", type=bool, default=False, help="Only check if file seems OK.")
 def import_file(
     data_filename: str,
     meta_filename: str,
@@ -47,7 +43,8 @@ def import_file(
     submission_id: str,
     table_names: str,
     xml_filename: str,
-):
+    check_only: bool,
+) -> None:
     logger.add(f"logs/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
     opts: Options = Options(locals())
@@ -62,14 +59,13 @@ def workflow(opts: Options) -> None:
             logger.error(f" ---> file '{opts.xml_filename}' does not exist")
             return
 
-        logger.info(f"Uploading existing file {opts.xml_filename}")
+        if opts.check_only:
+            logger.error("The --check-only option is not supported when using an existing XML file")
+            return
 
-        submission: SubmissionData | str = opts.xml_filename
-
-    else:
-        logger.info("Generating new XML file ...")
-        submission: SubmissionData | str = load_excel(metadata=metadata, source=opts.source())
-
+    submission: SubmissionData | str = (
+        opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.source())
+    )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
 

@@ -1,8 +1,10 @@
 import abc
 from dataclasses import dataclass, field
+import logging
 
 import numpy as np
 import pandas as pd
+from loguru import logger
 
 from ..utility import Registry
 from .metadata import Metadata, TableSpec
@@ -17,6 +19,12 @@ class SpecificationRegistry(Registry):
 class SpecificationMessages:
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+
+
+class SpecificationError(Exception):
+    def __init__(self, messages: SpecificationMessages) -> None:
+        super().__init__("Submission specification failed")
+        self.messages: SpecificationMessages = messages
 
 
 class SpecificationBase(abc.ABC):
@@ -46,9 +54,15 @@ class SubmissionSpecification(SpecificationBase):
     """Specification class that tests validity of submission"""
 
     def __init__(
-        self, metadata: Metadata, *, messages: SpecificationMessages = None, ignore_columns: list[str] = None
+        self,
+        metadata: Metadata,
+        *,
+        messages: SpecificationMessages = None,
+        ignore_columns: list[str] = None,
+        raise_errors: bool = True,
     ) -> None:
         super().__init__(metadata, messages or SpecificationMessages(), ignore_columns)
+        self.raise_errors: bool = raise_errors
 
     def is_satisfied_by(self, submission: SubmissionData, _: str = None) -> bool:
         self.clear()
@@ -59,7 +73,22 @@ class SubmissionSpecification(SpecificationBase):
             for table_name in submission.index_table_names:
                 specification.is_satisfied_by(submission, table_name)
 
+        self.log_messages(self.messages.warnings, logging.WARNING)
+        self.log_messages(self.messages.errors, logging.ERROR)
+
+        if self.raise_errors and len(specification.errors) > 0:
+            raise SpecificationError(self.messages)
+
         return len(self.errors) == 0
+
+    def log_messages(self, messages: list[str], level: int) -> None:
+        if len(messages) > 0:
+            for message in messages:
+                try:
+                    logger.log(level, message)
+                except UnicodeEncodeError as ex:
+                    logger.warning("WARNING! Failed to output warning message")
+                    logger.exception(ex)
 
 
 @SpecificationRegistry.register()
@@ -124,8 +153,11 @@ class ColumnTypesSpecification(SpecificationBase):
         for _, column_spec in self.metadata[table_name].columns.items():
             if column_spec.column_name not in data_table.columns:
                 continue
-
+            if column_spec.column_name in self.ignore_columns:
+                continue
             data_column_type: str = data_table.dtypes[column_spec.column_name].name
+            if all(data_table[column_spec.column_name].isna()):
+                continue
             if not self.TYPE_COMPATIBILITY_MATRIX.get((column_spec.data_type, data_column_type), False):
                 self.warnings.append(
                     "WARNING type clash: {}.{} {}<=>{}".format(

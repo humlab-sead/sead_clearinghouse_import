@@ -280,30 +280,7 @@ class XmlProcessor:
         table_names: list[str] = None,
         extra_names: list[str] = None,
     ) -> None:
-        specification: SubmissionSpecification = SubmissionSpecification(
-            metadata=metadata, ignore_columns=self.ignore_columns
-        )
-
-        specification.is_satisfied_by(submission)
-
-        if len(specification.warnings) > 0:
-            for warning in specification.warnings:
-                try:
-                    logger.info(warning)
-                except UnicodeEncodeError as ex:
-                    logger.warning("WARNING! Failed to output warning message")
-                    logger.exception(ex)
-
-        if len(specification.errors) > 0:
-            for error in specification.errors:
-                try:
-                    logger.error(error)
-                except UnicodeEncodeError as ex:
-                    logger.warning("WARNING! Failed to output error message")
-                    logger.exception(ex)
-
-            raise DataImportError("Process ABORTED since submission does not conform to SPECIFICATION")
-
+ 
         tables_to_process: list[str] = submission.index_table_names if table_names is None else table_names
         extra_names: set[str] = (
             set(metadata.sead_schema.keys()) - set(submission.data_table_names) if extra_names is None else extra_names

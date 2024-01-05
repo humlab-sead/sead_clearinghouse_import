@@ -9,8 +9,14 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from importer.model import DataImportError, Metadata, SubmissionData, SubmissionRepository
-from importer.model.metadata import TableSpec
+from importer.model import (
+    DataImportError,
+    Metadata,
+    SubmissionData,
+    SubmissionRepository,
+    SubmissionSpecification,
+    TableSpec,
+)
 
 from . import process_xml, utility
 
@@ -35,7 +41,8 @@ class Options:
     submission_id: int
     xml_filename: str
     data_types: str
-
+    check_only: bool
+    ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
     timestamp: str = field(init=False, default=None)
     source: str = field(init=False, default=None)
@@ -46,6 +53,7 @@ class Options:
         self.timestamp: str = time.strftime("%Y%m%d-%H%M%S")
         self.source: str = join(self.input_folder, self.data_filename)
         self.target: str = join(self.output_folder, f"{self.basename}_{self.timestamp}.xml")
+        self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
 
     def db_uri(self) -> str:
         return "postgresql://{}@{}:{}/{}".format(self.dbuser, self.dbhost, self.port, self.dbname)
@@ -76,8 +84,11 @@ class ImportService:
         self.repository: SubmissionRepository = repository or SubmissionRepository(opts.db_opts)
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
         self.xml_processor: process_xml.XmlProcessor = xml_processor or process_xml.XmlProcessor
+        self.specification: SubmissionSpecification = SubmissionSpecification(
+            metadata=self.metadata, ignore_columns=self.opts.ignore_columns
+        )
 
-    @utility.log_decorator(enter_message=" ---> creating new XML file...", exit_message=" ---> XML created")
+    @utility.log_decorator(enter_message=" ---> generating XML file...", exit_message=" ---> XML created")
     def to_xml(self, submission: SubmissionData) -> str:
         """
         Reads Excel files and convert content to an CH XML-file.
@@ -100,14 +111,19 @@ class ImportService:
                 logger.info("Skipping: %s", opts.basename)
                 return
 
+            if isinstance(submission, SubmissionData):
+                assert self.specification.is_satisfied_by(submission)
+                if self.opts.check_only:
+                    return
+
+            if (opts.submission_id or 0) > 0:
+                self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
+
             if (opts.submission_id or 0) == 0:
                 opts.xml_filename = submission if isinstance(submission, str) else self.to_xml(submission)
                 opts.submission_id = self.repository.register(filename=opts.xml_filename, data_types=opts.data_types)
 
                 self.repository.extract_to_staging_tables(opts.submission_id)
-
-            else:
-                self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             self.repository.explode_to_public_tables(opts.submission_id, p_dry_run=False, p_add_missing_columns=False)
             self.repository.set_pending(opts.submission_id)
