@@ -79,7 +79,7 @@ def load_sead_data(db_uri: str, sql_id: str | pd.DataFrame, index: list[str], so
     """Returns a dataframe of tables from SEAD with attributes."""
     index = index if isinstance(index, list) else [index]
     sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
-    tables: pd.DataFrame = (
+    data: pd.DataFrame = (
         (
             sql_id
             if isinstance(sql_id, pd.DataFrame)
@@ -89,7 +89,7 @@ def load_sead_data(db_uri: str, sql_id: str | pd.DataFrame, index: list[str], so
         .rename_axis([f'index_{x}' for x in index])
         .sort_values(by=sortby if sortby else index)
     )
-    return tables
+    return data
 
 
 def flatten(l) -> list:

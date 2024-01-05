@@ -111,12 +111,7 @@ class SubmissionRepository:
         self.commit()
 
     @log_decorator(enter_message=" ---> removing submission...", exit_message=" ---> submission removed")
-    def remove(
-        self,
-        submission_id: int,
-        clear_header: bool = False,
-        clear_exploded: bool = True,
-    ) -> None:
+    def remove(self, submission_id: int, clear_header: bool = False, clear_exploded: bool = True) -> None:
         """Delete submission from staging tables."""
         logger.info("   --> Cleaning up existing data for submission...")
         with self.open().cursor() as cursor:
