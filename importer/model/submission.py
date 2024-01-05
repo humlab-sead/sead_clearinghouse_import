@@ -1,11 +1,10 @@
 import contextlib
 import functools
 
-import numpy as np
 import pandas as pd
 from loguru import logger
 
-from importer.utility import flatten_sets
+from importer.utility import flatten_sets, log_decorator
 
 from .metadata import Metadata
 
@@ -14,7 +13,7 @@ def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
     with contextlib.suppress(Exception):
         return reader.parse(sheetname)
 
-
+@log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel')
 def load_excel(*, metadata: Metadata, source: str | pd.ExcelFile) -> "SubmissionData":
     """Loads the submission file into a SubmissionData object"""
     reader: pd.ExcelFile = pd.ExcelFile(source) if isinstance(source, str) else source
@@ -73,9 +72,7 @@ class SubmissionData:
             return []
         fk_tables: list[str] = metadata.get_tablenames_referencing(table_name)
         referenced_pk_ids: list[set] = [
-            set(
-                self.data_tables[foreign_name][pk_name].loc[~self.data_tables[foreign_name][pk_name].isnull()].tolist()
-            )
+            set(self.data_tables[foreign_name][pk_name].loc[~self.data_tables[foreign_name][pk_name].isnull()].tolist())
             for foreign_name in fk_tables
             if not self.data_tables[foreign_name] is None
         ]
