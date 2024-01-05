@@ -4,16 +4,16 @@
         "column_name": "abundance_id",
         "xml_column_name": "abundanceId",
         "position": 1,
-        "data_type": "integer",
-        "numeric_precision": 32,
+        "data_type": "bigint",
+        "numeric_precision": 64,
         "numeric_scale": 0,
         "character_maximum_length": 0,
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.lang.Integer"
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "???"
     },
     {
         "table_name": "tbl_abundances",
@@ -27,8 +27,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_taxa_tree_master",
-        "f_column_name": "taxon_id",
+        "fk_table_name": "tbl_taxa_tree_master",
+        "fk_column_name": "taxon_id",
         "class_name": "TblTaxaTreeMaster"
     },
     {
@@ -43,8 +43,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_analysis_entities",
-        "f_column_name": "analysis_entity_id",
+        "fk_table_name": "tbl_analysis_entities",
+        "fk_column_name": "analysis_entity_id",
         "class_name": "TblAnalysisEntities"
     },
     {
@@ -59,8 +59,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_abundance_elements",
-        "f_column_name": "abundance_element_id",
+        "fk_table_name": "tbl_abundance_elements",
+        "fk_column_name": "abundance_element_id",
         "class_name": "TblAbundanceElements"
     },
     {
@@ -75,8 +75,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -91,8 +91,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -100,16 +100,16 @@
         "column_name": "analysis_entity_id",
         "xml_column_name": "analysisEntityId",
         "position": 1,
-        "data_type": "integer",
-        "numeric_precision": 32,
+        "data_type": "bigint",
+        "numeric_precision": 64,
         "numeric_scale": 0,
         "character_maximum_length": 0,
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.lang.Integer"
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "???"
     },
     {
         "table_name": "tbl_analysis_entities",
@@ -123,8 +123,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_physical_samples",
-        "f_column_name": "physical_sample_id",
+        "fk_table_name": "tbl_physical_samples",
+        "fk_column_name": "physical_sample_id",
         "class_name": "TblPhysicalSamples"
     },
     {
@@ -139,8 +139,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_datasets",
-        "f_column_name": "dataset_id",
+        "fk_table_name": "tbl_datasets",
+        "fk_column_name": "dataset_id",
         "class_name": "TblDatasets"
     },
     {
@@ -155,8 +155,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -171,8 +171,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -187,8 +187,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_contacts",
-        "f_column_name": "contact_id",
+        "fk_table_name": "tbl_contacts",
+        "fk_column_name": "contact_id",
         "class_name": "TblContacts"
     },
     {
@@ -203,8 +203,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_contact_types",
-        "f_column_name": "contact_type_id",
+        "fk_table_name": "tbl_contact_types",
+        "fk_column_name": "contact_type_id",
         "class_name": "TblContactTypes"
     },
     {
@@ -219,8 +219,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_datasets",
-        "f_column_name": "dataset_id",
+        "fk_table_name": "tbl_datasets",
+        "fk_column_name": "dataset_id",
         "class_name": "TblDatasets"
     },
     {
@@ -235,8 +235,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -251,8 +251,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -267,8 +267,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_datasets",
-        "f_column_name": "dataset_id",
+        "fk_table_name": "tbl_datasets",
+        "fk_column_name": "dataset_id",
         "class_name": "TblDatasets"
     },
     {
@@ -283,8 +283,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_dataset_submission_types",
-        "f_column_name": "submission_type_id",
+        "fk_table_name": "tbl_dataset_submission_types",
+        "fk_column_name": "submission_type_id",
         "class_name": "TblDatasetSubmissionTypes"
     },
     {
@@ -299,8 +299,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_contacts",
-        "f_column_name": "contact_id",
+        "fk_table_name": "tbl_contacts",
+        "fk_column_name": "contact_id",
         "class_name": "TblContacts"
     },
     {
@@ -308,16 +308,16 @@
         "column_name": "date_submitted",
         "xml_column_name": "dateSubmitted",
         "position": 5,
-        "data_type": "date",
+        "data_type": "text",
         "numeric_precision": 0,
         "numeric_scale": 0,
         "character_maximum_length": 0,
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.util.Date"
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "java.lang.String"
     },
     {
         "table_name": "tbl_dataset_submissions",
@@ -331,8 +331,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -347,8 +347,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -363,8 +363,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -379,8 +379,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_dataset_masters",
-        "f_column_name": "master_set_id",
+        "fk_table_name": "tbl_dataset_masters",
+        "fk_column_name": "master_set_id",
         "class_name": "TblDatasetMasters"
     },
     {
@@ -395,8 +395,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_data_types",
-        "f_column_name": "data_type_id",
+        "fk_table_name": "tbl_data_types",
+        "fk_column_name": "data_type_id",
         "class_name": "TblDataTypes"
     },
     {
@@ -411,8 +411,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_methods",
-        "f_column_name": "method_id",
+        "fk_table_name": "tbl_methods",
+        "fk_column_name": "method_id",
         "class_name": "TblMethods"
     },
     {
@@ -427,8 +427,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_biblio",
-        "f_column_name": "biblio_id",
+        "fk_table_name": "tbl_biblio",
+        "fk_column_name": "biblio_id",
         "class_name": "TblBiblio"
     },
     {
@@ -443,8 +443,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_datasets",
-        "f_column_name": "dataset_id",
+        "fk_table_name": "tbl_datasets",
+        "fk_column_name": "dataset_id",
         "class_name": "TblDatasets"
     },
     {
@@ -459,8 +459,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_projects",
-        "f_column_name": "project_id",
+        "fk_table_name": "tbl_projects",
+        "fk_column_name": "project_id",
         "class_name": "TblProjects"
     },
     {
@@ -475,8 +475,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -491,8 +491,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -507,8 +507,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -523,47 +523,15 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_analysis_entities",
-        "f_column_name": "analysis_entity_id",
+        "fk_table_name": "tbl_analysis_entities",
+        "fk_column_name": "analysis_entity_id",
         "class_name": "TblAnalysisEntities"
     },
     {
         "table_name": "tbl_dendro",
-        "column_name": "measurement_value",
-        "xml_column_name": "measurementValue",
+        "column_name": "dendro_measurement_id",
+        "xml_column_name": "dendroMeasurementId",
         "position": 3,
-        "data_type": "character varying",
-        "numeric_precision": 0,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": false,
-        "is_pk": false,
-        "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.lang.String"
-    },
-    {
-        "table_name": "tbl_dendro",
-        "column_name": "date_updated",
-        "xml_column_name": "dateUpdated",
-        "position": 4,
-        "data_type": "timestamp with time zone",
-        "numeric_precision": 0,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": true,
-        "is_pk": false,
-        "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.util.Date"
-    },
-    {
-        "table_name": "tbl_dendro",
-        "column_name": "dendro_lookup_id",
-        "xml_column_name": "dendroLookupId",
-        "position": 5,
         "data_type": "integer",
         "numeric_precision": 32,
         "numeric_scale": 0,
@@ -571,9 +539,41 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_dendro_lookup",
-        "f_column_name": "dendro_lookup_id",
-        "class_name": "TblDendroLookup"
+        "fk_table_name": "tbl_dendro_measurements",
+        "fk_column_name": "dendro_measurement_id",
+        "class_name": "TblDendroMeasurements"
+    },
+    {
+        "table_name": "tbl_dendro",
+        "column_name": "measurement_value",
+        "xml_column_name": "measurementValue",
+        "position": 4,
+        "data_type": "character varying",
+        "numeric_precision": 0,
+        "numeric_scale": 0,
+        "character_maximum_length": 0,
+        "is_nullable": false,
+        "is_pk": false,
+        "is_fk": false,
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "java.lang.String"
+    },
+    {
+        "table_name": "tbl_dendro",
+        "column_name": "date_updated",
+        "xml_column_name": "dateUpdated",
+        "position": 5,
+        "data_type": "timestamp with time zone",
+        "numeric_precision": 0,
+        "numeric_scale": 0,
+        "character_maximum_length": 0,
+        "is_nullable": true,
+        "is_pk": false,
+        "is_fk": false,
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "java.util.Date"
     },
     {
         "table_name": "tbl_dendro_date_notes",
@@ -587,8 +587,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -603,8 +603,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_dendro_dates",
-        "f_column_name": "dendro_date_id",
+        "fk_table_name": "tbl_dendro_dates",
+        "fk_column_name": "dendro_date_id",
         "class_name": "TblDendroDates"
     },
     {
@@ -619,8 +619,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -635,8 +635,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -651,8 +651,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -667,14 +667,14 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_analysis_entities",
-        "f_column_name": "analysis_entity_id",
+        "fk_table_name": "tbl_analysis_entities",
+        "fk_column_name": "analysis_entity_id",
         "class_name": "TblAnalysisEntities"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "age_older",
-        "xml_column_name": "ageOlder",
+        "column_name": "cal_age_younger",
+        "xml_column_name": "calAgeYounger",
         "position": 3,
         "data_type": "integer",
         "numeric_precision": 32,
@@ -683,14 +683,14 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "age_younger",
-        "xml_column_name": "ageYounger",
+        "column_name": "dating_uncertainty_id",
+        "xml_column_name": "datingUncertaintyId",
         "position": 4,
         "data_type": "integer",
         "numeric_precision": 32,
@@ -698,15 +698,15 @@
         "character_maximum_length": 0,
         "is_nullable": true,
         "is_pk": false,
-        "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.lang.Integer"
+        "is_fk": true,
+        "fk_table_name": "tbl_dating_uncertainty",
+        "fk_column_name": "dating_uncertainty_id",
+        "class_name": "TblDatingUncertainty"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "dating_uncertainty_id",
-        "xml_column_name": "datingUncertaintyId",
+        "column_name": "years_type_id",
+        "xml_column_name": "yearsTypeId",
         "position": 5,
         "data_type": "integer",
         "numeric_precision": 32,
@@ -715,14 +715,14 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_dating_uncertainty",
-        "f_column_name": "dating_uncertainty_id",
-        "class_name": "TblDatingUncertainty"
+        "fk_table_name": "tbl_years_types",
+        "fk_column_name": "years_type_id",
+        "class_name": "TblYearsTypes"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "season_or_qualifier_id",
-        "xml_column_name": "seasonOrQualifierId",
+        "column_name": "error",
+        "xml_column_name": "error",
         "position": 6,
         "data_type": "integer",
         "numeric_precision": 32,
@@ -731,31 +731,15 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "date_updated",
-        "xml_column_name": "dateUpdated",
+        "column_name": "season_or_qualifier_id",
+        "xml_column_name": "seasonOrQualifierId",
         "position": 7,
-        "data_type": "timestamp with time zone",
-        "numeric_precision": 0,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": true,
-        "is_pk": false,
-        "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
-        "class_name": "java.util.Date"
-    },
-    {
-        "table_name": "tbl_dendro_dates",
-        "column_name": "error_plus",
-        "xml_column_name": "errorPlus",
-        "position": 8,
         "data_type": "integer",
         "numeric_precision": 32,
         "numeric_scale": 0,
@@ -763,14 +747,30 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
         "table_name": "tbl_dendro_dates",
-        "column_name": "error_minus",
-        "xml_column_name": "errorMinus",
+        "column_name": "date_updated",
+        "xml_column_name": "dateUpdated",
+        "position": 8,
+        "data_type": "timestamp with time zone",
+        "numeric_precision": 0,
+        "numeric_scale": 0,
+        "character_maximum_length": 0,
+        "is_nullable": true,
+        "is_pk": false,
+        "is_fk": false,
+        "fk_table_name": "",
+        "fk_column_name": "",
+        "class_name": "java.util.Date"
+    },
+    {
+        "table_name": "tbl_dendro_dates",
+        "column_name": "cal_age_older",
+        "xml_column_name": "calAgeOlder",
         "position": 9,
         "data_type": "integer",
         "numeric_precision": 32,
@@ -779,57 +779,9 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
-    },
-    {
-        "table_name": "tbl_dendro_dates",
-        "column_name": "dendro_lookup_id",
-        "xml_column_name": "dendroLookupId",
-        "position": 10,
-        "data_type": "integer",
-        "numeric_precision": 32,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": false,
-        "is_pk": false,
-        "is_fk": true,
-        "f_table_name": "tbl_dendro_lookup",
-        "f_column_name": "dendro_lookup_id",
-        "class_name": "TblDendroLookup"
-    },
-    {
-        "table_name": "tbl_dendro_dates",
-        "column_name": "error_uncertainty_id",
-        "xml_column_name": "errorUncertaintyId",
-        "position": 11,
-        "data_type": "integer",
-        "numeric_precision": 32,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": true,
-        "is_pk": false,
-        "is_fk": true,
-        "f_table_name": "tbl_error_uncertainties",
-        "f_column_name": "error_uncertainty_id",
-        "class_name": "TblErrorUncertainties"
-    },
-    {
-        "table_name": "tbl_dendro_dates",
-        "column_name": "age_type_id",
-        "xml_column_name": "ageTypeId",
-        "position": 12,
-        "data_type": "integer",
-        "numeric_precision": 32,
-        "numeric_scale": 0,
-        "character_maximum_length": 0,
-        "is_nullable": false,
-        "is_pk": false,
-        "is_fk": true,
-        "f_table_name": "tbl_age_types",
-        "f_column_name": "age_type_id",
-        "class_name": "TblAgeTypes"
     },
     {
         "table_name": "tbl_locations",
@@ -843,8 +795,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -859,8 +811,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -875,8 +827,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_location_types",
-        "f_column_name": "location_type_id",
+        "fk_table_name": "tbl_location_types",
+        "fk_column_name": "location_type_id",
         "class_name": "TblLocationTypes"
     },
     {
@@ -891,8 +843,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -907,8 +859,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -923,8 +875,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -939,8 +891,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -955,8 +907,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_groups",
-        "f_column_name": "sample_group_id",
+        "fk_table_name": "tbl_sample_groups",
+        "fk_column_name": "sample_group_id",
         "class_name": "TblSampleGroups"
     },
     {
@@ -971,8 +923,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_alt_ref_types",
-        "f_column_name": "alt_ref_type_id",
+        "fk_table_name": "tbl_alt_ref_types",
+        "fk_column_name": "alt_ref_type_id",
         "class_name": "TblAltRefTypes"
     },
     {
@@ -987,8 +939,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_types",
-        "f_column_name": "sample_type_id",
+        "fk_table_name": "tbl_sample_types",
+        "fk_column_name": "sample_type_id",
         "class_name": "TblSampleTypes"
     },
     {
@@ -1003,8 +955,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1019,8 +971,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1035,8 +987,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1051,8 +1003,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1067,8 +1019,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_project_types",
-        "f_column_name": "project_type_id",
+        "fk_table_name": "tbl_project_types",
+        "fk_column_name": "project_type_id",
         "class_name": "TblProjectTypes"
     },
     {
@@ -1083,8 +1035,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_project_stages",
-        "f_column_name": "project_stage_id",
+        "fk_table_name": "tbl_project_stages",
+        "fk_column_name": "project_stage_id",
         "class_name": "TblProjectStages"
     },
     {
@@ -1099,8 +1051,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1115,8 +1067,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1131,8 +1083,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1147,8 +1099,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1163,8 +1115,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1179,8 +1131,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1195,8 +1147,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1211,8 +1163,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1227,8 +1179,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1243,8 +1195,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1259,8 +1211,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_alt_ref_types",
-        "f_column_name": "alt_ref_type_id",
+        "fk_table_name": "tbl_alt_ref_types",
+        "fk_column_name": "alt_ref_type_id",
         "class_name": "TblAltRefTypes"
     },
     {
@@ -1275,8 +1227,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1291,8 +1243,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_physical_samples",
-        "f_column_name": "physical_sample_id",
+        "fk_table_name": "tbl_physical_samples",
+        "fk_column_name": "physical_sample_id",
         "class_name": "TblPhysicalSamples"
     },
     {
@@ -1307,8 +1259,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1323,8 +1275,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_description_types",
-        "f_column_name": "sample_description_type_id",
+        "fk_table_name": "tbl_sample_description_types",
+        "fk_column_name": "sample_description_type_id",
         "class_name": "TblSampleDescriptionTypes"
     },
     {
@@ -1339,8 +1291,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_physical_samples",
-        "f_column_name": "physical_sample_id",
+        "fk_table_name": "tbl_physical_samples",
+        "fk_column_name": "physical_sample_id",
         "class_name": "TblPhysicalSamples"
     },
     {
@@ -1355,8 +1307,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1371,8 +1323,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1387,8 +1339,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1403,8 +1355,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_coordinate_method_dimensions",
-        "f_column_name": "coordinate_method_dimension_id",
+        "fk_table_name": "tbl_coordinate_method_dimensions",
+        "fk_column_name": "coordinate_method_dimension_id",
         "class_name": "TblCoordinateMethodDimensions"
     },
     {
@@ -1419,8 +1371,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -1435,8 +1387,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1451,8 +1403,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_groups",
-        "f_column_name": "sample_group_id",
+        "fk_table_name": "tbl_sample_groups",
+        "fk_column_name": "sample_group_id",
         "class_name": "TblSampleGroups"
     },
     {
@@ -1467,8 +1419,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1483,8 +1435,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1499,8 +1451,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1515,8 +1467,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_group_description_types",
-        "f_column_name": "sample_group_description_type_id",
+        "fk_table_name": "tbl_sample_group_description_types",
+        "fk_column_name": "sample_group_description_type_id",
         "class_name": "TblSampleGroupDescriptionTypes"
     },
     {
@@ -1531,8 +1483,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1547,8 +1499,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_groups",
-        "f_column_name": "sample_group_id",
+        "fk_table_name": "tbl_sample_groups",
+        "fk_column_name": "sample_group_id",
         "class_name": "TblSampleGroups"
     },
     {
@@ -1563,8 +1515,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1579,8 +1531,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_groups",
-        "f_column_name": "sample_group_id",
+        "fk_table_name": "tbl_sample_groups",
+        "fk_column_name": "sample_group_id",
         "class_name": "TblSampleGroups"
     },
     {
@@ -1595,8 +1547,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1611,8 +1563,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1627,8 +1579,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1643,8 +1595,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1659,8 +1611,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1675,8 +1627,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Short"
     },
     {
@@ -1691,8 +1643,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1707,8 +1659,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1723,8 +1675,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sites",
-        "f_column_name": "site_id",
+        "fk_table_name": "tbl_sites",
+        "fk_column_name": "site_id",
         "class_name": "TblSites"
     },
     {
@@ -1739,8 +1691,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_group_sampling_contexts",
-        "f_column_name": "sampling_context_id",
+        "fk_table_name": "tbl_sample_group_sampling_contexts",
+        "fk_column_name": "sampling_context_id",
         "class_name": "TblSampleGroupSamplingContexts"
     },
     {
@@ -1755,8 +1707,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_methods",
-        "f_column_name": "method_id",
+        "fk_table_name": "tbl_methods",
+        "fk_column_name": "method_id",
         "class_name": "TblMethods"
     },
     {
@@ -1771,8 +1723,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1787,8 +1739,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1803,8 +1755,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1819,8 +1771,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1835,8 +1787,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sample_location_types",
-        "f_column_name": "sample_location_type_id",
+        "fk_table_name": "tbl_sample_location_types",
+        "fk_column_name": "sample_location_type_id",
         "class_name": "TblSampleLocationTypes"
     },
     {
@@ -1851,8 +1803,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_physical_samples",
-        "f_column_name": "physical_sample_id",
+        "fk_table_name": "tbl_physical_samples",
+        "fk_column_name": "physical_sample_id",
         "class_name": "TblPhysicalSamples"
     },
     {
@@ -1867,8 +1819,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1883,8 +1835,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1899,8 +1851,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1915,8 +1867,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_physical_samples",
-        "f_column_name": "physical_sample_id",
+        "fk_table_name": "tbl_physical_samples",
+        "fk_column_name": "physical_sample_id",
         "class_name": "TblPhysicalSamples"
     },
     {
@@ -1931,8 +1883,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1947,8 +1899,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -1963,8 +1915,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -1979,8 +1931,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -1995,8 +1947,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -2011,8 +1963,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_locations",
-        "f_column_name": "location_id",
+        "fk_table_name": "tbl_locations",
+        "fk_column_name": "location_id",
         "class_name": "TblLocations"
     },
     {
@@ -2027,8 +1979,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sites",
-        "f_column_name": "site_id",
+        "fk_table_name": "tbl_sites",
+        "fk_column_name": "site_id",
         "class_name": "TblSites"
     },
     {
@@ -2043,8 +1995,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -2059,8 +2011,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_sites",
-        "f_column_name": "site_id",
+        "fk_table_name": "tbl_sites",
+        "fk_column_name": "site_id",
         "class_name": "TblSites"
     },
     {
@@ -2075,8 +2027,8 @@
         "is_nullable": false,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_biblio",
-        "f_column_name": "biblio_id",
+        "fk_table_name": "tbl_biblio",
+        "fk_column_name": "biblio_id",
         "class_name": "TblBiblio"
     },
     {
@@ -2091,8 +2043,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -2107,8 +2059,8 @@
         "is_nullable": false,
         "is_pk": true,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.Integer"
     },
     {
@@ -2123,8 +2075,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -2139,8 +2091,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -2155,8 +2107,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.math.BigDecimal"
     },
     {
@@ -2171,8 +2123,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -2187,8 +2139,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -2203,8 +2155,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     },
     {
@@ -2219,8 +2171,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": true,
-        "f_table_name": "tbl_site_preservation_status",
-        "f_column_name": "site_preservation_status_id",
+        "fk_table_name": "tbl_site_preservation_status",
+        "fk_column_name": "site_preservation_status_id",
         "class_name": "TblSitePreservationStatus"
     },
     {
@@ -2235,8 +2187,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.util.Date"
     },
     {
@@ -2251,8 +2203,8 @@
         "is_nullable": true,
         "is_pk": false,
         "is_fk": false,
-        "f_table_name": "",
-        "f_column_name": "",
+        "fk_table_name": "",
+        "fk_column_name": "",
         "class_name": "java.lang.String"
     }
 ]

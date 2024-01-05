@@ -78,9 +78,9 @@ def test_referenced_keyset(submission: SubmissionData, metadata: Metadata):
     def compute_unique_system_ids_referenced_by_fk(table_name: str, pk_name: str) -> int:
         fk_tables: list[str] = metadata.get_tablenames_referencing(table_name)
         unique_ids: set[str] = set()
-        for table_name in fk_tables:
-            if table_name in submission:
-                unique_ids.update(set(submission[table_name][pk_name].unique()))
+        for fk_table_name in fk_tables:
+            if fk_table_name in submission:
+                unique_ids.update(set(submission[fk_table_name][pk_name].unique()))
         return unique_ids
 
     unique_site_ids: set[str] = compute_unique_system_ids_referenced_by_fk('tbl_sites', 'site_id')

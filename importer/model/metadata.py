@@ -23,8 +23,8 @@ class ColumnSpec:
     is_nullable: bool
     is_pk: bool
     is_fk: bool
-    f_table_name: str | None
-    f_column_name: str | None
+    fk_table_name: str | None
+    fk_column_name: str | None
     class_name: str
 
     def __contains__(self, key: str) -> bool:
@@ -146,8 +146,8 @@ class Metadata:
     @cached_property
     def foreign_keys(self) -> pd.DataFrame:
         """Returns foreign key columns from SEAD columns (performance only)."""
-        return self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'f_table_name', 'class_name']]
+        return self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'fk_table_name', 'class_name']]
 
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
         """Returns a list of tablenames referencing the given table"""
-        return self.foreign_keys.loc[(self.foreign_keys.f_table_name == table_name)]["table_name"].tolist()
+        return self.foreign_keys.loc[(self.foreign_keys.fk_table_name == table_name)]["table_name"].tolist()

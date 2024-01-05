@@ -9,10 +9,10 @@ select 	table_name,
         case when is_nullable = 'YES' then true else false end as is_nullable,
         case when is_pk = 'YES' then true else false end as is_pk,
         case when is_fk = 'YES' then true else false end as is_fk,
-        coalesce(f_table_name, '') as f_table_name,
-        coalesce(f_column_name, '') as f_column_name,
+        coalesce(t.fk_table_name, '') as fk_table_name,
+        coalesce(t.fk_column_name, '') as fk_column_name,
         case
-            when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(f_table_name)
+            when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(t.fk_table_name)
             when data_type = 'integer' then 'java.lang.Integer'
             when data_type = 'smallint' then 'java.lang.Short'
             when data_type = 'boolean' then	'java.lang.Boolean'
@@ -22,6 +22,6 @@ select 	table_name,
             when data_type = 'date' then 'java.util.Date'
             when data_type = 'numeric' then 'java.math.BigDecimal'
             else '???' end as class_name
-from sead_utility.table_columns
-where table_schema = 'public'
-    and table_name like 'tbl_%'
+from sead_utility.table_columns t
+where t.table_schema = 'public'
+    and t.table_name like 'tbl_%'

@@ -10,10 +10,10 @@ with sead_columns as (
 			is_nullable,
 			is_pk,
 			is_fk,
-			f_table_name,
-			f_column_name,
+			fk_table_name,
+			fk_column_name,
 			case
-				when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(f_table_name)
+				when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(fk_table_name)
 				when data_type = 'integer' then 'java.lang.Integer'
 				when data_type = 'smallint' then 'java.lang.Short'
 				when data_type = 'date' then 'java.sql.Date'
