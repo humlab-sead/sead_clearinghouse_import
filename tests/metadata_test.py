@@ -39,7 +39,7 @@ TEST_TABLES: list[str] = [
 ]
 
 
-# @pytest.mark.skipif(True, reason='Used for generating test data only')
+@pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
 def test_load_metadata_from_postgres():
     metadata: Metadata = Metadata(dburi_from_env())
 
@@ -145,7 +145,7 @@ def test_regression_of_foreign_keys(metadata: Metadata):
 
     assert (merged['_merge'] == 'both').all()
 
-    # self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'f_table_name', 'class_name']]
+    # self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'fk_table_name', 'class_name']]
 
 
 ###### REMOVE CODE BELOW WHEN DONE
