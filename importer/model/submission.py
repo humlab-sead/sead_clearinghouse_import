@@ -13,6 +13,7 @@ def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
     with contextlib.suppress(Exception):
         return reader.parse(sheetname)
 
+
 @log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel')
 def load_excel(*, metadata: Metadata, source: str | pd.ExcelFile) -> "SubmissionData":
     """Loads the submission file into a SubmissionData object"""
