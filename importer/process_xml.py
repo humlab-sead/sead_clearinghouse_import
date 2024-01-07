@@ -9,7 +9,7 @@ import pandas as pd
 from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
-from importer.model import DataImportError, Metadata, SubmissionData, SubmissionSpecification
+from importer.model import Metadata, SubmissionData
 from importer.model.metadata import TableSpec
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
@@ -280,7 +280,6 @@ class XmlProcessor:
         table_names: list[str] = None,
         extra_names: list[str] = None,
     ) -> None:
- 
         tables_to_process: list[str] = submission.index_table_names if table_names is None else table_names
         extra_names: set[str] = (
             set(metadata.sead_schema.keys()) - set(submission.data_table_names) if extra_names is None else extra_names
