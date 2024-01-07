@@ -1,6 +1,6 @@
 import abc
-from dataclasses import dataclass, field
 import logging
+from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
@@ -16,7 +16,7 @@ class SpecificationRegistry(Registry):
 
 
 @dataclass
-class SpecificationMessages:
+class SpecificationMessages: 
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
@@ -65,6 +65,16 @@ class SubmissionSpecification(SpecificationBase):
         self.raise_errors: bool = raise_errors
 
     def is_satisfied_by(self, submission: SubmissionData, _: str = None) -> bool:
+        """
+        Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
+
+        Parameters:
+            submission (SubmissionData): The submission data to be checked.
+            _ (str, optional): Ignored argument. Defaults to None.
+
+        Returns:
+            bool: True if all the specifications are satisfied, False otherwise.
+        """
         self.clear()
         for cls in SpecificationRegistry.items.values():
             specification: SpecificationBase = cls(
