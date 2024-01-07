@@ -15,28 +15,27 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @click.command()
-@click.argument("data_filename")
-@click.argument("meta_filename")
-@click.option("--data-types", "-t", help="Types of data (short description)", required=True)
-@click.option("--host", "-h", "dbhost", envvar="DBHOST", help="Target database server")
-@click.option("--database", "-d", "dbname", envvar="DBNAME", help="Database name")
-@click.option("--user", "-u", "dbuser", envvar="DBUSER", help="Database user")
-@click.option("--input-folder", envvar="INPUT_FOLDER", help="Input folder")
-@click.option("--output-folder", envvar="OUTPUT_FOLDER", help="Output folder")
-@click.option("--port", default=5432, help="Server port number.")
-@click.option("--skip", default=False, help="Skip the import (do nothing)")
-@click.option("--id", "submission_id", default=None, help="Replace existing submission.")
-@click.option("--table-names", default=None, help="Only load specified tables.")
-@click.option("--xml-filename", default=None, help="Name of existing XML file to use.")
-@click.option("--check-only", type=bool, default=False, help="Only check if file seems OK.")
+@click.argument("filename")
+@click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=True)
+@click.option("--output-folder", type=str, envvar="OUTPUT_FOLDER", help="Output folder")
+@click.option("--host", "-h", "dbhost", type=str, envvar="DBHOST", help="Target database server")
+@click.option("--database", "-d", "dbname", type=str, envvar="DBNAME", help="Database name")
+@click.option("--user", "-u", "dbuser", type=str, envvar="DBUSER", help="Database user")
+@click.option("--port", type=int, default=5432, help="Server port number.")
+@click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
+@click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
+@click.option("--table-names", type=str, default=None, help="Only load specified tables.")
+@click.option("--xml-filename", type=str, default=None, help="Name of existing XML file to use.")
+@click.option("--log-folder", type=str, default="./logs", help="Name of existing XML file to use.")
+@click.option(
+    "--check-only", type=bool, is_flag=True, show_default=True, default=False, help="Only check if file seems OK."
+)
 def import_file(
-    data_filename: str,
-    meta_filename: str,
+    filename: str,
     data_types: str,
     dbhost: str,
     dbname: str,
     dbuser: str,
-    input_folder: str,
     output_folder: str,
     port: str,
     skip: str,
@@ -44,10 +43,18 @@ def import_file(
     table_names: str,
     xml_filename: str,
     check_only: bool,
+    log_folder: str,
 ) -> None:
-    logger.add(f"logs/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+    """
+    Imports an Excel file to the database. The Excel file is stored as an XML file conforming to the clearinghouse data import XML schema.
+    The Excel file must satisfy the following requirements:
+    - The file must be in the Excel 2007+ format (xlsx)
+    - The file must contain a sheet named `data_table_index' listing all tables in the submission having new or changed data.
+    - The file must contain a sheet named as in SEADe' for each table in the submission.
+    """
+    logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
 
-    opts: Options = Options(locals())
+    opts: Options = Options(**locals())
     return workflow(opts)
 
 
@@ -64,7 +71,7 @@ def workflow(opts: Options) -> None:
             return
 
     submission: SubmissionData | str = (
-        opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.source())
+        opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.filename)
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
