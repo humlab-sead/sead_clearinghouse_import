@@ -12,34 +12,35 @@ from tests.utility import load_excel_by_regression  # Assuming Metadata is the c
 
 TEST_TABLES: list[str] = [
     # 'tbl_sites',
-    'tbl_locations',
-    'tbl_sample_group_sampling_contexts',
-    'tbl_record_types',
+    'tbl_abundances',
     'tbl_analysis_entities',
     'tbl_dataset_contacts',
     'tbl_dataset_submissions',
     'tbl_datasets',
-    'tbl_dendro',
     'tbl_dendro_date_notes',
     'tbl_dendro_dates',
+    'tbl_dendro',
+    'tbl_locations',
+    'tbl_methods',
     'tbl_physical_samples',
     'tbl_projects',
+    'tbl_record_types',
     'tbl_sample_alt_refs',
     'tbl_sample_descriptions',
     'tbl_sample_group_coordinates',
     'tbl_sample_group_descriptions',
     'tbl_sample_group_notes',
+    'tbl_sample_group_sampling_contexts',
     'tbl_sample_groups',
     'tbl_sample_locations',
     'tbl_sample_notes',
     'tbl_site_locations',
     'tbl_site_references',
     'tbl_sites',
-    'tbl_abundances',
 ]
 
 
-@pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
+# @pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
 def test_load_metadata_from_postgres():
     metadata: Metadata = Metadata(dburi_from_env())
 
