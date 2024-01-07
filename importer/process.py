@@ -12,6 +12,7 @@ from loguru import logger
 from importer.model import (
     DataImportError,
     Metadata,
+    SpecificationError,
     SubmissionData,
     SubmissionRepository,
     SubmissionSpecification,
@@ -33,25 +34,23 @@ class Options:
     dbuser: str
     dbhost: str
     port: int
-    input_folder: str
     output_folder: str
-    data_filename: str
+    filename: str
     table_names: str
     skip: bool
     submission_id: int
     xml_filename: str
     data_types: str
     check_only: bool
+    log_folder: str = field(default="./logs")
     ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
     timestamp: str = field(init=False, default=None)
-    source: str = field(init=False, default=None)
     target: str = field(init=False, default=None)
 
-    def __post__init__(self) -> None:
-        self.basename: str = splitext(self.data_filename)[0]
+    def __post_init__(self) -> None:
+        self.basename: str = splitext(self.filename)[0]
         self.timestamp: str = time.strftime("%Y%m%d-%H%M%S")
-        self.source: str = join(self.input_folder, self.data_filename)
         self.target: str = join(self.output_folder, f"{self.basename}_{self.timestamp}.xml")
         self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
 
@@ -85,7 +84,7 @@ class ImportService:
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
         self.xml_processor: process_xml.XmlProcessor = xml_processor or process_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(
-            metadata=self.metadata, ignore_columns=self.opts.ignore_columns
+            metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
 
     @utility.log_decorator(enter_message=" ---> generating XML file...", exit_message=" ---> XML created")
@@ -112,7 +111,8 @@ class ImportService:
                 return
 
             if isinstance(submission, SubmissionData):
-                assert self.specification.is_satisfied_by(submission)
+                if not self.specification.is_satisfied_by(submission):
+                    return
                 if self.opts.check_only:
                     return
 
@@ -128,8 +128,8 @@ class ImportService:
             self.repository.explode_to_public_tables(opts.submission_id, p_dry_run=False, p_add_missing_columns=False)
             self.repository.set_pending(opts.submission_id)
 
-        except:  # pylint: disable=bare-except
-            logger.exception("aborted critical error %s ", opts.basename)
+        except SpecificationError:
+            logger.exception(f"aborted critical error {opts.basename}")
 
 
 def update_missing_system_id_to_public_id(metadata: Metadata, submission: SubmissionData) -> None:
