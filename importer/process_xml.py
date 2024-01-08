@@ -17,7 +17,7 @@ from importer.model.metadata import TableSpec
 LOOKUP_TEMPLATE: str = """
 <{{class_name}} length="{{length}}">
 {% for lookup_id in lookup_ids %} <com.sead.database.{{class_name}} id="{{lookup_id}}" clonedId="{{lookup_id}}"/>
-{% endfor %}
+{% endfor -%}
 </{{class_name}}>
 """
 
@@ -191,7 +191,8 @@ class XmlProcessor:
                             f'<clonedId class="java.util.Integer">{"NULL" if np.isnan(public_id) else int(public_id)}</clonedId>',
                             3,
                         )
-                        self.emit_date_updated(date_updated, 3)
+                        self.emit('<dateUpdated class="java.util.Date"/>', 3)
+
                         self.emit(f"</{table_namespace}>", 2)
 
                         if 0 < max_rows < index:
@@ -214,9 +215,6 @@ class XmlProcessor:
             except:
                 logger.exception("CRITICAL ERROR")
                 raise
-
-    def emit_date_updated(self, date_updated: str, indent: int) -> None:
-        self.emit('<dateUpdated class="java.util.Date">{}</dateUpdated>'.format(date_updated), indent)
 
     def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
         template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
