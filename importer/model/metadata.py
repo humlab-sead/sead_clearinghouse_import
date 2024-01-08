@@ -74,7 +74,12 @@ class TableSpec(types.SimpleNamespace):
 
 
 class SeadSchema(dict[str, TableSpec]):
-    ...
+    @cached_property
+    def sead_schema_by_class(self) -> dict[str, TableSpec]:
+        return SeadSchema({t.java_class: t for t in self.values()})
+
+    def get_table_spec(self, table_name: str) -> TableSpec:
+        return self.get(table_name) if table_name in self else self.sead_schema_by_class.get(table_name)
 
 
 class Metadata:
@@ -112,20 +117,11 @@ class Metadata:
         )
         return schema
 
-    @cached_property
-    def sead_schema_by_class(self) -> SeadSchema:
-        return SeadSchema({t.java_class: t for t in self.sead_schema.values()})
-
     def __getitem__(self, what: str) -> TableSpec | ColumnSpec:
         table_name, column_name = what if isinstance(what, tuple) else (what, None)
-        table: TableSpec = (
-            self.sead_schema.get(table_name)
-            if table_name in self.sead_schema
-            else self.sead_schema_by_class.get(table_name)
-        )
+        table: TableSpec = self.sead_schema.get_table_spec(table_name)
         if table is None:
             raise KeyError(f"Table {table_name} not found in metadata")
-        table: TableSpec = self.sead_schema[table_name]
         if column_name is not None:
             if column_name not in table.columns:
                 raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
