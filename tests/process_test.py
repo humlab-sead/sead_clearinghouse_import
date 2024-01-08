@@ -25,10 +25,11 @@ def test_create_options():
             'xml_filename': None,
             'check_only': True,
             'log_folder': './logs',
+            'timestamp': True,
         }
     )
     assert opts.basename == 'building_dendro_2023-12_import'
-    assert opts.timestamp is not None
+    assert opts.timestamp
     assert opts.target is not None
     assert opts.ignore_columns is not None
     assert opts.db_uri().startswith('postgresql://')
@@ -55,6 +56,34 @@ def test_import_submission():
     metadata: Metadata = Metadata(opts.db_uri())
 
     submission: SubmissionData = load_or_cache_submission(opts, metadata)
+
+    ImportService(metadata=metadata, opts=opts).process(submission=submission)
+
+
+def test_import_reduced_submission():
+    opts: Options = Options(
+        **{
+            'filename': 'tests/test_data/building_dendro_reduced.xlsx',
+            'data_types': 'dendrochronology',
+            'dbhost': 'humlabseadserv.srv.its.umu.se',
+            'dbname': 'sead_staging_202212',
+            'dbuser': 'humlab_admin',
+            'output_folder': 'data/output',
+            'port': 5432,
+            'skip': False,
+            'submission_id': None,
+            'table_names': None,
+            'xml_filename': None,
+            'check_only': False,
+            'register': False,
+            'explode': False,
+            'log_folder': './logs',
+            'timestamp': False,
+        }
+    )
+    metadata: Metadata = Metadata(opts.db_uri())
+
+    submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
 
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
