@@ -45,6 +45,7 @@ class Options:
     register: bool
     explode: bool
     timestamp: bool
+    tidy_xml: bool
     log_folder: str = field(default="./logs")
     ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
@@ -52,9 +53,11 @@ class Options:
 
     def __post_init__(self) -> None:
         self.basename: str = splitext(basename(self.filename))[0]
-        self.target: str = join(self.output_folder, f"{self.basename}_{time.strftime('%Y%m%d-%H%M%S')}.xml") if self.timestamp else join(
-            self.output_folder, f"{self.basename}.xml"
-        )  
+        self.target: str = (
+            join(self.output_folder, f"{self.basename}_{time.strftime('%Y%m%d-%H%M%S')}.xml")
+            if self.timestamp
+            else join(self.output_folder, f"{self.basename}.xml")
+        )
         self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
 
     def db_uri(self) -> str:
@@ -91,7 +94,7 @@ class ImportService:
         )
 
     @utility.log_decorator(enter_message=" ---> generating XML file...", exit_message=" ---> XML created")
-    def to_xml(self, submission: SubmissionData) -> str:
+    def to_xml(self, submission: SubmissionData, format_document: bool = False) -> str:
         """
         Reads Excel files and convert content to an CH XML-file.
         Stores submission in output_filename and returns filename for a cleaned up version of the XML
@@ -102,13 +105,12 @@ class ImportService:
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
             self.xml_processor(outstream).process(self.metadata, submission, self.opts.table_names)
 
+        if format_document:
+            self.opts.target: str = utility.tidy_xml(self.opts.target, remove_source=True)
+
         logger.info(" ---> XML file created: %s", self.opts.target)
 
-        tidy_output_filename: str = utility.tidy_xml(self.opts.target, remove_source=True)
-
-        logger.info(" ---> XML (cleaned) file created: %s", tidy_output_filename)
-
-        return tidy_output_filename
+        return self.opts.target
 
     @utility.log_decorator(enter_message="Processing started...", exit_message="Processing done")
     def process(self, submission: str | SubmissionData) -> None:
@@ -130,7 +132,11 @@ class ImportService:
                 self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             if (opts.submission_id or 0) == 0:
-                opts.xml_filename = submission if isinstance(submission, str) else self.to_xml(submission)
+                opts.xml_filename = (
+                    submission
+                    if isinstance(submission, str)
+                    else self.to_xml(submission, format_document=opts.tidy_xml)
+                )
 
                 if opts.register:
                     opts.submission_id = self.repository.register(
