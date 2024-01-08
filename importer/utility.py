@@ -111,7 +111,7 @@ def flatten_sets(x, y) -> set:
 def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
     try:
         doc = minidom.parse(path)
-        tidy_doc = doc.toprettyxml(encoding="UTF-8")
+        tidy_doc = doc.toprettyxml(encoding="UTF-8", newl="")
         tidy_path: str = path[:-4] + "{}.xml".format(suffix)
         with io.open(tidy_path, "wb") as outstream:
             outstream.write(tidy_doc)
