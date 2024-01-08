@@ -270,11 +270,15 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
                 all_nan: bool = data_table[column_spec.column_name].isnull().values.all()
                 if all_nan and not column_spec.is_nullable:
                     self.errors.append(
-                        "CRITICAL ERROR Foreign key column {}.{} has no values".format(table_name, column_spec.column_name)
+                        "CRITICAL ERROR Foreign key column {}.{} has no values".format(
+                            table_name, column_spec.column_name
+                        )
                     )
                 if has_nan and not column_spec.is_nullable:
                     self.warnings.append(
-                        "WARNING Non-nullable foreign key column {}.{} has missing values".format(table_name, column_spec.column_name)
+                        "WARNING Non-nullable foreign key column {}.{} has missing values".format(
+                            table_name, column_spec.column_name
+                        )
                     )
 
 
