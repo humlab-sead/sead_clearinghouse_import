@@ -27,9 +27,9 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--table-names", type=str, default=None, help="Only load specified tables.")
 @click.option("--xml-filename", type=str, default=None, help="Name of existing XML file to use.")
 @click.option("--log-folder", type=str, default="./logs", help="Name of existing XML file to use.")
-@click.option(
-    "--check-only", type=bool, is_flag=True, show_default=True, default=False, help="Only check if file seems OK."
-)
+@click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
+@click.option("--register/--no-register", type=bool, is_flag=True, default=False, help="Register file in the database.")
+@click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode XML into public tables.")
 def import_file(
     filename: str,
     data_types: str,
@@ -43,6 +43,8 @@ def import_file(
     table_names: str,
     xml_filename: str,
     check_only: bool,
+    register: bool,
+    explode: bool,
     log_folder: str,
 ) -> None:
     """
@@ -53,12 +55,21 @@ def import_file(
     - The file must contain a sheet named as in SEADe' for each table in the submission.
     """
     logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-
+    print(locals())
     opts: Options = Options(**locals())
     return workflow(opts)
 
 
 def workflow(opts: Options) -> None:
+    """
+    Executes the workflow based on the given options.
+
+    Parameters:
+        opts (Options): An instance of the Options class containing the workflow configuration.
+
+    Returns:
+        None: This function does not return any value.
+    """
     metadata: Metadata = Metadata(opts.db_uri())
 
     if isinstance(opts.xml_filename, str):

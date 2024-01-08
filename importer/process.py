@@ -2,7 +2,7 @@ import io
 import os
 import time
 from dataclasses import dataclass, field
-from os.path import join, splitext
+from os.path import basename, join, splitext
 from typing import Any
 
 import numpy as np
@@ -42,6 +42,8 @@ class Options:
     xml_filename: str
     data_types: str
     check_only: bool
+    register: bool
+    explode: bool
     log_folder: str = field(default="./logs")
     ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
@@ -49,7 +51,7 @@ class Options:
     target: str = field(init=False, default=None)
 
     def __post_init__(self) -> None:
-        self.basename: str = splitext(self.filename)[0]
+        self.basename: str = splitext(basename(self.filename))[0]
         self.timestamp: str = time.strftime("%Y%m%d-%H%M%S")
         self.target: str = join(self.output_folder, f"{self.basename}_{self.timestamp}.xml")
         self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
@@ -99,7 +101,12 @@ class ImportService:
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
             self.xml_processor(outstream).process(self.metadata, submission, self.opts.table_names)
 
+        logger.info(" ---> XML file created: %s", self.opts.target)
+
         tidy_output_filename: str = utility.tidy_xml(self.opts.target, remove_source=True)
+
+        logger.info(" ---> XML (cleaned) file created: %s", tidy_output_filename)
+
         return tidy_output_filename
 
     @utility.log_decorator(enter_message="Processing started...", exit_message="Processing done")
@@ -112,8 +119,10 @@ class ImportService:
 
             if isinstance(submission, SubmissionData):
                 if not self.specification.is_satisfied_by(submission):
+                    logger.error(f" ---> {opts.basename} does not satisfy the specification")
                     return
                 if self.opts.check_only:
+                    logger.info(f" ---> {opts.basename} satisfies the specification")
                     return
 
             if (opts.submission_id or 0) > 0:
@@ -121,12 +130,18 @@ class ImportService:
 
             if (opts.submission_id or 0) == 0:
                 opts.xml_filename = submission if isinstance(submission, str) else self.to_xml(submission)
-                opts.submission_id = self.repository.register(filename=opts.xml_filename, data_types=opts.data_types)
 
-                self.repository.extract_to_staging_tables(opts.submission_id)
+                if opts.register:
+                    opts.submission_id = self.repository.register(
+                        filename=opts.xml_filename, data_types=opts.data_types
+                    )
+                    self.repository.extract_to_staging_tables(opts.submission_id)
 
-            self.repository.explode_to_public_tables(opts.submission_id, p_dry_run=False, p_add_missing_columns=False)
-            self.repository.set_pending(opts.submission_id)
+            if opts.explode is True:
+                self.repository.explode_to_public_tables(
+                    opts.submission_id, p_dry_run=False, p_add_missing_columns=False
+                )
+                self.repository.set_pending(opts.submission_id)
 
         except SpecificationError:
             logger.exception(f"aborted critical error {opts.basename}")
