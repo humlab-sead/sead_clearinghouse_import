@@ -78,7 +78,7 @@ class XmlProcessor:
                     continue
 
                 self.emit(
-                    f'<{table_spec.java_class} length="{table_spec.java_class, data_table.shape[0]}">', 1
+                    f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1
                 )  # data_table.length
                 # self.emit_tag(table_specification['java_class'], dict(length=data_table.shape[0]), close=False, indent=1)
 
