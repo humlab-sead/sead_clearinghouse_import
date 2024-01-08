@@ -61,7 +61,7 @@ class XmlProcessor:
         All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
         """
         date_updated: str = time.strftime("%Y-%m-%d %H%M")
-        for table_name in table_names:
+        for table_name in sorted(table_names):
             try:
                 logger.info(f"Processing {table_name}...")
 
