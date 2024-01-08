@@ -18,9 +18,9 @@ def log_decorator(enter_message='Entering', exit_message='Exiting', level=loggin
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            logger.log(level, f'{enter_message}: {func.__name__}')
+            logger.log(level, f'{enter_message} ({func.__name__})')
             result = func(*args, **kwargs)
-            logger.log(level, f'{exit_message}: {func.__name__}')
+            logger.log(level, f'{exit_message} ({func.__name__})')
             return result
 
         return wrapper
