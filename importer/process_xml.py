@@ -38,14 +38,8 @@ class XmlProcessor:
         self.outstream.write("{}{}\n".format("  " * indent, data))
 
     def emit_tag(self, tag: str, attributes: dict[str, Any] = None, indent=0, close=True) -> None:
-        self.emit(
-            "<{} {}{}>".format(
-                tag,
-                " ".join(['{}="{}"'.format(x, y) for (x, y) in (attributes or {}).items()]),
-                "/" if close else "",
-            ),
-            indent,
-        )
+        attrib_str: str = " ".join(['{}="{}"'.format(x, y) for (x, y) in (attributes or {}).items()])
+        self.emit(f"<{tag} {attrib_str}{'/' if close else ''}>", indent)
 
     def emit_close_tag(self, tag: str, indent: int) -> None:
         self.emit(f"</{tag}>", indent)
@@ -78,12 +72,14 @@ class XmlProcessor:
                 data_table: pd.DataFrame = submission.data_tables[table_name]
 
                 referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
-                table_namespace: str = "com.sead.database.{}".format(table_spec.java_class)
+                table_namespace: str = f"com.sead.database.{table_spec.java_class}"
 
                 if data_table is None:
                     continue
 
-                self.emit('<{} length="{}">'.format(table_spec.java_class, data_table.shape[0]), 1)  # data_table.length
+                self.emit(
+                    f'<{table_spec.java_class} length="{table_spec.java_class, data_table.shape[0]}">', 1
+                )  # data_table.length
                 # self.emit_tag(table_specification['java_class'], dict(length=data_table.shape[0]), close=False, indent=1)
 
                 for index, record in data_table.iterrows():
@@ -103,10 +99,10 @@ class XmlProcessor:
 
                         if not np.isnan(public_id):
                             public_id = int(public_id)
-                            self.emit('<{} id="{}" clonedId="{}"/>'.format(table_namespace, system_id, public_id), 2)
+                            self.emit(f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
                             continue
 
-                        self.emit('<{} id="{}">'.format(table_namespace, system_id), 2)
+                        self.emit(f'<{table_namespace} id="{system_id}">', 2)
 
                         for column_name, column_spec in table_spec.columns.items():
                             if column_name in self.ignore_columns:
@@ -133,7 +129,7 @@ class XmlProcessor:
                                         value: str = escape(value)
 
                                 self.emit(
-                                    '<{0} class="{1}">{2}</{0}>'.format(camel_case_column_name, class_name, value),
+                                    f'<{camel_case_column_name} class="{class_name}">{value}</{camel_case_column_name}>',
                                     3,
                                 )
 
@@ -175,35 +171,24 @@ class XmlProcessor:
 
                                     if np.isnan(fk_public_id):
                                         self.emit(
-                                            '<{} class="com.sead.database.{}" id="{}"/>'.format(
-                                                camel_case_column_name,
-                                                class_name,
-                                                fk_system_id,
-                                            ),
+                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>',
                                             3,
                                         )
                                     else:
                                         self.emit(
-                                            '<{} class="com.sead.database.{}" id="{}" clonedId="{}"/>'.format(
-                                                camel_case_column_name,
-                                                class_name,
-                                                int(fk_system_id),
-                                                int(fk_public_id),
-                                            ),
+                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
                                             3,
                                         )
 
                                 except:
                                     logger.error(
-                                        "Table {table_name}, id={system_id}, process failed for column {column_name}"
+                                        f"Table {table_name}, id={system_id}, process failed for column {column_name}"
                                     )
                                     raise
 
                         # ClonedId tag is always emitted (NULL id missing)
                         self.emit(
-                            '<clonedId class="java.util.Integer">{}</clonedId>'.format(
-                                "NULL" if np.isnan(public_id) else int(public_id)
-                            ),
+                            f'<clonedId class="java.util.Integer">{"NULL" if np.isnan(public_id) else int(public_id)}</clonedId>',
                             3,
                         )
                         self.emit_date_updated(date_updated, 3)
