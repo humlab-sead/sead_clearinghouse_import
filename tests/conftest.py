@@ -1,11 +1,15 @@
 import pandas as pd
 import pytest
 
-from importer.model import Metadata
+from importer.model import Metadata, SubmissionData, load_excel
 from importer.utility import load_sead_data
 
+from . import REDUCED_EXCEL_FILENAME
 
-@pytest.fixture
+# pylint: disable=redefined-outer-name
+
+
+@pytest.fixture(scope="session")
 def metadata() -> Metadata:
     instance = Metadata("a-dummy-db-uri")
     instance.__dict__['sead_tables'] = load_sead_data(
@@ -21,3 +25,8 @@ def metadata() -> Metadata:
     )
 
     return instance
+
+
+@pytest.fixture(scope="session")
+def submission(metadata: Metadata) -> SubmissionData:
+    return load_excel(metadata=metadata, source=REDUCED_EXCEL_FILENAME)

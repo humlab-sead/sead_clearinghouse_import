@@ -1,29 +1,16 @@
 from os.path import isfile
-import pandas as pd
 
+import pandas as pd
 import pytest
 
 from importer.model import Metadata
 from importer.model.specification import SubmissionSpecification
-from importer.model.submission import SubmissionData, load_excel
+from importer.model.submission import SubmissionData
 from tests.utility import dburi_from_env, generate_test_excel
 
-TEST_SITES: list[int] = [1635]
-SOURCE_EXCEL_FILENAME: str = "data/input/building_dendro_2023-12_import.xlsx"
-REDUCED_EXCEL_FILENAME: str = "tests/test_data/building_dendro_reduced.xlsx"
+from . import REDUCED_EXCEL_FILENAME, SOURCE_EXCEL_FILENAME, TEST_SITES
 
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name
-
-
-@pytest.fixture(scope="module")
-def metadata() -> Metadata:
-    # FIXME: Create a test fixture for Metadata instead of using the real thing
-    return Metadata(dburi_from_env())
-
-
-@pytest.fixture(scope="module")
-def submission(metadata: Metadata) -> SubmissionData:
-    return load_excel(metadata=metadata, source=REDUCED_EXCEL_FILENAME)
 
 
 @pytest.mark.skipif(isfile(REDUCED_EXCEL_FILENAME), reason="Test file already exists")
