@@ -63,6 +63,13 @@
         "is_lookup_table": true
     },
     {
+        "table_name": "tbl_methods",
+        "pk_name": "method_id",
+        "java_class": "TblMethods",
+        "excel_sheet": "tbl_methods",
+        "is_lookup_table": true
+    },
+    {
         "table_name": "tbl_physical_samples",
         "pk_name": "physical_sample_id",
         "java_class": "TblPhysicalSamples",
