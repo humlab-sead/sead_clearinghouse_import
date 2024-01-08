@@ -44,16 +44,17 @@ class Options:
     check_only: bool
     register: bool
     explode: bool
+    timestamp: bool
     log_folder: str = field(default="./logs")
     ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
-    timestamp: str = field(init=False, default=None)
     target: str = field(init=False, default=None)
 
     def __post_init__(self) -> None:
         self.basename: str = splitext(basename(self.filename))[0]
-        self.timestamp: str = time.strftime("%Y%m%d-%H%M%S")
-        self.target: str = join(self.output_folder, f"{self.basename}_{self.timestamp}.xml")
+        self.target: str = join(self.output_folder, f"{self.basename}_{time.strftime('%Y%m%d-%H%M%S')}.xml") if self.timestamp else join(
+            self.output_folder, f"{self.basename}.xml"
+        )  
         self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
 
     def db_uri(self) -> str:

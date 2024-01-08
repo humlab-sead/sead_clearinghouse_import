@@ -30,6 +30,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
 @click.option("--register/--no-register", type=bool, is_flag=True, default=False, help="Register file in the database.")
 @click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode XML into public tables.")
+@click.option("--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename.")
 def import_file(
     filename: str,
     data_types: str,
@@ -46,6 +47,7 @@ def import_file(
     register: bool,
     explode: bool,
     log_folder: str,
+    timestamp: bool,
 ) -> None:
     """
     Imports an Excel file to the database. The Excel file is stored as an XML file conforming to the clearinghouse data import XML schema.
