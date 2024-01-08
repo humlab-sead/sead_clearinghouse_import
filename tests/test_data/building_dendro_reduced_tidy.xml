@@ -1,0 +1,1443 @@
+<?xml version="1.0" encoding="UTF-8"?><sead-data-upload>	
+
+	<TblSeasons length="1">		
+ 		<com.sead.database.TblSeasons id="3" clonedId="3"/>		
+	</TblSeasons>	
+
+	<TblSampleTypes length="1">		
+ 		<com.sead.database.TblSampleTypes id="12" clonedId="12"/>		
+	</TblSampleTypes>	
+
+	<TblMethods length="1">		
+ 		<com.sead.database.TblMethods id="10" clonedId="10"/>		
+	</TblMethods>	
+
+	<TblLocations length="6">		
+ 		<com.sead.database.TblLocations id="5064" clonedId="5064"/>		
+ 		<com.sead.database.TblLocations id="781" clonedId="781"/>		
+ 		<com.sead.database.TblLocations id="205" clonedId="205"/>		
+ 		<com.sead.database.TblLocations id="3760" clonedId="3760"/>		
+ 		<com.sead.database.TblLocations id="4820" clonedId="4820"/>		
+ 		<com.sead.database.TblLocations id="3737" clonedId="3737"/>		
+	</TblLocations>	
+
+	<TblSampleGroupSamplingContexts length="1">		
+ 		<com.sead.database.TblSampleGroupSamplingContexts id="17" clonedId="17"/>		
+	</TblSampleGroupSamplingContexts>	
+
+	<TblDatasetSubmissionTypes length="3">		
+ 		<com.sead.database.TblDatasetSubmissionTypes id="10" clonedId="10"/>		
+ 		<com.sead.database.TblDatasetSubmissionTypes id="3" clonedId="3"/>		
+ 		<com.sead.database.TblDatasetSubmissionTypes id="5" clonedId="5"/>		
+	</TblDatasetSubmissionTypes>	
+
+	<TblDendroLookup length="14">		
+ 		<com.sead.database.TblDendroLookup id="128" clonedId="128"/>		
+ 		<com.sead.database.TblDendroLookup id="129" clonedId="129"/>		
+ 		<com.sead.database.TblDendroLookup id="130" clonedId="130"/>		
+ 		<com.sead.database.TblDendroLookup id="131" clonedId="131"/>		
+ 		<com.sead.database.TblDendroLookup id="132" clonedId="132"/>		
+ 		<com.sead.database.TblDendroLookup id="133" clonedId="133"/>		
+ 		<com.sead.database.TblDendroLookup id="134" clonedId="134"/>		
+ 		<com.sead.database.TblDendroLookup id="137" clonedId="137"/>		
+ 		<com.sead.database.TblDendroLookup id="121" clonedId="121"/>		
+ 		<com.sead.database.TblDendroLookup id="122" clonedId="122"/>		
+ 		<com.sead.database.TblDendroLookup id="124" clonedId="124"/>		
+ 		<com.sead.database.TblDendroLookup id="125" clonedId="125"/>		
+ 		<com.sead.database.TblDendroLookup id="126" clonedId="126"/>		
+ 		<com.sead.database.TblDendroLookup id="127" clonedId="127"/>		
+	</TblDendroLookup>	
+
+	<TblTaxaTreeMaster length="1">		
+ 		<com.sead.database.TblTaxaTreeMaster id="18197" clonedId="18197"/>		
+	</TblTaxaTreeMaster>	
+
+	<TblDatasetMasters length="1">		
+ 		<com.sead.database.TblDatasetMasters id="10" clonedId="10"/>		
+	</TblDatasetMasters>	
+
+	<TblContacts length="4">		
+ 		<com.sead.database.TblContacts id="56" clonedId="56"/>		
+ 		<com.sead.database.TblContacts id="65" clonedId="65"/>		
+ 		<com.sead.database.TblContacts id="34" clonedId="34"/>		
+ 		<com.sead.database.TblContacts id="67" clonedId="67"/>		
+	</TblContacts>	
+
+	<TblSampleLocationTypes length="6">		
+ 		<com.sead.database.TblSampleLocationTypes id="72" clonedId="72"/>		
+ 		<com.sead.database.TblSampleLocationTypes id="73" clonedId="73"/>		
+ 		<com.sead.database.TblSampleLocationTypes id="74" clonedId="74"/>		
+ 		<com.sead.database.TblSampleLocationTypes id="75" clonedId="75"/>		
+ 		<com.sead.database.TblSampleLocationTypes id="76" clonedId="76"/>		
+ 		<com.sead.database.TblSampleLocationTypes id="77" clonedId="77"/>		
+	</TblSampleLocationTypes>	
+
+	<TblBiblio length="2">		
+ 		<com.sead.database.TblBiblio id="352" clonedId="352"/>		
+ 		<com.sead.database.TblBiblio id="129" clonedId="129"/>		
+	</TblBiblio>	
+
+	<TblSampleDescriptionTypes length="1">		
+ 		<com.sead.database.TblSampleDescriptionTypes id="30" clonedId="30"/>		
+	</TblSampleDescriptionTypes>	
+
+	<TblAbundanceElements length="1">		
+ 		<com.sead.database.TblAbundanceElements id="44" clonedId="44"/>		
+	</TblAbundanceElements>	
+
+	<TblDataTypes length="6">		
+ 		<com.sead.database.TblDataTypes id="5" clonedId="5"/>		
+ 		<com.sead.database.TblDataTypes id="6" clonedId="6"/>		
+ 		<com.sead.database.TblDataTypes id="43" clonedId="43"/>		
+ 		<com.sead.database.TblDataTypes id="44" clonedId="44"/>		
+ 		<com.sead.database.TblDataTypes id="15" clonedId="15"/>		
+ 		<com.sead.database.TblDataTypes id="19" clonedId="19"/>		
+	</TblDataTypes>	
+
+	<TblAgeTypes length="1">		
+ 		<com.sead.database.TblAgeTypes id="1" clonedId="1"/>		
+	</TblAgeTypes>	
+
+	<TblSampleGroupDescriptionTypes length="8">		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="53" clonedId="53"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="54" clonedId="54"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="55" clonedId="55"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="56" clonedId="56"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="58" clonedId="58"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="59" clonedId="59"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="61" clonedId="61"/>		
+ 		<com.sead.database.TblSampleGroupDescriptionTypes id="62" clonedId="62"/>		
+	</TblSampleGroupDescriptionTypes>	
+
+	<TblContactTypes length="1">		
+ 		<com.sead.database.TblContactTypes id="2" clonedId="2"/>		
+	</TblContactTypes>	
+
+	<TblProjectStages length="1">		
+ 		<com.sead.database.TblProjectStages id="6" clonedId="6"/>		
+	</TblProjectStages>	
+
+	<TblCoordinateMethodDimensions length="1">		
+ 		<com.sead.database.TblCoordinateMethodDimensions id="2" clonedId="2"/>		
+	</TblCoordinateMethodDimensions>	
+
+	<TblAltRefTypes length="2">		
+ 		<com.sead.database.TblAltRefTypes id="2" clonedId="2"/>		
+ 		<com.sead.database.TblAltRefTypes id="3" clonedId="3"/>		
+	</TblAltRefTypes>	
+
+	<TblProjectTypes length="1">		
+ 		<com.sead.database.TblProjectTypes id="8" clonedId="8"/>		
+	</TblProjectTypes>	
+  	<TblAbundances length="2">		
+    		<com.sead.database.TblAbundances id="3930">			
+      			<abundanceId class="???">3930</abundanceId>			
+      			<taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4191"/>			
+      			<abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>			
+      			<abundance class="java.lang.Integer">1.0</abundance>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAbundances>		
+    		<com.sead.database.TblAbundances id="3931">			
+      			<abundanceId class="???">3931</abundanceId>			
+      			<taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4192"/>			
+      			<abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>			
+      			<abundance class="java.lang.Integer">1.0</abundance>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAbundances>		
+  	</TblAbundances>	
+  	<TblAnalysisEntities length="12">		
+    		<com.sead.database.TblAnalysisEntities id="4191">			
+      			<analysisEntityId class="???">4191</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4191"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="4192">			
+      			<analysisEntityId class="???">4192</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4192"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="9207">			
+      			<analysisEntityId class="???">9207</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9207"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="9208">			
+      			<analysisEntityId class="???">9208</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9208"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="14223">			
+      			<analysisEntityId class="???">14223</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14223"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="14224">			
+      			<analysisEntityId class="???">14224</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14224"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="19239">			
+      			<analysisEntityId class="???">19239</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19239"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="19240">			
+      			<analysisEntityId class="???">19240</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19240"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="24255">			
+      			<analysisEntityId class="???">24255</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24255"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="24256">			
+      			<analysisEntityId class="???">24256</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24256"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="29267">			
+      			<analysisEntityId class="???">29267</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29267"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+    		<com.sead.database.TblAnalysisEntities id="29268">			
+      			<analysisEntityId class="???">29268</analysisEntityId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29268"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblAnalysisEntities>		
+  	</TblAnalysisEntities>	
+  	<TblDatasetContacts length="12">		
+    		<com.sead.database.TblDatasetContacts id="4191">			
+      			<datasetContactId class="java.lang.Integer">4191</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4191"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="4192">			
+      			<datasetContactId class="java.lang.Integer">4192</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4192"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="9207">			
+      			<datasetContactId class="java.lang.Integer">9207</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9207"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="9208">			
+      			<datasetContactId class="java.lang.Integer">9208</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9208"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="14223">			
+      			<datasetContactId class="java.lang.Integer">14223</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14223"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="14224">			
+      			<datasetContactId class="java.lang.Integer">14224</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14224"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="19239">			
+      			<datasetContactId class="java.lang.Integer">19239</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19239"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="19240">			
+      			<datasetContactId class="java.lang.Integer">19240</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19240"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="24255">			
+      			<datasetContactId class="java.lang.Integer">24255</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24255"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="24256">			
+      			<datasetContactId class="java.lang.Integer">24256</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24256"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="29267">			
+      			<datasetContactId class="java.lang.Integer">29267</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29267"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+    		<com.sead.database.TblDatasetContacts id="29268">			
+      			<datasetContactId class="java.lang.Integer">29268</datasetContactId>			
+      			<contactId class="com.sead.database.TblContacts" id="56" clonedId="56"/>			
+      			<contactTypeId class="com.sead.database.TblContactTypes" id="2" clonedId="2"/>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29268"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetContacts>		
+  	</TblDatasetContacts>	
+  	<TblDatasetSubmissions length="36">		
+    		<com.sead.database.TblDatasetSubmissions id="12188">			
+      			<datasetSubmissionId class="java.lang.Integer">12188</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4191"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="12189">			
+      			<datasetSubmissionId class="java.lang.Integer">12189</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4191"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="12190">			
+      			<datasetSubmissionId class="java.lang.Integer">12190</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4191"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="12191">			
+      			<datasetSubmissionId class="java.lang.Integer">12191</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4192"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="12192">			
+      			<datasetSubmissionId class="java.lang.Integer">12192</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4192"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="12193">			
+      			<datasetSubmissionId class="java.lang.Integer">12193</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="4192"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26715">			
+      			<datasetSubmissionId class="java.lang.Integer">26715</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9207"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26716">			
+      			<datasetSubmissionId class="java.lang.Integer">26716</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9207"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26717">			
+      			<datasetSubmissionId class="java.lang.Integer">26717</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9207"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26718">			
+      			<datasetSubmissionId class="java.lang.Integer">26718</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9208"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26719">			
+      			<datasetSubmissionId class="java.lang.Integer">26719</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9208"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="26720">			
+      			<datasetSubmissionId class="java.lang.Integer">26720</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="9208"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41242">			
+      			<datasetSubmissionId class="java.lang.Integer">41242</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14223"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41243">			
+      			<datasetSubmissionId class="java.lang.Integer">41243</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14223"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41244">			
+      			<datasetSubmissionId class="java.lang.Integer">41244</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14223"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41245">			
+      			<datasetSubmissionId class="java.lang.Integer">41245</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14224"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41246">			
+      			<datasetSubmissionId class="java.lang.Integer">41246</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14224"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="41247">			
+      			<datasetSubmissionId class="java.lang.Integer">41247</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="14224"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55769">			
+      			<datasetSubmissionId class="java.lang.Integer">55769</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19239"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55770">			
+      			<datasetSubmissionId class="java.lang.Integer">55770</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19239"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55771">			
+      			<datasetSubmissionId class="java.lang.Integer">55771</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19239"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55772">			
+      			<datasetSubmissionId class="java.lang.Integer">55772</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19240"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55773">			
+      			<datasetSubmissionId class="java.lang.Integer">55773</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19240"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="55774">			
+      			<datasetSubmissionId class="java.lang.Integer">55774</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="19240"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70296">			
+      			<datasetSubmissionId class="java.lang.Integer">70296</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24255"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70297">			
+      			<datasetSubmissionId class="java.lang.Integer">70297</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24255"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70298">			
+      			<datasetSubmissionId class="java.lang.Integer">70298</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24255"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70299">			
+      			<datasetSubmissionId class="java.lang.Integer">70299</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24256"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70300">			
+      			<datasetSubmissionId class="java.lang.Integer">70300</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24256"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="70301">			
+      			<datasetSubmissionId class="java.lang.Integer">70301</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="24256"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84811">			
+      			<datasetSubmissionId class="java.lang.Integer">84811</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29267"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84812">			
+      			<datasetSubmissionId class="java.lang.Integer">84812</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29267"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84813">			
+      			<datasetSubmissionId class="java.lang.Integer">84813</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29267"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84814">			
+      			<datasetSubmissionId class="java.lang.Integer">84814</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29268"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="10" clonedId="10"/>			
+      			<contactId class="com.sead.database.TblContacts" id="65" clonedId="65"/>			
+      			<dateSubmitted class="java.lang.String">2005-01-26 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84815">			
+      			<datasetSubmissionId class="java.lang.Integer">84815</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29268"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="3" clonedId="3"/>			
+      			<contactId class="com.sead.database.TblContacts" id="34" clonedId="34"/>			
+      			<dateSubmitted class="java.lang.String">2020-06-30 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+    		<com.sead.database.TblDatasetSubmissions id="84816">			
+      			<datasetSubmissionId class="java.lang.Integer">84816</datasetSubmissionId>			
+      			<datasetId class="com.sead.database.TblDatasets" id="29268"/>			
+      			<submissionTypeId class="com.sead.database.TblDatasetSubmissionTypes" id="5" clonedId="5"/>			
+      			<contactId class="com.sead.database.TblContacts" id="67" clonedId="67"/>			
+      			<dateSubmitted class="java.lang.String">2023-12-19 00:00:00</dateSubmitted>			
+      			<notes class="java.lang.String">NULL</notes>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasetSubmissions>		
+  	</TblDatasetSubmissions>	
+  	<TblDatasets length="12">		
+    		<com.sead.database.TblDatasets id="4191">			
+      			<datasetId class="java.lang.Integer">4191</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="19" clonedId="19"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Categorical</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="4192">			
+      			<datasetId class="java.lang.Integer">4192</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="19" clonedId="19"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Categorical</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="9207">			
+      			<datasetId class="java.lang.Integer">9207</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="6" clonedId="6"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Presence</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="9208">			
+      			<datasetId class="java.lang.Integer">9208</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="6" clonedId="6"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Presence</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="14223">			
+      			<datasetId class="java.lang.Integer">14223</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="15" clonedId="15"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Counted dates</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="14224">			
+      			<datasetId class="java.lang.Integer">14224</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="15" clonedId="15"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Counted dates</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="19239">			
+      			<datasetId class="java.lang.Integer">19239</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="5" clonedId="5"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Abundance</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="19240">			
+      			<datasetId class="java.lang.Integer">19240</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="5" clonedId="5"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Abundance</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="24255">			
+      			<datasetId class="java.lang.Integer">24255</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="43" clonedId="43"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Estimated Years</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="24256">			
+      			<datasetId class="java.lang.Integer">24256</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="43" clonedId="43"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Estimated Years</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="29267">			
+      			<datasetId class="java.lang.Integer">29267</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="44" clonedId="44"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75699 Composite Dates</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+    		<com.sead.database.TblDatasets id="29268">			
+      			<datasetId class="java.lang.Integer">29268</datasetId>			
+      			<masterSetId class="com.sead.database.TblDatasetMasters" id="10" clonedId="10"/>			
+      			<dataTypeId class="com.sead.database.TblDataTypes" id="44" clonedId="44"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="129" clonedId="129"/>			
+      			<updatedDatasetId class="com.sead.database.TblDatasets" id="NULL"/>			
+      			<projectId class="com.sead.database.TblProjects" id="550"/>			
+      			<datasetName class="java.lang.String">75800 Composite Dates</datasetName>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDatasets>		
+  	</TblDatasets>	
+  	<TblDendro length="24">		
+    		<com.sead.database.TblDendro id="4191">			
+      			<dendroId class="java.lang.Integer">4191</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4191"/>			
+      			<measurementValue class="java.lang.String">Tall</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="121" clonedId="121"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="4192">			
+      			<dendroId class="java.lang.Integer">4192</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4192"/>			
+      			<measurementValue class="java.lang.String">Tall</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="121" clonedId="121"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26032">			
+      			<dendroId class="java.lang.Integer">26032</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9207"/>			
+      			<measurementValue class="java.lang.String">Nej</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="125" clonedId="125"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26033">			
+      			<dendroId class="java.lang.Integer">26033</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9207"/>			
+      			<measurementValue class="java.lang.String">36</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="126" clonedId="126"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26034">			
+      			<dendroId class="java.lang.Integer">26034</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9207"/>			
+      			<measurementValue class="java.lang.String">Nej</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="127" clonedId="127"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26035">			
+      			<dendroId class="java.lang.Integer">26035</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9207"/>			
+      			<measurementValue class="java.lang.String">W</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="128" clonedId="128"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26036">			
+      			<dendroId class="java.lang.Integer">26036</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9207"/>			
+      			<measurementValue class="java.lang.String">~ 5</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="129" clonedId="129"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26037">			
+      			<dendroId class="java.lang.Integer">26037</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9208"/>			
+      			<measurementValue class="java.lang.String">Nej</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="125" clonedId="125"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26038">			
+      			<dendroId class="java.lang.Integer">26038</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9208"/>			
+      			<measurementValue class="java.lang.String">50</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="126" clonedId="126"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26039">			
+      			<dendroId class="java.lang.Integer">26039</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9208"/>			
+      			<measurementValue class="java.lang.String">Nej</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="127" clonedId="127"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26040">			
+      			<dendroId class="java.lang.Integer">26040</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9208"/>			
+      			<measurementValue class="java.lang.String">W</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="128" clonedId="128"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="26041">			
+      			<dendroId class="java.lang.Integer">26041</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="9208"/>			
+      			<measurementValue class="java.lang.String">~ 3</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="129" clonedId="129"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="36124">			
+      			<dendroId class="java.lang.Integer">36124</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14223"/>			
+      			<measurementValue class="java.lang.String">49</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="122" clonedId="122"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="36125">			
+      			<dendroId class="java.lang.Integer">36125</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14224"/>			
+      			<measurementValue class="java.lang.String">102</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="122" clonedId="122"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="41607">			
+      			<dendroId class="java.lang.Integer">41607</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="19239"/>			
+      			<measurementValue class="java.lang.String">2</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="124" clonedId="124"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="41608">			
+      			<dendroId class="java.lang.Integer">41608</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="19240"/>			
+      			<measurementValue class="java.lang.String">2</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="124" clonedId="124"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59193">			
+      			<dendroId class="java.lang.Integer">59193</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24255"/>			
+      			<measurementValue class="java.lang.String">60</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="130" clonedId="130"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59194">			
+      			<dendroId class="java.lang.Integer">59194</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24255"/>			
+      			<measurementValue class="java.lang.String">80</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="131" clonedId="131"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59195">			
+      			<dendroId class="java.lang.Integer">59195</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24255"/>			
+      			<measurementValue class="java.lang.String">1670</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="132" clonedId="132"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59196">			
+      			<dendroId class="java.lang.Integer">59196</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24255"/>			
+      			<measurementValue class="java.lang.String">1710</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="133" clonedId="133"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59197">			
+      			<dendroId class="java.lang.Integer">59197</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24256"/>			
+      			<measurementValue class="java.lang.String">110</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="130" clonedId="130"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59198">			
+      			<dendroId class="java.lang.Integer">59198</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24256"/>			
+      			<measurementValue class="java.lang.String">130</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="131" clonedId="131"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59199">			
+      			<dendroId class="java.lang.Integer">59199</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24256"/>			
+      			<measurementValue class="java.lang.String">1710</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="132" clonedId="132"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+    		<com.sead.database.TblDendro id="59200">			
+      			<dendroId class="java.lang.Integer">59200</dendroId>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="24256"/>			
+      			<measurementValue class="java.lang.String">1750</measurementValue>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="133" clonedId="133"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendro>		
+  	</TblDendro>	
+  	<TblDendroDateNotes length="1">		
+    		<com.sead.database.TblDendroDateNotes id="1">			
+      			<dendroDateNoteId class="java.lang.Integer">1</dendroDateNoteId>			
+      			<dendroDateId class="com.sead.database.TblDendroDates" id="3072"/>			
+      			<note class="java.lang.String">Fällningsåret omräknat med nuvarande splintstatistik för ek 17±7</note>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendroDateNotes>		
+  	</TblDendroDateNotes>	
+  	<TblDendroDates length="4">		
+    		<com.sead.database.TblDendroDates id="3072">			
+      			<dendroDateId class="java.lang.Integer">3072</dendroDateId>			
+      			<seasonId class="com.sead.database.TblSeasons" id="NULL"/>			
+      			<datingUncertaintyId class="com.sead.database.TblDatingUncertainty" id="NULL"/>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="137" clonedId="137"/>			
+      			<ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14223"/>			
+      			<ageOlder class="java.lang.Integer">1774.0</ageOlder>			
+      			<ageYounger class="java.lang.Integer">NULL</ageYounger>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendroDates>		
+    		<com.sead.database.TblDendroDates id="3073">			
+      			<dendroDateId class="java.lang.Integer">3073</dendroDateId>			
+      			<seasonId class="com.sead.database.TblSeasons" id="NULL"/>			
+      			<datingUncertaintyId class="com.sead.database.TblDatingUncertainty" id="NULL"/>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="137" clonedId="137"/>			
+      			<ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14224"/>			
+      			<ageOlder class="java.lang.Integer">1865.0</ageOlder>			
+      			<ageYounger class="java.lang.Integer">NULL</ageYounger>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendroDates>		
+    		<com.sead.database.TblDendroDates id="6734">			
+      			<dendroDateId class="java.lang.Integer">6734</dendroDateId>			
+      			<seasonId class="com.sead.database.TblSeasons" id="3" clonedId="3"/>			
+      			<datingUncertaintyId class="com.sead.database.TblDatingUncertainty" id="NULL"/>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="134" clonedId="134"/>			
+      			<ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="29267"/>			
+      			<ageOlder class="java.lang.Integer">1774.0</ageOlder>			
+      			<ageYounger class="java.lang.Integer">NULL</ageYounger>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendroDates>		
+    		<com.sead.database.TblDendroDates id="6735">			
+      			<dendroDateId class="java.lang.Integer">6735</dendroDateId>			
+      			<seasonId class="com.sead.database.TblSeasons" id="3" clonedId="3"/>			
+      			<datingUncertaintyId class="com.sead.database.TblDatingUncertainty" id="NULL"/>			
+      			<dendroLookupId class="com.sead.database.TblDendroLookup" id="134" clonedId="134"/>			
+      			<ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>			
+      			<analysisEntityId class="com.sead.database.TblAnalysisEntities" id="29268"/>			
+      			<ageOlder class="java.lang.Integer">1865.0</ageOlder>			
+      			<ageYounger class="java.lang.Integer">NULL</ageYounger>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblDendroDates>		
+  	</TblDendroDates>	
+  	<TblPhysicalSamples length="2">		
+    		<com.sead.database.TblPhysicalSamples id="53971">			
+      			<physicalSampleId class="java.lang.Integer">53971</physicalSampleId>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<altRefTypeId class="com.sead.database.TblAltRefTypes" id="3" clonedId="3"/>			
+      			<sampleTypeId class="com.sead.database.TblSampleTypes" id="12" clonedId="12"/>			
+      			<sampleName class="java.lang.String">75699</sampleName>			
+      			<dateSampled class="java.lang.String">2005-01-26</dateSampled>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblPhysicalSamples>		
+    		<com.sead.database.TblPhysicalSamples id="53972">			
+      			<physicalSampleId class="java.lang.Integer">53972</physicalSampleId>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<altRefTypeId class="com.sead.database.TblAltRefTypes" id="3" clonedId="3"/>			
+      			<sampleTypeId class="com.sead.database.TblSampleTypes" id="12" clonedId="12"/>			
+      			<sampleName class="java.lang.String">75800</sampleName>			
+      			<dateSampled class="java.lang.String">2005-01-26</dateSampled>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblPhysicalSamples>		
+    		<com.sead.database.TblPhysicalSamples id="11952" clonedId="11952"/>		
+  	</TblPhysicalSamples>	
+  	<TblProjects length="1">		
+    		<com.sead.database.TblProjects id="550">			
+      			<projectId class="java.lang.Integer">550</projectId>			
+      			<projectTypeId class="com.sead.database.TblProjectTypes" id="8" clonedId="8"/>			
+      			<projectStageId class="com.sead.database.TblProjectStages" id="6" clonedId="6"/>			
+      			<projectName class="java.lang.String">75699 Fröjden</projectName>			
+      			<projectAbbrevName class="java.lang.String">NULL</projectAbbrevName>			
+      			<description class="java.lang.String">CONTRACTOR: Fastighetsägaren SAMPLING REASON: Byggnadsundersökning DESCRIPTION: Att få klarhet i byggnadens ålder och tillkomst</description>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblProjects>		
+  	</TblProjects>	
+  	<TblSampleAltRefs length="2">		
+    		<com.sead.database.TblSampleAltRefs id="2095">			
+      			<sampleAltRefId class="java.lang.Integer">2095</sampleAltRefId>			
+      			<altRef class="java.lang.String">1.0</altRef>			
+      			<altRefTypeId class="com.sead.database.TblAltRefTypes" id="2" clonedId="2"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleAltRefs>		
+    		<com.sead.database.TblSampleAltRefs id="2096">			
+      			<sampleAltRefId class="java.lang.Integer">2096</sampleAltRefId>			
+      			<altRef class="java.lang.String">2.0</altRef>			
+      			<altRefTypeId class="com.sead.database.TblAltRefTypes" id="2" clonedId="2"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleAltRefs>		
+  	</TblSampleAltRefs>	
+  	<TblSampleDescriptions length="2">		
+    		<com.sead.database.TblSampleDescriptions id="3843">			
+      			<sampleDescriptionId class="java.lang.Integer">3843</sampleDescriptionId>			
+      			<sampleDescriptionTypeId class="com.sead.database.TblSampleDescriptionTypes" id="30" clonedId="30"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<description class="java.lang.String">Liggande timmer</description>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleDescriptions>		
+    		<com.sead.database.TblSampleDescriptions id="3844">			
+      			<sampleDescriptionId class="java.lang.Integer">3844</sampleDescriptionId>			
+      			<sampleDescriptionTypeId class="com.sead.database.TblSampleDescriptionTypes" id="30" clonedId="30"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<description class="java.lang.String">Liggande timmer</description>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleDescriptions>		
+  	</TblSampleDescriptions>	
+  	<TblSampleGroupCoordinates length="1">		
+    		<com.sead.database.TblSampleGroupCoordinates id="143">			
+      			<sampleGroupPositionId class="java.lang.Integer">143</sampleGroupPositionId>			
+      			<coordinateMethodDimensionId class="com.sead.database.TblCoordinateMethodDimensions" id="2" clonedId="2"/>			
+      			<sampleGroupPosition class="java.math.BigDecimal">57.5276850784344</sampleGroupPosition>			
+      			<positionAccuracy class="java.lang.String">Precise</positionAccuracy>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="143" clonedId="143"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupCoordinates>		
+  	</TblSampleGroupCoordinates>	
+  	<TblSampleGroupDescriptions length="8">		
+    		<com.sead.database.TblSampleGroupDescriptions id="508">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">508</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Bostadshus</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="62" clonedId="62"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="509">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">509</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Mangårdsbyggnad</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="61" clonedId="61"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="510">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">510</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">1,5 Plan</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="59" clonedId="59"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="511">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">511</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Trä, Liggtimmer</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="58" clonedId="58"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="512">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">512</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Panel</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="56" clonedId="56"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="513">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">513</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Sadeltak</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="55" clonedId="55"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="514">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">514</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Takpannor</groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="54" clonedId="54"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+    		<com.sead.database.TblSampleGroupDescriptions id="515">			
+      			<sampleGroupDescriptionId class="java.lang.Integer">515</sampleGroupDescriptionId>			
+      			<groupDescription class="java.lang.String">Nybyggnad (1775) &quot;Virket till den första byggperioden avverkades vinterhalvåret 1774/75.&quot; (Rapport 2005:31) </groupDescription>			
+      			<sampleGroupDescriptionTypeId class="com.sead.database.TblSampleGroupDescriptionTypes" id="53" clonedId="53"/>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupDescriptions>		
+  	</TblSampleGroupDescriptions>	
+  	<TblSampleGroupNotes length="1">		
+    		<com.sead.database.TblSampleGroupNotes id="1">			
+      			<sampleGroupNoteId class="java.lang.Integer">1</sampleGroupNoteId>			
+      			<sampleGroupId class="com.sead.database.TblSampleGroups" id="11952"/>			
+      			<note class="java.lang.String">Ladugården är riven men några stockar är bevarade</note>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroupNotes>		
+  	</TblSampleGroupNotes>	
+  	<TblSampleGroups length="1">		
+    		<com.sead.database.TblSampleGroups id="11952">			
+      			<sampleGroupId class="java.lang.Integer">11952</sampleGroupId>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<samplingContextId class="com.sead.database.TblSampleGroupSamplingContexts" id="17" clonedId="17"/>			
+      			<methodId class="com.sead.database.TblMethods" id="10" clonedId="10"/>			
+      			<sampleGroupName class="java.lang.String">75699A Fröjden</sampleGroupName>			
+      			<sampleGroupDescription class="java.lang.String">NULL</sampleGroupDescription>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleGroups>		
+    		<com.sead.database.TblSampleGroups id="143" clonedId="143"/>		
+  	</TblSampleGroups>	
+  	<TblSampleLocations length="12">		
+    		<com.sead.database.TblSampleLocations id="21427">			
+      			<sampleLocationId class="java.lang.Integer">21427</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="72" clonedId="72"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">Bottenvåning</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21428">			
+      			<sampleLocationId class="java.lang.Integer">21428</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="73" clonedId="73"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">Garderob</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21429">			
+      			<sampleLocationId class="java.lang.Integer">21429</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="74" clonedId="74"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">Vägg</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21430">			
+      			<sampleLocationId class="java.lang.Integer">21430</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="75" clonedId="75"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">Öster om norra murstocken</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21431">			
+      			<sampleLocationId class="java.lang.Integer">21431</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="76" clonedId="76"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">Innervägg</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21432">			
+      			<sampleLocationId class="java.lang.Integer">21432</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="77" clonedId="77"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>			
+      			<location class="java.lang.String">4:e stockvarvet</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21433">			
+      			<sampleLocationId class="java.lang.Integer">21433</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="72" clonedId="72"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">2 plan</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21434">			
+      			<sampleLocationId class="java.lang.Integer">21434</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="73" clonedId="73"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">Garderob</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21435">			
+      			<sampleLocationId class="java.lang.Integer">21435</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="74" clonedId="74"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">Vägg</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21436">			
+      			<sampleLocationId class="java.lang.Integer">21436</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="75" clonedId="75"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">Västra långväggen</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21437">			
+      			<sampleLocationId class="java.lang.Integer">21437</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="76" clonedId="76"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">3 m från norra gaveln</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+    		<com.sead.database.TblSampleLocations id="21438">			
+      			<sampleLocationId class="java.lang.Integer">21438</sampleLocationId>			
+      			<sampleLocationTypeId class="com.sead.database.TblSampleLocationTypes" id="77" clonedId="77"/>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>			
+      			<location class="java.lang.String">3:e stockvarvet uppifrån</location>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleLocations>		
+  	</TblSampleLocations>	
+  	<TblSampleNotes length="1">		
+    		<com.sead.database.TblSampleNotes id="1">			
+      			<sampleNoteId class="java.lang.Integer">1</sampleNoteId>			
+      			<physicalSampleId class="com.sead.database.TblPhysicalSamples" id="11952" clonedId="11952"/>			
+      			<noteType class="java.lang.String">NULL</noteType>			
+      			<note class="java.lang.String">Samma träd som 10009</note>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSampleNotes>		
+  	</TblSampleNotes>	
+  	<TblSiteLocations length="6">		
+    		<com.sead.database.TblSiteLocations id="391">			
+      			<siteLocationId class="java.lang.Integer">391</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="781" clonedId="781"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+    		<com.sead.database.TblSiteLocations id="392">			
+      			<siteLocationId class="java.lang.Integer">392</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="3737" clonedId="3737"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+    		<com.sead.database.TblSiteLocations id="393">			
+      			<siteLocationId class="java.lang.Integer">393</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="3760" clonedId="3760"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+    		<com.sead.database.TblSiteLocations id="394">			
+      			<siteLocationId class="java.lang.Integer">394</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="4820" clonedId="4820"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+    		<com.sead.database.TblSiteLocations id="395">			
+      			<siteLocationId class="java.lang.Integer">395</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="5064" clonedId="5064"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+    		<com.sead.database.TblSiteLocations id="396">			
+      			<siteLocationId class="java.lang.Integer">396</siteLocationId>			
+      			<locationId class="com.sead.database.TblLocations" id="205" clonedId="205"/>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteLocations>		
+  	</TblSiteLocations>	
+  	<TblSiteReferences length="1">		
+    		<com.sead.database.TblSiteReferences id="1">			
+      			<siteReferenceId class="java.lang.Integer">1</siteReferenceId>			
+      			<siteId class="com.sead.database.TblSites" id="1635"/>			
+      			<biblioId class="com.sead.database.TblBiblio" id="352" clonedId="352"/>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSiteReferences>		
+  	</TblSiteReferences>	
+  	<TblSites length="1">		
+    		<com.sead.database.TblSites id="1635">			
+      			<siteId class="java.lang.Integer">1635</siteId>			
+      			<altitude class="java.math.BigDecimal">NULL</altitude>			
+      			<latitudeDd class="java.math.BigDecimal">58.0836551307243</latitudeDd>			
+      			<longitudeDd class="java.math.BigDecimal">16.4887472928153</longitudeDd>			
+      			<nationalSiteIdentifier class="java.lang.String">NULL</nationalSiteIdentifier>			
+      			<siteDescription class="java.lang.String">NULL</siteDescription>			
+      			<siteName class="java.lang.String">Fröjden</siteName>			
+      			<sitePreservationStatusId class="com.sead.database.TblSitePreservationStatus" id="NULL"/>			
+      			<siteLocationAccuracy class="java.lang.String">NULL</siteLocationAccuracy>			
+      			<clonedId class="java.util.Integer">NULL</clonedId>			
+      			<dateUpdated class="java.util.Date"/>			
+    		</com.sead.database.TblSites>		
+  	</TblSites>	
+</sead-data-upload>
