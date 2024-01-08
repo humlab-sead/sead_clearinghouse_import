@@ -16,7 +16,7 @@ class SpecificationRegistry(Registry):
 
 
 @dataclass
-class SpecificationMessages: 
+class SpecificationMessages:
     errors: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
 
@@ -256,6 +256,26 @@ class IdColumnHasConstraintSpecification(SpecificationBase):
                         table_name, column_spec.column_name
                     )
                 )
+
+
+@SpecificationRegistry.register()
+class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+        for _, column_spec in self.metadata[table_name].columns.items():
+            if len(data_table[column_spec.column_name]) == 0:
+                continue
+            if column_spec.is_fk:
+                has_nan: bool = data_table[column_spec.column_name].isnull().values.any()
+                all_nan: bool = data_table[column_spec.column_name].isnull().values.all()
+                if all_nan and not column_spec.is_nullable:
+                    self.errors.append(
+                        "CRITICAL ERROR Foreign key column {}.{} has no values".format(table_name, column_spec.column_name)
+                    )
+                if has_nan and not column_spec.is_nullable:
+                    self.warnings.append(
+                        "WARNING Non-nullable foreign key column {}.{} has missing values".format(table_name, column_spec.column_name)
+                    )
 
 
 @SpecificationRegistry.register()
