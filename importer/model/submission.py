@@ -77,4 +77,4 @@ class SubmissionData:
             for foreign_name in fk_tables
             if not self.data_tables[foreign_name] is None
         ]
-        return set(functools.reduce(flatten_sets, referenced_pk_ids or [], []))
+        return set(int(x) for x in functools.reduce(flatten_sets, referenced_pk_ids or [], []))
