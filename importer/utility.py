@@ -14,13 +14,15 @@ from loguru import logger
 from sqlalchemy import Engine, create_engine
 
 
-def log_decorator(enter_message='Entering', exit_message='Exiting', level=logging.INFO):
+def log_decorator(enter_message: str|None='Entering', exit_message: str | None='Exiting', level: int=logging.INFO):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            logger.log(level, f'{enter_message} ({func.__name__})')
+            if enter_message is not None:
+                logger.log(level, f'{enter_message} ({func.__name__})')
             result = func(*args, **kwargs)
-            logger.log(level, f'{exit_message} ({func.__name__})')
+            if exit_message is not None:
+                logger.log(level, f'{exit_message} ({func.__name__})')
             return result
 
         return wrapper
