@@ -14,6 +14,13 @@ from importer.model.metadata import TableSpec
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 
+LOOKUP_TEMPLATE: str = """
+<{{class_name}} length="{{length}}">
+{% for lookup_id in lookup_ids %} <com.sead.database.{{class_name}} id="{{lookup_id}}" clonedId="{{lookup_id}}"/>
+{% endfor %}
+</{{class_name}}>
+"""
+
 
 class XmlProcessor:
     """
@@ -41,7 +48,7 @@ class XmlProcessor:
         )
 
     def emit_close_tag(self, tag: str, indent: int) -> None:
-        self.emit("</{}>".format(tag), indent)
+        self.emit(f"</{tag}>", indent)
 
     def camel_case_name(self, undescore_name: str) -> str:
         first, *rest = undescore_name.split("_")
@@ -62,7 +69,7 @@ class XmlProcessor:
         date_updated: str = time.strftime("%Y-%m-%d %H%M")
         for table_name in table_names:
             try:
-                logger.info("Processing %s...", table_name)
+                logger.info(f"Processing {table_name}...")
 
                 if table_name not in metadata:
                     raise ValueError(f"Table {table_name}: not found in metadata")
@@ -85,7 +92,7 @@ class XmlProcessor:
                         public_id: int = data_row[table_spec.pk_name] if table_spec.pk_name in data_row else np.NAN
 
                         if np.isnan(public_id) and np.isnan(data_row["system_id"]):
-                            logger.warning("Table %s: Skipping row since both CloneId and SystemID is NULL", table_name)
+                            logger.warning(f"Table {table_name}: Skipping row since both CloneId and SystemID is NULL")
                             continue
 
                         system_id = int(data_row["system_id"] if not np.isnan(data_row["system_id"]) else public_id)
@@ -109,9 +116,7 @@ class XmlProcessor:
 
                             if column_name not in data_row.keys():
                                 logger.warning(
-                                    "Table %s, FK column %s: META field name not found in submission",
-                                    table_name,
-                                    column_name,
+                                    f"Table {table_name}, FK column {column_name}: META field name not found in submission"
                                 )
                                 continue
 
@@ -138,10 +143,7 @@ class XmlProcessor:
                                     fk_table_name: str = metadata[class_name].table_name
                                     if fk_table_name is None:
                                         logger.warning(
-                                            "Table %s, FK column %s: unable to resolve FK class %s",
-                                            table_name,
-                                            column_name,
-                                            class_name,
+                                            f"Table {table_name}, FK column {column_name}: unable to resolve FK class {class_name}"
                                         )
                                         continue
 
@@ -149,9 +151,7 @@ class XmlProcessor:
 
                                     if np.isnan(value):
                                         self.emit(
-                                            '<{} class="com.sead.database.{}" id="NULL"/>'.format(
-                                                camel_case_column_name, class_name
-                                            ),
+                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>',
                                             3,
                                         )
                                         continue
@@ -162,11 +162,7 @@ class XmlProcessor:
                                     else:
                                         if column_name not in fk_data_table.columns:
                                             logger.warning(
-                                                "Table %s, FK column %s: FK column not found in %s, id=%s",
-                                                table_name,
-                                                column_name,
-                                                fk_table_name,
-                                                fk_system_id,
+                                                f"Table {table_name}, FK column {column_name}: FK column not found in {fk_table_name}, id={fk_system_id}"
                                             )
                                             continue
                                         fk_data_row = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]
@@ -199,10 +195,7 @@ class XmlProcessor:
 
                                 except:
                                     logger.error(
-                                        "Table %s, id=%s, process failed for column %s",
-                                        table_name,
-                                        system_id,
-                                        column_name,
+                                        "Table {table_name}, id={system_id}, process failed for column {column_name}"
                                     )
                                     raise
 
@@ -213,33 +206,25 @@ class XmlProcessor:
                             ),
                             3,
                         )
-                        self.emit_date_updated(
-                            date_updated,
-                            3,
-                        )
-                        self.emit("</{}>".format(table_namespace), 2)
+                        self.emit_date_updated(date_updated, 3)
+                        self.emit(f"</{table_namespace}>", 2)
 
                         if 0 < max_rows < index:
                             break
 
                     except Exception as x:
-                        logger.error("CRITICAL FAILURE: Table %s %s", table_name, x)
+                        logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
                         raise
 
                 if len(referenced_keyset) > 0 and max_rows == 0:
                     logger.warning(
-                        "Warning: %s has %s referenced keys not found in submission",
-                        table_name,
-                        len(referenced_keyset),
+                        f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
                     )
                     for key in referenced_keyset:
                         self.emit(
-                            '<com.sead.database.{} id="{}" clonedId="{}"/>'.format(
-                                table_spec.java_class, int(key), int(key)
-                            ),
-                            2,
+                            f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2
                         )
-                self.emit("</{}>".format(table_spec.java_class), 1)
+                self.emit(f"</{table_spec.java_class}>", 1)
 
             except:
                 logger.exception("CRITICAL ERROR")
@@ -249,27 +234,18 @@ class XmlProcessor:
         self.emit('<dateUpdated class="java.util.Date">{}</dateUpdated>'.format(date_updated), indent)
 
     def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
-        template_str = """
-        <{{class_name}} length="{{length}}">
-        {% for lookup in lookups %}
-            <com.sead.database.{{class_name}} id="{{lookup_id}}" clonedId="{{lookup_id}}"/>
-        {% endfor %}
-        </{{class_name}}>
-        """
-        template: Template = self.jinja_env.from_string(template_str)
+        template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
 
         for table_name in table_names:
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
 
             if len(referenced_keyset) == 0:
-                logger.info("Skipping %s: not referenced", table_name)
+                logger.info(f"Skipping {table_name}: not referenced")
                 continue
 
             class_name: str = metadata[table_name].java_class
             xml: str = template.render(
-                lookups=referenced_keyset,
-                class_name=class_name,
-                length=len(referenced_keyset),
+                lookup_ids=referenced_keyset, class_name=class_name, length=len(referenced_keyset)
             )
             self.emit(xml)
 
