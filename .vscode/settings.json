@@ -4,9 +4,9 @@
             "source.organizeImports": "explicit"
         },
         "editor.defaultFormatter": null,
-        "editor.formatOnPaste": true,
-        "editor.formatOnSave": true,
-        "editor.formatOnType": false,
+        // "editor.formatOnPaste": true,
+        // "editor.formatOnSave": true,
+        // "editor.formatOnType": false,
         // "editor.rulers": [
         //     120
         // ]
