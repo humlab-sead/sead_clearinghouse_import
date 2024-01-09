@@ -1,9 +1,38 @@
 <?xml version="1.0" ?>
 <sead-data-upload>
 
-<TblDatasetMasters length="1">
- <com.sead.database.TblDatasetMasters id="10" clonedId="10"/>
-</TblDatasetMasters>
+<TblAbundanceElements length="1">
+ <com.sead.database.TblAbundanceElements id="44" clonedId="44"/>
+</TblAbundanceElements>
+
+<TblAgeTypes length="1">
+ <com.sead.database.TblAgeTypes id="1" clonedId="1"/>
+</TblAgeTypes>
+
+<TblAltRefTypes length="2">
+ <com.sead.database.TblAltRefTypes id="2" clonedId="2"/>
+ <com.sead.database.TblAltRefTypes id="3" clonedId="3"/>
+</TblAltRefTypes>
+
+<TblBiblio length="2">
+ <com.sead.database.TblBiblio id="352" clonedId="352"/>
+ <com.sead.database.TblBiblio id="129" clonedId="129"/>
+</TblBiblio>
+
+<TblContactTypes length="1">
+ <com.sead.database.TblContactTypes id="2" clonedId="2"/>
+</TblContactTypes>
+
+<TblContacts length="4">
+ <com.sead.database.TblContacts id="56" clonedId="56"/>
+ <com.sead.database.TblContacts id="65" clonedId="65"/>
+ <com.sead.database.TblContacts id="34" clonedId="34"/>
+ <com.sead.database.TblContacts id="67" clonedId="67"/>
+</TblContacts>
+
+<TblCoordinateMethodDimensions length="1">
+ <com.sead.database.TblCoordinateMethodDimensions id="2" clonedId="2"/>
+</TblCoordinateMethodDimensions>
 
 <TblDataTypes length="6">
  <com.sead.database.TblDataTypes id="5" clonedId="5"/>
@@ -13,6 +42,16 @@
  <com.sead.database.TblDataTypes id="15" clonedId="15"/>
  <com.sead.database.TblDataTypes id="19" clonedId="19"/>
 </TblDataTypes>
+
+<TblDatasetMasters length="1">
+ <com.sead.database.TblDatasetMasters id="10" clonedId="10"/>
+</TblDatasetMasters>
+
+<TblDatasetSubmissionTypes length="3">
+ <com.sead.database.TblDatasetSubmissionTypes id="10" clonedId="10"/>
+ <com.sead.database.TblDatasetSubmissionTypes id="3" clonedId="3"/>
+ <com.sead.database.TblDatasetSubmissionTypes id="5" clonedId="5"/>
+</TblDatasetSubmissionTypes>
 
 <TblDendroLookup length="14">
  <com.sead.database.TblDendroLookup id="128" clonedId="128"/>
@@ -31,50 +70,6 @@
  <com.sead.database.TblDendroLookup id="127" clonedId="127"/>
 </TblDendroLookup>
 
-<TblAgeTypes length="1">
- <com.sead.database.TblAgeTypes id="1" clonedId="1"/>
-</TblAgeTypes>
-
-<TblCoordinateMethodDimensions length="1">
- <com.sead.database.TblCoordinateMethodDimensions id="2" clonedId="2"/>
-</TblCoordinateMethodDimensions>
-
-<TblSampleLocationTypes length="6">
- <com.sead.database.TblSampleLocationTypes id="72" clonedId="72"/>
- <com.sead.database.TblSampleLocationTypes id="73" clonedId="73"/>
- <com.sead.database.TblSampleLocationTypes id="74" clonedId="74"/>
- <com.sead.database.TblSampleLocationTypes id="75" clonedId="75"/>
- <com.sead.database.TblSampleLocationTypes id="76" clonedId="76"/>
- <com.sead.database.TblSampleLocationTypes id="77" clonedId="77"/>
-</TblSampleLocationTypes>
-
-<TblContacts length="4">
- <com.sead.database.TblContacts id="56" clonedId="56"/>
- <com.sead.database.TblContacts id="65" clonedId="65"/>
- <com.sead.database.TblContacts id="34" clonedId="34"/>
- <com.sead.database.TblContacts id="67" clonedId="67"/>
-</TblContacts>
-
-<TblSampleTypes length="1">
- <com.sead.database.TblSampleTypes id="12" clonedId="12"/>
-</TblSampleTypes>
-
-<TblTaxaTreeMaster length="1">
- <com.sead.database.TblTaxaTreeMaster id="18197" clonedId="18197"/>
-</TblTaxaTreeMaster>
-
-<TblSampleGroupSamplingContexts length="1">
- <com.sead.database.TblSampleGroupSamplingContexts id="17" clonedId="17"/>
-</TblSampleGroupSamplingContexts>
-
-<TblContactTypes length="1">
- <com.sead.database.TblContactTypes id="2" clonedId="2"/>
-</TblContactTypes>
-
-<TblProjectTypes length="1">
- <com.sead.database.TblProjectTypes id="8" clonedId="8"/>
-</TblProjectTypes>
-
 <TblLocations length="6">
  <com.sead.database.TblLocations id="5064" clonedId="5064"/>
  <com.sead.database.TblLocations id="781" clonedId="781"/>
@@ -84,18 +79,21 @@
  <com.sead.database.TblLocations id="3737" clonedId="3737"/>
 </TblLocations>
 
-<TblAltRefTypes length="2">
- <com.sead.database.TblAltRefTypes id="2" clonedId="2"/>
- <com.sead.database.TblAltRefTypes id="3" clonedId="3"/>
-</TblAltRefTypes>
+<TblMethods length="1">
+ <com.sead.database.TblMethods id="10" clonedId="10"/>
+</TblMethods>
 
-<TblAbundanceElements length="1">
- <com.sead.database.TblAbundanceElements id="44" clonedId="44"/>
-</TblAbundanceElements>
+<TblProjectStages length="1">
+ <com.sead.database.TblProjectStages id="6" clonedId="6"/>
+</TblProjectStages>
 
-<TblSeasons length="1">
- <com.sead.database.TblSeasons id="3" clonedId="3"/>
-</TblSeasons>
+<TblProjectTypes length="1">
+ <com.sead.database.TblProjectTypes id="8" clonedId="8"/>
+</TblProjectTypes>
+
+<TblSampleDescriptionTypes length="1">
+ <com.sead.database.TblSampleDescriptionTypes id="30" clonedId="30"/>
+</TblSampleDescriptionTypes>
 
 <TblSampleGroupDescriptionTypes length="8">
  <com.sead.database.TblSampleGroupDescriptionTypes id="53" clonedId="53"/>
@@ -108,28 +106,30 @@
  <com.sead.database.TblSampleGroupDescriptionTypes id="62" clonedId="62"/>
 </TblSampleGroupDescriptionTypes>
 
-<TblBiblio length="2">
- <com.sead.database.TblBiblio id="352" clonedId="352"/>
- <com.sead.database.TblBiblio id="129" clonedId="129"/>
-</TblBiblio>
+<TblSampleGroupSamplingContexts length="1">
+ <com.sead.database.TblSampleGroupSamplingContexts id="17" clonedId="17"/>
+</TblSampleGroupSamplingContexts>
 
-<TblProjectStages length="1">
- <com.sead.database.TblProjectStages id="6" clonedId="6"/>
-</TblProjectStages>
+<TblSampleLocationTypes length="6">
+ <com.sead.database.TblSampleLocationTypes id="72" clonedId="72"/>
+ <com.sead.database.TblSampleLocationTypes id="73" clonedId="73"/>
+ <com.sead.database.TblSampleLocationTypes id="74" clonedId="74"/>
+ <com.sead.database.TblSampleLocationTypes id="75" clonedId="75"/>
+ <com.sead.database.TblSampleLocationTypes id="76" clonedId="76"/>
+ <com.sead.database.TblSampleLocationTypes id="77" clonedId="77"/>
+</TblSampleLocationTypes>
 
-<TblMethods length="1">
- <com.sead.database.TblMethods id="10" clonedId="10"/>
-</TblMethods>
+<TblSampleTypes length="1">
+ <com.sead.database.TblSampleTypes id="12" clonedId="12"/>
+</TblSampleTypes>
 
-<TblSampleDescriptionTypes length="1">
- <com.sead.database.TblSampleDescriptionTypes id="30" clonedId="30"/>
-</TblSampleDescriptionTypes>
+<TblSeasons length="1">
+ <com.sead.database.TblSeasons id="3" clonedId="3"/>
+</TblSeasons>
 
-<TblDatasetSubmissionTypes length="3">
- <com.sead.database.TblDatasetSubmissionTypes id="10" clonedId="10"/>
- <com.sead.database.TblDatasetSubmissionTypes id="3" clonedId="3"/>
- <com.sead.database.TblDatasetSubmissionTypes id="5" clonedId="5"/>
-</TblDatasetSubmissionTypes>
+<TblTaxaTreeMaster length="1">
+ <com.sead.database.TblTaxaTreeMaster id="18197" clonedId="18197"/>
+</TblTaxaTreeMaster>
   <TblAbundances length="2">
     <com.sead.database.TblAbundances id="3930">
       <abundanceId class="???">3930</abundanceId>
