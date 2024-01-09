@@ -87,12 +87,14 @@ def test_import_reduced_submission():
         }
     )
 
+
     metadata: Metadata = Metadata(opts.db_uri())
 
     submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
 
-    ImportService(metadata=metadata, opts=opts).process(submission=submission)
-
+    service: ImportService = ImportService(metadata=metadata, opts=opts)
+    service.process(submission=submission)
+    assert len(service.specification.errors) == 0
     assert filecmp.cmp(target_filename, expected_filename, shallow=False)
 
 
