@@ -63,6 +63,7 @@ class Options:
     def db_uri(self) -> str:
         return "postgresql://{}@{}:{}/{}".format(self.dbuser, self.dbhost, self.port, self.dbname)
 
+    @property
     def db_opts(self) -> dict[str, Any]:
         assert (
             os.environ.get("SEAD_CH_PASSWORD", None) is not None
