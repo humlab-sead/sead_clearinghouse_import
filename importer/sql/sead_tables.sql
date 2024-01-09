@@ -123,7 +123,7 @@ with table_name_override(table_name, excel_sheet) as(values
         ('tbl_site_locations', 'data'),
         ('tbl_site_natgridrefs', 'data'),
         ('tbl_site_other_records', 'data'),
-        ('tbl_site_preservation_status', 'data'),
+        ('tbl_site_preservation_status', 'lookup'),
         ('tbl_site_references', 'data'),
         ('tbl_sites', 'data'),
         ('tbl_species_association_types', 'lookup'),
