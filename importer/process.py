@@ -108,7 +108,7 @@ class ImportService:
         if format_document:
             self.opts.target: str = utility.tidy_xml(self.opts.target, remove_source=True)
 
-        logger.info(" ---> XML file created: %s", self.opts.target)
+        logger.info(f" ---> XML file created: {self.opts.target}")
 
         return self.opts.target
 
