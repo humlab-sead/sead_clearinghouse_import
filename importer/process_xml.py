@@ -44,16 +44,8 @@ class XmlProcessor:
     def emit_close_tag(self, tag: str, indent: int) -> None:
         self.emit(f"</{tag}>", indent)
 
-    def camel_case_name(self, undescore_name: str) -> str:
-        first, *rest = undescore_name.split("_")
-        return first + "".join(word.capitalize() for word in rest)
-
-    def process_data(
-        self,
-        metadata: Metadata,
-        submission: SubmissionData,
-        table_names: list[str],
-        max_rows: int = 0,
+    def process_tables(
+        self, metadata: Metadata, submission: SubmissionData, table_names: list[str], max_rows: int = 0
     ) -> None:
         """
         Import assumes that all FK references points to a local "system_id" in referenced table
@@ -76,9 +68,7 @@ class XmlProcessor:
                 if data_table is None:
                     continue
 
-                self.emit(
-                    f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1
-                )
+                self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
 
                 for index, record in data_table.iterrows():
                     try:
@@ -106,71 +96,19 @@ class XmlProcessor:
                             if column_name in self.ignore_columns:
                                 continue
 
-                            class_name: str = column_spec.class_name
-
                             if column_name not in data_row.keys():
                                 logger.warning(
                                     f"Table {table_name}, FK column {column_name}: META field name not found in submission"
                                 )
                                 continue
 
-                            camel_case_column_name: str = self.camel_case_name(column_name)
-                            value = data_row[column_name]
                             if not column_spec.is_fk:
-                                value = self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
-
+                                self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
                             else:
-                                """The value is a FK system_id"""
-                                try:
-                                    fk_table_name: str = metadata[class_name].table_name
-                                    if fk_table_name is None:
-                                        logger.warning(
-                                            f"Table {table_name}, FK column {column_name}: unable to resolve FK class {class_name}"
-                                        )
-                                        continue
-
-                                    fk_data_table: str = submission.data_tables[fk_table_name]
-
-                                    if np.isnan(value):
-                                        self.emit(
-                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>',
-                                            3,
-                                        )
-                                        continue
-
-                                    fk_system_id: int = int(value)
-                                    if fk_data_table is None:
-                                        fk_public_id = fk_system_id
-                                    else:
-                                        if column_name not in fk_data_table.columns:
-                                            logger.warning(
-                                                f"Table {table_name}, FK column {column_name}: FK column not found in {fk_table_name}, id={fk_system_id}"
-                                            )
-                                            continue
-                                        fk_data_row = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]
-                                        if fk_data_row.empty or len(fk_data_row) != 1:
-                                            fk_public_id: int = fk_system_id
-                                        else:
-                                            fk_public_id = fk_data_row[column_name].iloc[0]
-
-                                    class_name = class_name.split(".")[-1]
-
-                                    if np.isnan(fk_public_id):
-                                        self.emit(
-                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>',
-                                            3,
-                                        )
-                                    else:
-                                        self.emit(
-                                            f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
-                                            3,
-                                        )
-
-                                except:
-                                    logger.error(
-                                        f"Table {table_name}, id={system_id}, process failed for column {column_name}"
-                                    )
-                                    raise
+                                fk_table_spec: str = metadata[column_spec.class_name]
+                                fk_data_table: pd.DataFrame = submission.data_tables[fk_table_spec.table_name]
+                                submission.data_tables[fk_table_spec.table_name]
+                                self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
                         # ClonedId tag is always emitted (NULL id missing)
                         self.emit(
@@ -202,12 +140,54 @@ class XmlProcessor:
                 logger.exception("CRITICAL ERROR")
                 raise
 
-    def process_pk_and_non_fk(self, data_row: pd.Series, public_id: int, system_id: int, column_spec: ColumnSpec):
+    def process_fk(
+        self, data_row: dict, column_spec: ColumnSpec, fk_table_spec: TableSpec, fk_data_table: pd.DataFrame
+    ) -> None:
+        """The value is a FK system_id"""
+        class_name: str = column_spec.class_name
+        camel_case_column_name: str = column_spec.camel_case_column_name
+
+        if fk_table_spec.table_name is None:
+            logger.warning(
+                f"Table {column_spec.table_name}, FK column {column_spec.column_name}: unable to resolve FK class {class_name}"
+            )
+            return
+
+        value: Any = data_row[column_spec.column_name]
+        if np.isnan(value):
+            self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>', 3)
+            return
+
+        fk_system_id: int = int(value)
+        if fk_data_table is None:
+            fk_public_id = fk_system_id
+        else:
+            if column_spec.column_name not in fk_data_table.columns:
+                logger.warning(
+                    f"Table {column_spec.table_name}, FK column {column_spec.column_name}: FK column not found in {fk_table_spec.table_name}, id={fk_system_id}"
+                )
+                return
+            fk_data_row: pd.DataFrame = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]
+            if fk_data_row.empty or len(fk_data_row) != 1:
+                fk_public_id: int = fk_system_id
+            else:
+                fk_public_id = fk_data_row[column_spec.column_name].iloc[0]
+
+        class_name = class_name.split(".")[-1]
+
+        if np.isnan(fk_public_id):
+            self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>', 3)
+        else:
+            self.emit(
+                f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
+                3,
+            )
+
+    def process_pk_and_non_fk(self, data_row: dict, public_id: int, system_id: int, column_spec: ColumnSpec):
         """The value is a PK or non-FK attribte"""
         value = data_row[column_spec.column_name]
         class_name: str = column_spec.class_name
-        camel_case_column_name: str = self.camel_case_name(column_spec.column_name)
-        
+
         if column_spec.is_pk:
             value = int(public_id) if not np.isnan(public_id) else system_id
         elif isinstance(value, numbers.Number) and np.isnan(value):
@@ -216,8 +196,11 @@ class XmlProcessor:
             if isinstance(value, str) and any((c in "<>&") for c in value):
                 value: str = escape(value)
 
-        self.emit(f'<{camel_case_column_name} class="{class_name}">{value}</{camel_case_column_name}>', 3 )
-        
+        self.emit(
+            f'<{column_spec.camel_case_column_name} class="{class_name}">{value}</{column_spec.camel_case_column_name}>',
+            3,
+        )
+
         return value
 
     def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
@@ -241,7 +224,7 @@ class XmlProcessor:
         metadata: Metadata,
         submission: SubmissionData,
         table_names: list[str] = None,
-        extra_names: list[str] = None
+        extra_names: list[str] = None,
     ) -> None:
         tables_to_process: list[str] = submission.index_table_names if table_names is None else table_names
         extra_names: set[str] = (
@@ -251,5 +234,5 @@ class XmlProcessor:
         self.emit('<?xml version="1.0" ?>')
         self.emit("<sead-data-upload>")
         self.process_lookups(metadata, submission, extra_names)
-        self.process_data(metadata, submission, tables_to_process)
+        self.process_tables(metadata, submission, tables_to_process)
         self.emit("</sead-data-upload>")
