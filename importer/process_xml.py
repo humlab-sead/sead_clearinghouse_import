@@ -10,7 +10,7 @@ from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
 from importer.model import Metadata, SubmissionData
-from importer.model.metadata import TableSpec
+from importer.model.metadata import ColumnSpec, TableSpec
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 
@@ -117,19 +117,7 @@ class XmlProcessor:
                             camel_case_column_name: str = self.camel_case_name(column_name)
                             value = data_row[column_name]
                             if not column_spec.is_fk:
-                                """The value is a PK or non-FK attribte"""
-                                if column_spec.is_pk:
-                                    value = int(public_id) if not np.isnan(public_id) else system_id
-                                elif isinstance(value, numbers.Number) and np.isnan(value):
-                                    value = "NULL"
-                                else:
-                                    if isinstance(value, str) and any((c in "<>&") for c in value):
-                                        value: str = escape(value)
-
-                                self.emit(
-                                    f'<{camel_case_column_name} class="{class_name}">{value}</{camel_case_column_name}>',
-                                    3,
-                                )
+                                value = self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
 
                             else:
                                 """The value is a FK system_id"""
@@ -213,6 +201,24 @@ class XmlProcessor:
             except:
                 logger.exception("CRITICAL ERROR")
                 raise
+
+    def process_pk_and_non_fk(self, data_row: pd.Series, public_id: int, system_id: int, column_spec: ColumnSpec):
+        """The value is a PK or non-FK attribte"""
+        value = data_row[column_spec.column_name]
+        class_name: str = column_spec.class_name
+        camel_case_column_name: str = self.camel_case_name(column_spec.column_name)
+        
+        if column_spec.is_pk:
+            value = int(public_id) if not np.isnan(public_id) else system_id
+        elif isinstance(value, numbers.Number) and np.isnan(value):
+            value = "NULL"
+        else:
+            if isinstance(value, str) and any((c in "<>&") for c in value):
+                value: str = escape(value)
+
+        self.emit(f'<{camel_case_column_name} class="{class_name}">{value}</{camel_case_column_name}>', 3 )
+        
+        return value
 
     def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
         template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
