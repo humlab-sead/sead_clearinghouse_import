@@ -107,6 +107,9 @@ def flatten_sets(x, y) -> set:
     """
     return set(list(x) + list(y))
 
+def camel_case_name(undescore_name: str) -> str:
+    first, *rest = undescore_name.split("_")
+    return first + "".join(word.capitalize() for word in rest)
 
 def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
     try:
