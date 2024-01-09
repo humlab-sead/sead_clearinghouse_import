@@ -76,6 +76,10 @@ def workflow(opts: Options) -> None:
     """
     metadata: Metadata = Metadata(opts.db_uri())
 
+    if opts.filename.endswith(".xml"):
+        opts.xml_filename = opts.filename
+        opts.filename = None
+        
     if isinstance(opts.xml_filename, str):
         if not os.path.isfile(opts.xml_filename):
             logger.error(f" ---> file '{opts.xml_filename}' does not exist")
