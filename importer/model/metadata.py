@@ -5,7 +5,7 @@ from typing import Any
 
 import pandas as pd
 
-from importer.utility import load_sead_data
+from importer.utility import camel_case_name, load_sead_data
 
 # pylint: disable=no-member
 
@@ -41,6 +41,10 @@ class ColumnSpec:
 
     def asdict(self) -> list[str]:
         return asdict(self)
+
+    @property
+    def camel_case_column_name(self) -> str:
+        return camel_case_name(self.column_name)
 
 
 @dataclass
