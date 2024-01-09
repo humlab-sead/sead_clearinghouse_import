@@ -112,11 +112,11 @@ class SubmissionTableExistsSpecification(SpecificationBase):
             alias_name: str = table_spec.excel_sheet or "no_alias"
             if alias_name not in submission.data_table_names:
                 """Not in submission table index sheet"""
-                self.errors.append("CRITICAL ERROR Table {0} not defined as submission table".format(table_name))
+                self.errors.append(f"ERROR Table {table_name} not defined as submission table")
 
         if not submission.exists(table_name):
             """No data sheet"""
-            self.errors.append("CRITICAL ERROR {0} has NO DATA!".format(table_name))
+            self.errors.append(f"ERROR {table_name} has NO DATA!")
 
 
 @SpecificationRegistry.register()
@@ -170,12 +170,7 @@ class ColumnTypesSpecification(SpecificationBase):
                 continue
             if not self.TYPE_COMPATIBILITY_MATRIX.get((column_spec.data_type, data_column_type), False):
                 self.warnings.append(
-                    "WARNING type clash: {}.{} {}<=>{}".format(
-                        table_name,
-                        column_spec.column_name,
-                        column_spec.data_type,
-                        data_column_type,
-                    )
+                    f"WARNING type clash: {table_name}.{column_spec.column_name} {column_spec.data_type}<=>{data_column_type}"
                 )
 
 
@@ -198,9 +193,7 @@ class SubmissionTableTypesSpecification(SpecificationBase):
             if not ok_mask.all():
                 error_values = " ".join(list(set(series[~ok_mask])))[:200]
                 self.errors.append(
-                    "CRITICAL ERROR Column {}.{} has non-numeric values: {}".format(
-                        table_name, column_spec.column_name, error_values
-                    )
+                    f"ERROR Column {table_name}.{column_spec.column_name} has non-numeric values: {error_values}"
                 )
 
 
@@ -210,13 +203,11 @@ class HasPrimaryKeySpecification(SpecificationBase):
         data_table: pd.DataFrame = submission.data_tables[table_name]
         if self.metadata[table_name].pk_name not in data_table.columns:
             self.errors.append(
-                'CRITICAL ERROR PK {}.{} (table metadata) not found in data columns.'.format(
-                    table_name, self.metadata[table_name].pk_name
-                )
+                f'ERROR PK {table_name}.{self.metadata[table_name].pk_name} (table metadata) not found in data columns.'
             )
 
         if not any(c.is_pk for c in self.metadata[table_name].columns.values()):
-            self.errors.append("Table {} has no column with PK constraint".format(table_name))
+            self.errors.append("ERROR Table {table_name} has no column with PK constraint")
 
 
 @SpecificationRegistry.register()
@@ -227,11 +218,11 @@ class HasSystemIdSpecification(SpecificationBase):
         data_table: pd.DataFrame = submission.data_tables[table_name]
 
         if "system_id" not in data_table.columns:
-            self.errors.append("{0} has no system id data column".format(table_name))
+            self.errors.append(f"ERROR {table_name} has no system id data column")
             return
 
         if data_table.system_id.isnull().values.any():
-            self.errors.append("CRITICAL ERROR {0} has missing system id values".format(table_name))
+            self.errors.append(f"ERROR {table_name} has missing system id values")
 
         try:
             # duplicate_mask = data_table[~data_table.system_id.isna()].duplicated('system_id')
@@ -239,11 +230,9 @@ class HasSystemIdSpecification(SpecificationBase):
             duplicates: list[int] = [int(x) for x in set(data_table[duplicate_mask].system_id)]
             if len(duplicates) > 0:
                 error_values: str = " ".join([str(x) for x in duplicates])[:200]
-                self.errors.append(
-                    "CRITICAL ERROR Table {} has DUPLICATE system ids: {}".format(table_name, error_values)
-                )
+                self.errors.append(f"ERROR Table {table_name} has DUPLICATE system ids: {error_values}")
         except Exception as _:
-            self.warnings.append("WARNING! Duplicate check of {}.{} failed".format(table_name, "system_id"))
+            self.warnings.append(f"WARNING! Duplicate check of {table_name}.system_id failed")
 
 
 @SpecificationRegistry.register()
@@ -252,15 +241,14 @@ class IdColumnHasConstraintSpecification(SpecificationBase):
         for _, column_spec in self.metadata[table_name].columns.items():
             if column_spec.column_name[-3:] == "_id" and not (column_spec.is_fk or column_spec.is_pk):
                 self.warnings.append(
-                    'WARNING! Column {}.{}: ends with "_id" but NOT marked as PK/FK'.format(
-                        table_name, column_spec.column_name
-                    )
+                    f'WARNING! Column {table_name}.{column_spec.column_name}: ends with "_id" but NOT marked as PK/FK'
                 )
 
 
 @SpecificationRegistry.register()
 class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        """All submission tables MUST have a non null "system_id" """
         data_table: pd.DataFrame = submission.data_tables[table_name]
         for _, column_spec in self.metadata[table_name].columns.items():
             if len(data_table[column_spec.column_name]) == 0:
@@ -269,17 +257,39 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
                 has_nan: bool = data_table[column_spec.column_name].isnull().values.any()
                 all_nan: bool = data_table[column_spec.column_name].isnull().values.all()
                 if all_nan and not column_spec.is_nullable:
-                    self.errors.append(
-                        "CRITICAL ERROR Foreign key column {}.{} has no values".format(
-                            table_name, column_spec.column_name
-                        )
-                    )
+                    self.errors.append(f"ERROR Foreign key column {table_name}.{column_spec.column_name} has no values")
                 if has_nan and not column_spec.is_nullable:
-                    self.warnings.append(
-                        "WARNING Non-nullable foreign key column {}.{} has missing values".format(
-                            table_name, column_spec.column_name
-                        )
+                    self.errors.append(
+                        f"ERROR Non-nullable foreign key column {table_name}.{column_spec.column_name} has missing values"
                     )
+
+
+@SpecificationRegistry.register()
+class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
+        """All submission tables MUST have a non null "system_id" """
+        data_table: pd.DataFrame = submission.data_tables[table_name]
+        for _, column_spec in self.metadata[table_name].columns.items():
+            if len(data_table[column_spec.column_name]) == 0:
+                continue
+            if not column_spec.is_fk:
+                continue
+            fk_system_id: int = data_table[column_spec.column_name]
+            fk_table_name: str = column_spec.fk_table_name
+            if fk_table_name not in submission.data_tables:
+                self.errors.append(f"ERROR Foreign key column {fk_table_name} missing in data")
+                continue
+            fk_table_spec: TableSpec = self.metadata[fk_table_name]
+            if fk_table_spec.is_lookup_table:
+                continue
+            # fk_table: pd.DataFrame = submission.data_tables[fk_table_name]
+            # if fk_table is None:
+            #     self.warnings.append(f"ERROR Table {fk_table_name} referenced as FK in data by {table_name} but not found in submission.")
+            #     continue
+            # if not fk_system_id.isin(fk_table.system_id).all():
+            #     self.warnings.append(
+            #         f"ERROR FK value {table_name}.{column_spec.column_name} has values not found as PK in {fk_table_name}"
+            #     )
 
 
 @SpecificationRegistry.register()
@@ -299,14 +309,10 @@ class NoMissingColumnSpecification(SpecificationBase):
         )
 
         if len(missing_column_names) > 0:
-            self.errors.append(
-                "ERROR {0} has MISSING DATA columns: ".format(table_name) + (", ".join(missing_column_names))
-            )
+            self.errors.append[f"ERROR {table_name} has MISSING DATA columns: {', '.join(missing_column_names)}"]
 
         if len(extra_column_names) > 0:
-            self.warnings.append(
-                "WARNING {0} has EXTRA DATA columns: ".format(table_name) + (", ".join(extra_column_names))
-            )
+            self.warnings.append(f"WARNING {table_name} has EXTRA DATA columns: {', '.join(extra_column_names)}")
 
 
 @SpecificationRegistry.register()
@@ -322,4 +328,4 @@ class LookupDataSpecification(SpecificationBase):
         pk_name: str = self.metadata[table_name].pk_name
 
         if data_table[pk_name].isnull().any():
-            self.errors.append("CRITICAL ERROR {} new values not allowed for lookup table.".format(table_name))
+            self.errors.append(f"ERROR {table_name} new values not allowed for lookup table.")
