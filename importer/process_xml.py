@@ -60,7 +60,6 @@ class XmlProcessor:
         All submission tables MUST have a non null "system_id"
         All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
         """
-        date_updated: str = time.strftime("%Y-%m-%d %H%M")
         for table_name in sorted(table_names):
             try:
                 logger.info(f"Processing {table_name}...")
@@ -79,8 +78,7 @@ class XmlProcessor:
 
                 self.emit(
                     f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1
-                )  # data_table.length
-                # self.emit_tag(table_specification['java_class'], dict(length=data_table.shape[0]), close=False, indent=1)
+                )
 
                 for index, record in data_table.iterrows():
                     try:
@@ -219,7 +217,7 @@ class XmlProcessor:
     def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
         template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
 
-        for table_name in table_names:
+        for table_name in sorted(table_names):
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
 
             if len(referenced_keyset) == 0:
@@ -237,7 +235,7 @@ class XmlProcessor:
         metadata: Metadata,
         submission: SubmissionData,
         table_names: list[str] = None,
-        extra_names: list[str] = None,
+        extra_names: list[str] = None
     ) -> None:
         tables_to_process: list[str] = submission.index_table_names if table_names is None else table_names
         extra_names: set[str] = (
