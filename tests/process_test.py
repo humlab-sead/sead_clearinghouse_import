@@ -62,7 +62,6 @@ def test_import_submission():
 
 
 def test_import_reduced_submission():
-
     target_filename: str = 'data/output/building_dendro_reduced.xml'
     expected_filename: str = 'tests/test_data/building_dendro_reduced.xml'
 
@@ -87,14 +86,16 @@ def test_import_reduced_submission():
             "tidy_xml": False,
         }
     )
+
     metadata: Metadata = Metadata(opts.db_uri())
 
     submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
 
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
-    assert filecmp.cmp(target_filename,expected_filename,  shallow=False)
-    
+    assert filecmp.cmp(target_filename, expected_filename, shallow=False)
+
+
 def load_or_cache_submission(opts, metadata) -> SubmissionData:
     pickled_filename: str = f"{opts.basename}.pkl"
     if not os.path.isfile(pickled_filename):
