@@ -30,8 +30,12 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
 @click.option("--register/--no-register", type=bool, is_flag=True, default=False, help="Register file in the database.")
 @click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode XML into public tables.")
-@click.option("--tidy-xml/--no-tidy-xml", type=bool, is_flag=True, default=False, help="Run XML formatting tool on document.")
-@click.option("--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename.")
+@click.option(
+    "--tidy-xml/--no-tidy-xml", type=bool, is_flag=True, default=False, help="Run XML formatting tool on document."
+)
+@click.option(
+    "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
+)
 def import_file(
     filename: str,
     data_types: str,
@@ -52,11 +56,17 @@ def import_file(
     tidy_xml: bool,
 ) -> None:
     """
-    Imports an Excel file to the database. The Excel file is stored as an XML file conforming to the clearinghouse data import XML schema.
+    Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
+    an Excel file or an XML file that has previously been generated with this program.
+
+    The content of the Excel file is processed and stored in an XML file that conforms to the
+    clearinghouse data import schema.
+
     The Excel file must satisfy the following requirements:
-    - The file must be in the Excel 2007+ format (xlsx)
-    - The file must contain a sheet named `data_table_index' listing all tables in the submission having new or changed data.
-    - The file must contain a sheet named as in SEADe' for each table in the submission.
+      - The file must be in the Excel 2007+ format (xlsx)
+      - The file must contain a sheet named `data_table_index' listing all tables in the submission having new or changed data.
+      - The file must contain a sheet named as in SEADe' for each table in the submission.
+
     """
     logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
     print(locals())
@@ -79,7 +89,7 @@ def workflow(opts: Options) -> None:
     if opts.filename.endswith(".xml"):
         opts.xml_filename = opts.filename
         opts.filename = None
-        
+
     if isinstance(opts.xml_filename, str):
         if not os.path.isfile(opts.xml_filename):
             logger.error(f" ---> file '{opts.xml_filename}' does not exist")
