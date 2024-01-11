@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from ..utility import Registry
+from ..utility import Registry, log_decorator
 from .metadata import Metadata, TableSpec
 from .submission import SubmissionData
 
@@ -64,6 +64,7 @@ class SubmissionSpecification(SpecificationBase):
         super().__init__(metadata, messages or SpecificationMessages(), ignore_columns)
         self.raise_errors: bool = raise_errors
 
+    @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked")
     def is_satisfied_by(self, submission: SubmissionData, _: str = None) -> bool:
         """
         Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
@@ -274,7 +275,6 @@ class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
                 continue
             if not column_spec.is_fk:
                 continue
-            fk_system_id: int = data_table[column_spec.column_name]
             fk_table_name: str = column_spec.fk_table_name
             if fk_table_name not in submission.data_tables:
                 self.errors.append(f"ERROR Foreign key column {fk_table_name} missing in data")
@@ -309,7 +309,7 @@ class NoMissingColumnSpecification(SpecificationBase):
         )
 
         if len(missing_column_names) > 0:
-            self.errors.append[f"ERROR {table_name} has MISSING DATA columns: {', '.join(missing_column_names)}"]
+            self.errors.append(f"ERROR {table_name} has MISSING DATA columns: {', '.join(missing_column_names)}")
 
         if len(extra_column_names) > 0:
             self.warnings.append(f"WARNING {table_name} has EXTRA DATA columns: {', '.join(extra_column_names)}")
