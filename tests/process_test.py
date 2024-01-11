@@ -87,7 +87,6 @@ def test_import_reduced_submission():
         }
     )
 
-
     metadata: Metadata = Metadata(opts.db_uri())
 
     submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
