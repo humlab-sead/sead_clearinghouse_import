@@ -107,7 +107,6 @@ class XmlProcessor:
                             else:
                                 fk_table_spec: str = metadata[column_spec.class_name]
                                 fk_data_table: pd.DataFrame = submission.data_tables[fk_table_spec.table_name]
-                                submission.data_tables[fk_table_spec.table_name]
                                 self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
                         # ClonedId tag is always emitted (NULL id missing)
