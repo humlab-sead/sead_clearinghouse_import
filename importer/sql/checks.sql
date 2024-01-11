@@ -15,6 +15,7 @@ with sead_columns as (
 			case
 				when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(fk_table_name)
 				when data_type = 'integer' then 'java.lang.Integer'
+				when data_type = 'bigint' then 'java.lang.Integer'
 				when data_type = 'smallint' then 'java.lang.Short'
 				when data_type = 'date' then 'java.sql.Date'
 				when data_type = 'boolean' then	'java.lang.Boolean'
@@ -23,7 +24,7 @@ with sead_columns as (
 				when data_type like 'timestamp%' then 'java.util.Date'
 				when data_type = 'date' then 'java.sql.Date'
 				when data_type = 'numeric' then 'java.math.BigDecimal'
-				else '???' end as class_name
+				else 'error['  || data_type || ']' end as class_name
 	from sead_utility.table_columns
 	where table_schema = 'public'
 	  and table_name like 'tbl_%'
