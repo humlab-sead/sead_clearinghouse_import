@@ -14,7 +14,9 @@ from loguru import logger
 from sqlalchemy import Engine, create_engine
 
 
-def log_decorator(enter_message: str|None='Entering', exit_message: str | None='Exiting', level: int=logging.INFO):
+def log_decorator(
+    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int = logging.INFO
+):
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -107,9 +109,11 @@ def flatten_sets(x, y) -> set:
     """
     return set(list(x) + list(y))
 
+
 def camel_case_name(undescore_name: str) -> str:
     first, *rest = undescore_name.split("_")
     return first + "".join(word.capitalize() for word in rest)
+
 
 def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
     try:
