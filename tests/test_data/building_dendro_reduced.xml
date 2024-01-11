@@ -132,7 +132,7 @@
 </TblTaxaTreeMaster>
   <TblAbundances length="2">
     <com.sead.database.TblAbundances id="3930">
-      <abundanceId class="???">3930</abundanceId>
+      <abundanceId class="java.lang.Integer">3930</abundanceId>
       <taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4191"/>
       <abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>
@@ -141,7 +141,7 @@
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAbundances>
     <com.sead.database.TblAbundances id="3931">
-      <abundanceId class="???">3931</abundanceId>
+      <abundanceId class="java.lang.Integer">3931</abundanceId>
       <taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4192"/>
       <abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>
@@ -152,84 +152,84 @@
   </TblAbundances>
   <TblAnalysisEntities length="12">
     <com.sead.database.TblAnalysisEntities id="4191">
-      <analysisEntityId class="???">4191</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">4191</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="4191"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="4192">
-      <analysisEntityId class="???">4192</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">4192</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="4192"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="9207">
-      <analysisEntityId class="???">9207</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">9207</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="9207"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="9208">
-      <analysisEntityId class="???">9208</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">9208</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="9208"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="14223">
-      <analysisEntityId class="???">14223</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">14223</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="14223"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="14224">
-      <analysisEntityId class="???">14224</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">14224</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="14224"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="19239">
-      <analysisEntityId class="???">19239</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">19239</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="19239"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="19240">
-      <analysisEntityId class="???">19240</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">19240</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="19240"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="24255">
-      <analysisEntityId class="???">24255</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">24255</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="24255"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="24256">
-      <analysisEntityId class="???">24256</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">24256</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="24256"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="29267">
-      <analysisEntityId class="???">29267</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">29267</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <datasetId class="com.sead.database.TblDatasets" id="29267"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
     <com.sead.database.TblAnalysisEntities id="29268">
-      <analysisEntityId class="???">29268</analysisEntityId>
+      <analysisEntityId class="java.lang.Integer">29268</analysisEntityId>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <datasetId class="com.sead.database.TblDatasets" id="29268"/>
       <clonedId class="java.util.Integer">NULL</clonedId>

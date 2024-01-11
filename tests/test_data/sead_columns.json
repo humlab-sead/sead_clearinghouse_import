@@ -13,7 +13,7 @@
         "is_fk": false,
         "fk_table_name": "",
         "fk_column_name": "",
-        "class_name": "???"
+        "class_name": "java.lang.Integer"
     },
     {
         "table_name": "tbl_abundances",
@@ -109,7 +109,7 @@
         "is_fk": false,
         "fk_table_name": "",
         "fk_column_name": "",
-        "class_name": "???"
+        "class_name": "java.lang.Integer"
     },
     {
         "table_name": "tbl_analysis_entities",
