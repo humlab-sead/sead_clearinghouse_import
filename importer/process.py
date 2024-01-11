@@ -65,13 +65,13 @@ class Options:
 
     @property
     def db_opts(self) -> dict[str, Any]:
-        assert (
-            os.environ.get("SEAD_CH_PASSWORD", None) is not None
-        ), "fatal: environment variable SEAD_CH_PASSWORD not set!"
+        # assert (
+        #     os.environ.get("SEAD_CH_PASSWORD", None) is not None
+        # ), "fatal: environment variable SEAD_CH_PASSWORD not set!"
         return dict(
             database=self.dbname,
             user=self.dbuser,
-            password=os.environ["SEAD_CH_PASSWORD"],
+            # password=os.environ["SEAD_CH_PASSWORD"],
             host=self.dbhost,
             port=self.port,
         )
