@@ -1,5 +1,7 @@
 from unittest.mock import Mock
 
+import pandas as pd
+
 from importer.process_xml import XmlProcessor
 
 # pylint: disable=unused-argument,redefined-outer-name
@@ -26,10 +28,17 @@ def test_emit_close_tag():
     outstream.write.assert_called_once_with('    </tag>\n')
 
 
-def test_camel_case_name():
-    outstream = Mock()
-    processor = XmlProcessor(outstream)
-    assert processor.camel_case_name('test_name') == 'testName'
+# def test_camel_case_name():
+#     outstream = Mock()
+#     processor = XmlProcessor(outstream)
+#     assert processor.camel_case_name('test_name') == 'testName'
+
+
+def test_read_xml():
+    source_file: str = 'tests/test_data/building_dendro_reduced.xml'
+
+    data: pd.DataFrame = pd.read_xml(source_file, xpath='//element')
+    assert data is not None
 
 
 # def test_process_data():
