@@ -1,6 +1,5 @@
 import logging
 import numbers
-import time
 from typing import Any
 from xml.sax.saxutils import escape
 
