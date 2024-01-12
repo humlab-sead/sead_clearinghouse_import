@@ -1,5 +1,4 @@
 import io
-import os
 import time
 from dataclasses import dataclass, field
 from os.path import basename, join, splitext
@@ -140,9 +139,9 @@ class ImportService:
                 )
 
                 if opts.register:
-                    opts.submission_id = self.repository.register(
-                        filename=opts.xml_filename, data_types=opts.data_types
-                    )
+                    opts.submission_id = self.repository.register(data_types=opts.data_types)
+
+                    self.repository.upload_xml(opts.xml_filename, opts.submission_id)
                     self.repository.extract_to_staging_tables(opts.submission_id)
 
             if opts.explode is True:
