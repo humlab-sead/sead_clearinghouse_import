@@ -7,7 +7,6 @@ import pandas as pd
 from importer.model.metadata import Metadata
 from importer.model.submission import SubmissionData, load_excel
 from importer.process import ImportService, Options
-from importer.scripts.import_excel import workflow
 
 
 def test_create_options():
