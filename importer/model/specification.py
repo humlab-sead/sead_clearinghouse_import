@@ -12,7 +12,7 @@ from .submission import SubmissionData
 
 
 class SpecificationRegistry(Registry):
-    ...
+    items: dict = {}
 
 
 @dataclass
