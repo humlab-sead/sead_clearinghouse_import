@@ -4,7 +4,7 @@ from os.path import isfile
 import pandas as pd
 import pytest
 
-from importer.model.metadata import Metadata
+from importer.metadata import Metadata
 from importer.utility import dburi_from_env, load_sql_from_file
 from tests.utility import load_excel_by_regression  # Assuming Metadata is the class name
 

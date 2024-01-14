@@ -8,17 +8,11 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from importer.model import (
-    DataImportError,
-    Metadata,
-    SpecificationError,
-    SubmissionData,
-    SubmissionRepository,
-    SubmissionSpecification,
-    TableSpec,
-)
-
-from . import to_xml, utility
+from . import DataImportError, to_xml, utility
+from .metadata import Metadata, TableSpec
+from .repository import SubmissionRepository
+from .specification import SpecificationError, SubmissionSpecification
+from .submission import SubmissionData
 
 # pylint: disable=too-many-instance-attributes
 

@@ -5,9 +5,9 @@ import click
 import dotenv
 from loguru import logger
 
-from importer.model.metadata import Metadata
-from importer.model.submission import SubmissionData, load_excel
+from importer.metadata import Metadata
 from importer.process import ImportService, Options
+from importer.submission import SubmissionData, load_excel
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 

@@ -6,8 +6,8 @@ from typing import Any
 
 import pandas as pd
 
-from importer.model import Metadata, load_excel
-from importer.model.submission import SubmissionData
+from importer.metadata import Metadata
+from importer.submission import SubmissionData, load_excel
 from importer.utility import dburi_from_env
 
 

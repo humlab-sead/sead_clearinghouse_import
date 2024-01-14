@@ -3,9 +3,9 @@ from os.path import isfile
 import pandas as pd
 import pytest
 
-from importer.model import Metadata
-from importer.model.specification import SubmissionSpecification
-from importer.model.submission import SubmissionData
+from importer.metadata import Metadata
+from importer.specification import SubmissionSpecification
+from importer.submission import SubmissionData
 from tests.utility import dburi_from_env, generate_test_excel
 
 from . import REDUCED_EXCEL_FILENAME, SOURCE_EXCEL_FILENAME, TEST_SITES

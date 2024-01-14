@@ -1,7 +1,8 @@
 import pandas as pd
 import pytest
 
-from importer.model import Metadata, SubmissionData, load_excel
+from importer.metadata import Metadata
+from importer.submission import SubmissionData, load_excel
 from importer.utility import load_sead_data
 
 from . import REDUCED_EXCEL_FILENAME

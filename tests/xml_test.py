@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pandas as pd
 
-from importer.process_xml import XmlProcessor
+from importer.to_xml import XmlProcessor
 
 # pylint: disable=unused-argument,redefined-outer-name
 
