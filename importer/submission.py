@@ -4,9 +4,8 @@ import functools
 import pandas as pd
 from loguru import logger
 
-from importer.utility import flatten_sets, log_decorator
-
 from .metadata import Metadata
+from .utility import flatten_sets, log_decorator
 
 
 def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:

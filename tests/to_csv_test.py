@@ -1,5 +1,14 @@
-from importer.to_csv import Table, Record, RecordValue, xml_to_records, xml_to_tables, xml_to_columns, xml_to_record_values, xml_to_csv,Column
-
+from importer.to_csv import (
+    Column,
+    Record,
+    RecordValue,
+    Table,
+    xml_to_columns,
+    xml_to_csv,
+    xml_to_record_values,
+    xml_to_records,
+    xml_to_tables,
+)
 
 XML_SNIPPET: str = """<?xml version="1.0" ?>
 <sead-data-upload>
@@ -39,6 +48,7 @@ XML_SNIPPET: str = """<?xml version="1.0" ?>
 </sead-data-upload>
 """
 
+
 def test_xml_to_records_by_str():
     records: list[Record] = list(xml_to_records(XML_SNIPPET))
     abundances = [r for r in records if r.class_name == 'TblAbundances']
@@ -60,13 +70,33 @@ def test_xml_to_records_by_str():
     record_values: list[RecordValue] = list(xml_to_records(XML_SNIPPET))
     assert len(record_values) > 0, "No records found"
     assert len(record_values) == 14
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'abundanceId', 'java.lang.Integer', 'NULL', 'NULL', '3930') in record_values
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'taxonId', 'com.sead.database.TblTaxaTreeMaster', '18197', '18197', 'NULL') in record_values
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'analysisEntityId', 'com.sead.database.TblAnalysisEntities', '4191', '4191', 'NULL') in record_values
+    assert (
+        RecordValue('TblAbundances', '3930', 'NULL', 'abundanceId', 'java.lang.Integer', 'NULL', 'NULL', '3930')
+        in record_values
+    )
+    assert (
+        RecordValue(
+            'TblAbundances', '3930', 'NULL', 'taxonId', 'com.sead.database.TblTaxaTreeMaster', '18197', '18197', 'NULL'
+        )
+        in record_values
+    )
+    assert (
+        RecordValue(
+            'TblAbundances',
+            '3930',
+            'NULL',
+            'analysisEntityId',
+            'com.sead.database.TblAnalysisEntities',
+            '4191',
+            '4191',
+            'NULL',
+        )
+        in record_values
+    )
 
 
 def test_xml_to_records_by_file():
-    test_xml_path:str = 'tests/test_data/building_dendro_reduced.xml'
+    test_xml_path: str = 'tests/test_data/building_dendro_reduced.xml'
 
     tables: list[Table] = list(xml_to_tables(test_xml_path))
     assert len(tables) > 0, "No tables found"
@@ -81,8 +111,12 @@ def test_xml_to_records_by_file():
     assert len(columns) == 7, "Incorrect number of columns found"
     assert Column('TblAbundances', 'abundanceId', 'java.lang.Integer') in columns, "Column not found"
     assert Column('TblAbundances', 'taxonId', 'com.sead.database.TblTaxaTreeMaster') in columns, "Column not found"
-    assert Column('TblAbundances', 'analysisEntityId', 'com.sead.database.TblAnalysisEntities') in columns, "Column not found"
-    assert Column('TblAbundances', 'abundanceElementId', 'com.sead.database.TblAbundanceElements') in columns, "Column not found"
+    assert (
+        Column('TblAbundances', 'analysisEntityId', 'com.sead.database.TblAnalysisEntities') in columns
+    ), "Column not found"
+    assert (
+        Column('TblAbundances', 'abundanceElementId', 'com.sead.database.TblAbundanceElements') in columns
+    ), "Column not found"
     assert Column('TblAbundances', 'abundance', 'java.lang.Integer') in columns, "Column not found"
     assert Column('TblAbundances', 'clonedId', 'java.util.Integer') in columns, "Column not found"
     assert Column('TblAbundances', 'dateUpdated', 'java.util.Date') in columns, "Column not found"
@@ -94,7 +128,7 @@ def test_xml_to_records_by_file():
 
     for record in records:
         assert isinstance(record, Record), "Record is not an instance of the Record class"
-        assert record.system_id.isnumeric() , "Local ID is None"
+        assert record.system_id.isnumeric(), "Local ID is None"
         assert record.public_id.isnumeric() or record.public_id == "NULL", "Public ID is None"
 
     abundances = [r for r in records if r.class_name == 'TblAbundances']
@@ -110,6 +144,26 @@ def test_xml_to_records_by_file():
     record_values: list[RecordValue] = list(xml_to_records(test_xml_path))
     assert len(record_values) > 0, "No records found"
     assert len(record_values) == 14
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'abundanceId', 'java.lang.Integer', 'NULL', 'NULL', '3930') in record_values
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'taxonId', 'com.sead.database.TblTaxaTreeMaster', '18197', '18197', 'NULL') in record_values
-    assert RecordValue('TblAbundances', '3930', 'NULL', 'analysisEntityId', 'com.sead.database.TblAnalysisEntities', '4191', '4191', 'NULL') in record_values
+    assert (
+        RecordValue('TblAbundances', '3930', 'NULL', 'abundanceId', 'java.lang.Integer', 'NULL', 'NULL', '3930')
+        in record_values
+    )
+    assert (
+        RecordValue(
+            'TblAbundances', '3930', 'NULL', 'taxonId', 'com.sead.database.TblTaxaTreeMaster', '18197', '18197', 'NULL'
+        )
+        in record_values
+    )
+    assert (
+        RecordValue(
+            'TblAbundances',
+            '3930',
+            'NULL',
+            'analysisEntityId',
+            'com.sead.database.TblAnalysisEntities',
+            '4191',
+            '4191',
+            'NULL',
+        )
+        in record_values
+    )

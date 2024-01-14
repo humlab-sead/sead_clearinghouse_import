@@ -7,8 +7,8 @@ import psycopg2
 from loguru import logger
 from psycopg2.extensions import connection as Connection
 
-from importer.to_csv import xml_to_csv_to_db
-from importer.utility import log_decorator
+from .to_csv import xml_to_csv_to_db
+from .utility import log_decorator
 
 
 class BaseUploader(abc.ABC):
@@ -62,7 +62,7 @@ class XmlUploader(BaseUploader):
 
 
 class CsvUploader(BaseUploader):
-    def __init__(self, *, csv_folder: str="./csv_files", target_schema: str = "clearing_house") -> None:
+    def __init__(self, *, csv_folder: str = "./csv_files", target_schema: str = "clearing_house") -> None:
         self.csv_folder: str = csv_folder
         self.target_schema: str = target_schema
 
@@ -81,12 +81,16 @@ class CsvUploader(BaseUploader):
         with connection.cursor() as cursor:
             cursor.callproc("clearing_house.fn_extract_csv_upload_to_staging_tables", (submission_id,))
 
-UPLOADERS: dict[str, Type[BaseUploader]] = { "xml": XmlUploader, "csv": CsvUploader }
+
+UPLOADERS: dict[str, Type[BaseUploader]] = {"xml": XmlUploader, "csv": CsvUploader}
+
 
 class SubmissionRepository:
     def __init__(self, db_options: dict[str, str], uploader: BaseUploader = None) -> None:
         self.db_options: dict[str, str] = db_options
-        self.uploader: BaseUploader | None = uploader if uploader is BaseUploader else UPLOADERS.get(uploader, XmlUploader)()
+        self.uploader: BaseUploader | None = (
+            uploader if uploader is BaseUploader else UPLOADERS.get(uploader, XmlUploader)()
+        )
         self.connection: Connection | None = None
         self.timeout_seconds: int = 300
 
@@ -110,7 +114,7 @@ class SubmissionRepository:
         with self as connection:
             for table_name_underscored in self.get_table_names(submission_id):
                 logger.info("   --> Processing table %s", table_name_underscored)
-                if  p_add_missing_columns:
+                if p_add_missing_columns:
                     with connection.cursor() as cursor:
                         cursor.callproc(
                             "clearing_house.fn_add_new_public_db_columns", (submission_id, table_name_underscored)
@@ -196,7 +200,10 @@ class SubmissionRepository:
     def __enter__(self) -> Connection:
         if self.connection is None:
             timeout_ms: int = self.timeout_seconds * 1000
-            self.connection: Connection = psycopg2.connect(**self.db_options, options=f'-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}')
+            self.connection: Connection = psycopg2.connect(
+                **self.db_options,
+                options=f'-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}',
+            )
         return self.connection
 
     def __exit__(self, exc_type, exc_val, exc_tb):

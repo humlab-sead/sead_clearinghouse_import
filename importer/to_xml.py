@@ -8,8 +8,8 @@ import pandas as pd
 from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
-from importer.model import Metadata, SubmissionData
-from importer.model.metadata import ColumnSpec, TableSpec
+from .metadata import ColumnSpec, Metadata, TableSpec
+from .submission import SubmissionData
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 

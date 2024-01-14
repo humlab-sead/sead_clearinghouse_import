@@ -5,7 +5,7 @@ from typing import Any
 
 import pandas as pd
 
-from importer.utility import camel_case_name, load_sead_data
+from .utility import camel_case_name, load_sead_data
 
 # pylint: disable=no-member
 

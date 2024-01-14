@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
 
-from importer.utility import Registry
+from .utility import Registry
 
 Table = namedtuple("Table", "table_type, record_count")
 

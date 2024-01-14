@@ -6,9 +6,9 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from ..utility import Registry, log_decorator
 from .metadata import Metadata, TableSpec
 from .submission import SubmissionData
+from .utility import Registry, log_decorator
 
 
 class SpecificationRegistry(Registry):

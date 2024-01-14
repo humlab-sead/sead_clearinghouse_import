@@ -87,7 +87,9 @@ class ImportService:
         xml_processor: to_xml.XmlProcessor = None,
     ) -> None:
         self.opts: Options = opts
-        self.repository: SubmissionRepository = repository or SubmissionRepository(opts.db_opts, uploader=opts.transfer_format)
+        self.repository: SubmissionRepository = repository or SubmissionRepository(
+            opts.db_opts, uploader=opts.transfer_format
+        )
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
         self.xml_processor: to_xml.XmlProcessor = xml_processor or to_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(

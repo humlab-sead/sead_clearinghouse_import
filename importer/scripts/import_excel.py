@@ -55,7 +55,7 @@ def import_file(
     log_folder: str,
     timestamp: bool,
     tidy_xml: bool,
-    transfer_format: str
+    transfer_format: str,
 ) -> None:
     """
     Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
