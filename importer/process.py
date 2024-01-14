@@ -18,7 +18,7 @@ from importer.model import (
     TableSpec,
 )
 
-from . import process_xml, utility
+from . import to_xml, utility
 
 # pylint: disable=too-many-instance-attributes
 
@@ -84,12 +84,12 @@ class ImportService:
         opts: Options,
         metadata: Metadata = None,
         repository: SubmissionRepository = None,
-        xml_processor: process_xml.XmlProcessor = None,
+        xml_processor: to_xml.XmlProcessor = None,
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(opts.db_opts, uploader=opts.transfer_format)
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
-        self.xml_processor: process_xml.XmlProcessor = xml_processor or process_xml.XmlProcessor
+        self.xml_processor: to_xml.XmlProcessor = xml_processor or to_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(
             metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
