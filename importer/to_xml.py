@@ -52,91 +52,86 @@ class XmlProcessor:
         All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
         """
         for table_name in sorted(table_names):
-            try:
-                logger.info(f"Processing {table_name}...")
+            logger.info(f"Processing {table_name}...")
 
-                if table_name not in metadata:
-                    raise ValueError(f"Table {table_name}: not found in metadata")
+            if table_name not in metadata:
+                raise ValueError(f"Table {table_name}: not found in metadata")
 
-                table_spec: TableSpec = metadata[table_name]
-                data_table: pd.DataFrame = submission.data_tables[table_name]
+            table_spec: TableSpec = metadata[table_name]
+            data_table: pd.DataFrame = submission.data_tables[table_name]
 
-                referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
-                table_namespace: str = f"com.sead.database.{table_spec.java_class}"
+            referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
+            table_namespace: str = f"com.sead.database.{table_spec.java_class}"
 
-                if data_table is None:
-                    continue
+            if data_table is None:
+                continue
 
-                self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
+            self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
 
-                for index, record in data_table.iterrows():
-                    try:
-                        data_row: dict = record.to_dict()
-                        public_id: int = data_row[table_spec.pk_name] if table_spec.pk_name in data_row else np.NAN
+            for index, record in data_table.iterrows():
+                try:
+                    data_row: dict = record.to_dict()
+                    public_id: int = data_row[table_spec.pk_name] if table_spec.pk_name in data_row else np.NAN
 
-                        if np.isnan(public_id) and np.isnan(data_row["system_id"]):
-                            logger.warning(f"Table {table_name}: Skipping row since both CloneId and SystemID is NULL")
+                    if np.isnan(public_id) and np.isnan(data_row["system_id"]):
+                        logger.warning(f"Table {table_name}: Skipping row since both CloneId and SystemID is NULL")
+                        continue
+
+                    system_id = int(data_row["system_id"] if not np.isnan(data_row["system_id"]) else public_id)
+
+                    referenced_keyset.discard(system_id)
+
+                    assert not (np.isnan(public_id) and np.isnan(system_id))
+
+                    if not np.isnan(public_id):
+                        public_id = int(public_id)
+                        self.emit(f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
+                        continue
+
+                    self.emit(f'<{table_namespace} id="{system_id}">', 2)
+
+                    for column_name, column_spec in table_spec.columns.items():
+                        if column_name in self.ignore_columns:
                             continue
 
-                        system_id = int(data_row["system_id"] if not np.isnan(data_row["system_id"]) else public_id)
-
-                        referenced_keyset.discard(system_id)
-
-                        assert not (np.isnan(public_id) and np.isnan(system_id))
-
-                        if not np.isnan(public_id):
-                            public_id = int(public_id)
-                            self.emit(f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
+                        if column_name not in data_row.keys():
+                            logger.warning(
+                                f"Table {table_name}, FK column {column_name}: META field name not found in submission"
+                            )
                             continue
 
-                        self.emit(f'<{table_namespace} id="{system_id}">', 2)
+                        if not column_spec.is_fk:
+                            self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
+                        else:
+                            fk_table_spec: str = metadata[column_spec.class_name]
+                            fk_data_table: pd.DataFrame = submission.data_tables[fk_table_spec.table_name]
+                            self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
-                        for column_name, column_spec in table_spec.columns.items():
-                            if column_name in self.ignore_columns:
-                                continue
-
-                            if column_name not in data_row.keys():
-                                logger.warning(
-                                    f"Table {table_name}, FK column {column_name}: META field name not found in submission"
-                                )
-                                continue
-
-                            if not column_spec.is_fk:
-                                self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
-                            else:
-                                fk_table_spec: str = metadata[column_spec.class_name]
-                                fk_data_table: pd.DataFrame = submission.data_tables[fk_table_spec.table_name]
-                                self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
-
-                        # ClonedId tag is always emitted (NULL id missing)
-                        self.emit(
-                            f'<clonedId class="java.util.Integer">{"NULL" if np.isnan(public_id) else int(public_id)}</clonedId>',
-                            3,
-                        )
-                        self.emit('<dateUpdated class="java.util.Date"/>', 3)
-
-                        self.emit(f"</{table_namespace}>", 2)
-
-                        if 0 < max_rows < index:
-                            break
-
-                    except Exception as x:
-                        logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
-                        raise
-
-                if len(referenced_keyset) > 0 and max_rows == 0:
-                    logger.warning(
-                        f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
+                    # ClonedId tag is always emitted (NULL id missing)
+                    self.emit(
+                        f'<clonedId class="java.util.Integer">{"NULL" if np.isnan(public_id) else int(public_id)}</clonedId>',
+                        3,
                     )
-                    for key in referenced_keyset:
-                        self.emit(
-                            f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2
-                        )
-                self.emit(f"</{table_spec.java_class}>", 1)
+                    self.emit('<dateUpdated class="java.util.Date"/>', 3)
 
-            except:
-                logger.exception("CRITICAL ERROR")
-                raise
+                    self.emit(f"</{table_namespace}>", 2)
+
+                    if 0 < max_rows < index:
+                        break
+
+                except Exception as x:
+                    logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
+                    raise
+
+            if len(referenced_keyset) > 0 and max_rows == 0:
+                logger.warning(
+                    f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
+                )
+                for key in referenced_keyset:
+                    self.emit(
+                        f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2
+                    )
+            self.emit(f"</{table_spec.java_class}>", 1)
 
     def process_fk(
         self, data_row: dict, column_spec: ColumnSpec, fk_table_spec: TableSpec, fk_data_table: pd.DataFrame
