@@ -22,7 +22,12 @@ RecordValue = namedtuple(
 
 DbType = Record | Column | Table | RecordValue
 
-ParserRegistry = Registry()
+
+class ParserRegistry(Registry):
+    items: dict = {}
+
+
+Parsers = Registry()
 
 
 def format_value(value: str, data_type: str) -> str:
@@ -37,20 +42,21 @@ def format_value(value: str, data_type: str) -> str:
     return value
 
 
-@ParserRegistry.register(key=Table)
+def load_xml(source: str) -> ET.ElementTree | ET.Element | Any:
+    return ET.fromstring(source) if '<' in source else ET.parse(source).getroot()
+
+
+@Parsers.register(key=Table)
 def xml_to_tables(source: str) -> Iterable[Table]:
-    tree: ET.ElementTree = ET.parse(source)
-    root: ET.Element | Any = tree.getroot()
+    root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
         yield Table(table.tag, table.get('length') or "NULL")
 
 
-@ParserRegistry.register(key=RecordValue)
+@Parsers.register(key=RecordValue)
 def xml_to_record_values(source: str) -> Iterable[RecordValue]:
-    tree: ET.ElementTree = ET.parse(source)
-    root: ET.Element | Any = tree.getroot()
+    root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
-        # record_count: int = int(table.get('length'))
         found_record_count: int = 0
         for record in table.findall("./*"):
             has_values: bool = False
@@ -70,34 +76,27 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
                 found_record_count += 1
 
 
-@ParserRegistry.register(key=Column)
+@Parsers.register(key=Column)
 def xml_to_columns(source: str) -> Iterable[Column]:
-    tree: ET.ElementTree = ET.parse(source)
-    root: ET.Element | Any = tree.getroot()
+    root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
-        # get first child to table
         record: ET.Element | Any = table.find("./*")
         for column in record.findall("./*"):
-            yield Column(
-                table.tag,
-                column.tag,
-                column.get('class'),
-            )
+            yield Column(table.tag, column.tag, column.get('class'))
 
 
-@ParserRegistry.register(key=Record)
+@Parsers.register(key=Record)
 def xml_to_records(source: str) -> Iterable[Record]:
-    tree: ET.ElementTree = ET.parse(source)
-    root: ET.Element | Any = tree.getroot()
+    root: ET.Element | Any = load_xml(source)
     for table in root.iterfind("./*"):
         for record in table.findall("./*"):
-            local_id: str = record.get('id') or "NULL"
-            public_id: str = record.get('clonedId') or "NULL"
+            local_id: str = record.get('id')
+            public_id: str = record.get('clonedId')
             if public_id is None:
-                column = record.find('./clonedId')
+                column: str = record.find('./clonedId')
                 if column is not None:
                     public_id = column.text or "NULL"
-            yield Record(table.tag, local_id, public_id)
+            yield Record(table.tag, local_id or "NULL", public_id or "NULL")
 
 
 def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_type: DbType) -> str:
@@ -117,7 +116,7 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
         columns_spec: list[str] = [f"{x} text null" for x in columns]
 
         with connection.cursor() as cursor:
-            cursor.execute(f"create table of not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
+            cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
             cursor.execute(f"truncate {target_schema}.{target_table}")
 
         connection.commit()
@@ -130,6 +129,7 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
 
 
 def xml_to_csv_to_db(connection: Any, xml_filename: str, csv_folder: str, target_schema: str) -> None:
-    for fn_type, fn in ParserRegistry.items.items():
+    os.makedirs(csv_folder, exist_ok=True)
+    for fn_type, fn in Parsers.items.items():
         table_name: str = f'temp_submission_upload_{fn_type.__name__.lower()}'
         csv_to_db(connection, xml_to_csv(xml_filename, csv_folder, fn, fn_type), target_schema, table_name)
