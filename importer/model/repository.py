@@ -7,7 +7,7 @@ import psycopg2
 from loguru import logger
 from psycopg2.extensions import connection as Connection
 
-from importer.model.to_csv import xml_to_csv_to_db
+from importer.to_csv import xml_to_csv_to_db
 from importer.utility import log_decorator
 
 
