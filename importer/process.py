@@ -46,6 +46,7 @@ class Options:
     timestamp: bool
     tidy_xml: bool
     log_folder: str = field(default="./logs")
+    transfer_format: str = field(default="xml")
     ignore_columns: list[str] = None
     basename: str = field(init=False, default=None)
     target: str = field(init=False, default=None)
@@ -86,7 +87,7 @@ class ImportService:
         xml_processor: process_xml.XmlProcessor = None,
     ) -> None:
         self.opts: Options = opts
-        self.repository: SubmissionRepository = repository or SubmissionRepository(opts.db_opts)
+        self.repository: SubmissionRepository = repository or SubmissionRepository(opts.db_opts, uploader=opts.transfer_format)
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
         self.xml_processor: process_xml.XmlProcessor = xml_processor or process_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(

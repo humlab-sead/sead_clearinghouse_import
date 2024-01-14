@@ -36,6 +36,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option(
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
+@click.option("--transfer-format", type=str, default='xml', help="Explode XML into public tables.")
 def import_file(
     filename: str,
     data_types: str,
@@ -54,6 +55,7 @@ def import_file(
     log_folder: str,
     timestamp: bool,
     tidy_xml: bool,
+    transfer_format: str
 ) -> None:
     """
     Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
