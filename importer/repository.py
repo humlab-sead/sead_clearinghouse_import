@@ -113,7 +113,7 @@ class SubmissionRepository:
         """Explode submission into public tables."""
         with self as connection:
             for table_name_underscored in self.get_table_names(submission_id):
-                logger.info("   --> Processing table %s", table_name_underscored)
+                logger.info(f"   --> Processing table {table_name_underscored}")
                 if p_add_missing_columns:
                     with connection.cursor() as cursor:
                         cursor.callproc(
