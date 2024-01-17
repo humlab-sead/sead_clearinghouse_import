@@ -16,7 +16,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 @click.command()
 @click.argument("filename")
-@click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=True)
+@click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option("--output-folder", type=str, envvar="OUTPUT_FOLDER", help="Output folder")
 @click.option("--host", "-h", "dbhost", type=str, envvar="DBHOST", help="Target database server")
 @click.option("--database", "-d", "dbname", type=str, envvar="DBNAME", help="Database name")
@@ -71,7 +71,6 @@ def import_file(
 
     """
     logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-    print(locals())
     opts: Options = Options(**locals())
     return workflow(opts)
 
@@ -88,21 +87,27 @@ def workflow(opts: Options) -> None:
     """
     metadata: Metadata = Metadata(opts.db_uri())
 
-    if opts.filename.endswith(".xml"):
-        opts.xml_filename = opts.filename
-        opts.filename = None
+    if opts.filename.isnumeric():
+        opts.submission_id: int = int(opts.filename)
+        opts.filename: str = None
 
-    if isinstance(opts.xml_filename, str):
-        if not os.path.isfile(opts.xml_filename):
-            logger.error(f" ---> file '{opts.xml_filename}' does not exist")
-            return
+    if not opts.use_existing_submission:
 
-        if opts.check_only:
-            logger.error("The --check-only option is not supported when using an existing XML file")
-            return
+        if opts.filename.endswith(".xml"):
+            opts.xml_filename = opts.filename
+            opts.filename = None
+
+        if isinstance(opts.xml_filename, str):
+            if not os.path.isfile(opts.xml_filename):
+                logger.error(f" ---> file '{opts.xml_filename}' does not exist")
+                return
+
+            if opts.check_only:
+                logger.error("The --check-only option is not supported when using an existing XML file")
+                return
 
     submission: SubmissionData | str = (
-        opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.filename)
+        opts.submission_id if opts.use_existing_submission else opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.filename)
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
