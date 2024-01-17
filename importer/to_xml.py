@@ -128,9 +128,7 @@ class XmlProcessor:
                     f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
                 )
                 for key in referenced_keyset:
-                    self.emit(
-                        f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2
-                    )
+                    self.emit(f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2)
             self.emit(f"</{table_spec.java_class}>", 1)
 
     def process_fk(
