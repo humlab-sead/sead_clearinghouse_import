@@ -1,125 +1,191 @@
-# -*- coding: utf-8 -*-
-import os
-import time
 import io
-import logging
+import time
+from dataclasses import dataclass, field
+from os.path import basename, join, splitext
+from typing import Any
 
-from . import model
-from . import options
-from . import utility
-from . import preprocess
-from . import xml_processor
+import numpy as np
+import pandas as pd
+from loguru import logger
 
-logger = logging.getLogger('Excel XML processor')
-utility.setup_logger(logger, )
-jj = os.path.join
+from . import DataImportError, to_xml, utility
+from .metadata import Metadata, TableSpec
+from .repository import SubmissionRepository
+from .specification import SpecificationError, SubmissionSpecification
+from .submission import SubmissionData
 
-class AppService:
+# pylint: disable=too-many-instance-attributes
 
-    def __init__(self, opts):
-        self.opts = opts
-        assert os.environ.get('SEAD_CH_PASSWORD', None) != None, "fatal: environment variable SEAD_CH_PASSWORD not set!"
-        db_opts = dict(
-             database=opts.dbname,
-             user=opts.dbuser,
-             password=os.environ['SEAD_CH_PASSWORD'],
-             host=opts.dbhost,
-             port=opts.port
-         )
-        self.repository = model.SubmissionRepository(db_opts)
 
-    def process_excel_to_xml(self, option, basename, timestamp):
-        '''
+@dataclass
+class Options:
+    """
+    Options for the importer
+    """
+
+    dbname: str
+    dbuser: str
+    dbhost: str
+    port: int
+    output_folder: str
+    filename: str
+    table_names: str
+    skip: bool
+    submission_id: int
+    xml_filename: str
+    data_types: str
+    check_only: bool
+    register: bool
+    explode: bool
+    timestamp: bool
+    tidy_xml: bool
+    log_folder: str = field(default="./logs")
+    transfer_format: str = field(default="xml")
+    ignore_columns: list[str] = None
+    basename: str = field(init=False, default=None)
+    target: str = field(init=False, default=None)
+
+    def __post_init__(self) -> None:
+
+        if self.filename:
+            self.basename: str = splitext(basename(self.filename))[0]
+            self.target: str = (
+                join(self.output_folder, f"{self.basename}_{time.strftime('%Y%m%d-%H%M%S')}.xml")
+                if self.timestamp
+                else join(self.output_folder, f"{self.basename}.xml")
+            )
+        self.ignore_columns: list[str] = self.ignore_columns if self.ignore_columns is not None else ["date_updated"]
+
+    def db_uri(self) -> str:
+        return "postgresql://{}@{}:{}/{}".format(self.dbuser, self.dbhost, self.port, self.dbname)
+
+    @property
+    def db_opts(self) -> dict[str, Any]:
+        # assert (
+        #     os.environ.get("SEAD_CH_PASSWORD", None) is not None
+        # ), "fatal: environment variable SEAD_CH_PASSWORD not set!"
+        return dict(
+            database=self.dbname,
+            user=self.dbuser,
+            # password=os.environ["SEAD_CH_PASSWORD"],
+            host=self.dbhost,
+            port=self.port,
+        )
+
+    @property
+    def use_existing_submission(self) -> bool:
+        return self.submission_id is not None and self.submission_id > 0
+
+class ImportService:
+    def __init__(
+        self,
+        *,
+        opts: Options,
+        metadata: Metadata = None,
+        repository: SubmissionRepository = None,
+        xml_processor: to_xml.XmlProcessor = None,
+    ) -> None:
+        self.opts: Options = opts
+        self.repository: SubmissionRepository = repository or SubmissionRepository(
+            opts.db_opts, uploader=opts.transfer_format
+        )
+        self.metadata: Metadata = metadata or Metadata(opts.db_uri())
+        self.xml_processor: to_xml.XmlProcessor = xml_processor or to_xml.XmlProcessor
+        self.specification: SubmissionSpecification = SubmissionSpecification(
+            metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
+        )
+
+    @utility.log_decorator(enter_message=" ---> generating XML file...", exit_message=" ---> XML created")
+    def to_xml(self, submission: SubmissionData, format_document: bool = False) -> str:
+        """
         Reads Excel files and convert content to an CH XML-file.
         Stores submission in output_filename and returns filename for a cleaned up version of the XML
-        '''
-        meta_filename = jj(option.input_folder, option.meta_filename)
-        data_filename = jj(option.input_folder, option.data_filename)
+        """
 
-        output_filename = jj(option.output_folder, '{}_{}.xml'.format(basename, timestamp))
+        update_missing_system_id_to_public_id(self.metadata, submission)
 
-        meta_data = model.MetaData().load(meta_filename)
+        with io.open(self.opts.target, "w", encoding="utf8") as outstream:
+            self.xml_processor(outstream).process(self.metadata, submission, self.opts.table_names)
 
-        submission = model.SubmissionData(meta_data).load(data_filename)
+        if format_document:
+            self.opts.target: str = utility.tidy_xml(self.opts.target, remove_source=True)
 
-        submission = preprocess.update_system_id(submission)
+        logger.info(f" ---> XML file created: {self.opts.target}")
 
-        with io.open(output_filename, 'w', encoding='utf8') as outstream:
-            service = xml_processor.XmlProcessor(outstream)
-            service.process(submission, option.table_names)
+        return self.opts.target
 
-        tidy_output_filename = utility.tidy_xml(output_filename)
-
-        if tidy_output_filename != output_filename:
-            os.remove(output_filename)
-
-        return tidy_output_filename
-
-    def upload_xml(self, xml_filename, data_types=''):
-
-        with io.open(xml_filename, mode="r", encoding="utf-8") as f:
-            xml = f.read()
-
-        submission_id = self.repository.add_xml(xml, data_types=data_types)
-
-        return submission_id
-
-    def process(self):
-
-        option = self.opts
-
+    @utility.log_decorator(enter_message="Processing started...", exit_message="Processing done")
+    def process(self, submission: int | str | SubmissionData) -> None:
+        """Process a submission. The submission can be either
+            - an Excel file,
+            - an XML file (generated by a previously process Excel file)
+            - a SubmissionData object (parsed Excel file, see importer/submission.py)
+            - a submission id (int) already stored in the database
+        """
         try:
-
-            basename = os.path.splitext(option.data_filename)[0]
-
-            if option.skip is True:
-                logger.info("Skipping: %s", basename)
+            opts: Options = self.opts
+            if opts.skip is True:
+                logger.info("Skipping: %s", opts.basename)
                 return
 
-            timestamp = time.strftime("%Y%m%d-%H%M%S")
+            if isinstance(submission, SubmissionData):
+                if not self.specification.is_satisfied_by(submission):
+                    logger.error(f" ---> {opts.basename} does not satisfy the specification")
+                    return
+                if self.opts.check_only:
+                    logger.info(f" ---> {opts.basename} satisfies the specification")
+                    return
 
-            log_filename = jj(option.output_folder, '{}_{}.log'.format(basename, timestamp))
-            utility.setup_logger(logger, log_filename)
+            if opts.use_existing_submission:
+                self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
-            logger.info('PROCESS OF %s STARTED', basename)
+            if not opts.use_existing_submission:
+                opts.xml_filename = (
+                    submission
+                    if isinstance(submission, str)
+                    else self.to_xml(submission, format_document=opts.tidy_xml)
+                )
 
-            if (option.submission_id or 0) == 0:
+                if opts.register:
+                    opts.submission_id = self.repository.register(data_types=opts.data_types)
 
-                if option.xml_filename is not None:
-                    logger.info(' ---> UPLOADING EXISTING FILE {}'.format(option.xml_filename))
-                else:
-                    logger.info(' ---> PARSING EXCEL EXCEL')
-                    option.xml_filename = self.process_excel_to_xml(option, basename, timestamp)
+                    self.repository.upload_xml(opts.xml_filename, opts.submission_id)
+                    self.repository.extract_to_staging_tables(opts.submission_id)
 
-                logger.info(' ---> UPLOAD STARTED!')
-                option.submission_id = self.upload_xml(option.xml_filename, data_types=option.data_types)
-                logger.info(' ---> UPLOAD DONE ID=%s', option.submission_id)
+            if opts.explode is True:
+                self.repository.explode_to_public_tables(
+                    opts.submission_id, p_dry_run=False, p_add_missing_columns=False
+                )
+                self.repository.set_pending(opts.submission_id)
 
-                logger.info(' ---> EXTRACT STARTED!')
-                self.repository.extract_submission(option.submission_id)
-                logger.info(' ---> EXTRACT DONE')
+        except SpecificationError:
+            logger.exception(f"aborted critical error {opts.basename}")
 
-            else:
-                self.repository.delete_submission(option.submission_id, clear_header=False, clear_exploded=False)
-                logger.info(' ---> USING EXISTING DATA ID=%s', option.submission_id)
 
-            logger.info(' ---> EXPLODE STARTED')
-            self.repository.explode_submission(option.submission_id, p_dry_run=False, p_add_missing_columns=False)
-            logger.info(' ---> EXPLODE DONE')
+def update_missing_system_id_to_public_id(metadata: Metadata, submission: SubmissionData) -> None:
+    """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
+    for table_name in submission.index_table_names:
+        try:
+            data_table: pd.DataFrame = submission.data_tables[table_name]
+            table_spec: TableSpec = metadata[table_name]
 
-            self.repository.set_pending(option.submission_id)
-            logger.info(' ---> PROCESS OF %s DONE', basename)
+            pk_name: str = table_spec.pk_name
 
-        except: # pylint: disable=bare-except
-            logger.exception('ABORTED CRITICAL ERROR %s ', basename)
+            if pk_name == "ceramics_id":
+                pk_name = "ceramic_id"
 
-def process(cmd_args=None):
+            if data_table is None or pk_name not in data_table.columns:
+                continue
 
-    opts = options.parse_args(cmd_args)
+            if "system_id" not in data_table.columns:
+                raise DataImportError(f'critical error Table {table_name} has no column named "system_id"')
 
-    logger.warning("Deploy target is %s on %s", opts.dbname, opts.dbhost)
+            # Update system_id to public_id if isnan. This should be avoided though.
+            data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
+                np.isnan(data_table.system_id), pk_name
+            ]
 
-    AppService(opts).process()
-
-if __name__ == "__main__":
-    process()
+        except DataImportError as _:
+            logger.error(f"error {table_name} when updating system_id ")
+            logger.exception("update_system_id")
+            continue

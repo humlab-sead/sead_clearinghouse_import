@@ -1,0 +1,197 @@
+import base64
+import os
+import pickle
+import struct
+from typing import Any
+
+import pandas as pd
+
+from importer.metadata import Metadata
+from importer.submission import SubmissionData, load_excel
+from importer.utility import dburi_from_env
+
+
+def load_excel_by_regression(filename):
+    def recode_excel_sheet_name(row):
+        value = row['excel_sheet']
+        if pd.notnull(value) and len(value) > 0 and value != 'nan':
+            return value
+        return row['table_name']
+
+    tables: pd.DataFrame = pd.read_excel(
+        filename,
+        'Tables',
+        dtype={'table_name': 'str', 'java_class': 'str', 'pk_name': 'str', 'excel_sheet': 'str', 'notes': 'str'},
+    )
+
+    columns: pd.DataFrame = pd.read_excel(
+        filename,
+        'Columns',
+        dtype={
+            'table_name': 'str',
+            'column_name': 'str',
+            'nullable': 'str',
+            'type': 'str',
+            'type2': 'str',
+            'class': 'str',
+        },
+    )
+
+    tables['table_name_index'] = tables['table_name']
+    tables = tables.set_index('table_name_index')
+
+    tables['excel_sheet'] = tables.apply(recode_excel_sheet_name, axis=1)
+
+    primary_keys: pd.DataFrame = pd.merge(
+        tables,
+        columns,
+        how='inner',
+        left_on=['table_name', 'pk_name'],
+        right_on=['table_name', 'column_name'],
+    )[['table_name', 'column_name', 'java_class']]
+    primary_keys.columns = ['table_name', 'column_name', 'class_name']
+
+    foreign_keys: pd.DataFrame = pd.merge(
+        columns,
+        primary_keys,
+        how='inner',
+        left_on=['column_name', 'class'],
+        right_on=['column_name', 'class_name'],
+    )[['table_name_x', 'column_name', 'table_name_y', 'class_name']]
+    foreign_keys = foreign_keys[foreign_keys.table_name_x != foreign_keys.table_name_y]
+
+    foreign_keys_lookup: dict[str, bool] = {
+        x: True for x in list(foreign_keys.table_name_x + '#' + foreign_keys.column_name)
+    }
+
+    primary_keys_lookup: dict[str, bool] = {x: True for x in tables.table_name + '#' + tables.pk_name}
+
+    classname_cache: dict[str, dict] = tables.set_index('java_class')['table_name'].to_dict()
+
+    return {
+        'tables': tables,
+        'columns': columns,
+        'primary_keys': primary_keys,
+        'foreign_keys': foreign_keys,
+        'foreign_keys_lookup': foreign_keys_lookup,
+        'primary_keys_lookup': primary_keys_lookup,
+        'classname_cache': classname_cache,
+    }
+
+
+def add_dummy_row(table: pd.DataFrame, row: list[Any]):
+    table.append(pd.Series([row]), index=table.columns, ignore_index=True, inplace=True)
+
+
+def generate_test_excel(
+    excel_filename: str,
+    test_sites: list[int],
+    filename: str,
+    force: bool = False,
+):
+    def filter_table(
+        submission: pd.DataFrame, table_name: str, column_name: str, values: list[Any], flip: bool = False
+    ) -> pd.DataFrame:
+        table: pd.DataFrame = submission[table_name]
+        data: pd.DataFrame = table[table["system_id" if flip else column_name].isin(values)]
+        print(f"{table_name}: {len(data)}")
+        return data
+
+    submission: SubmissionData = load_test_submission(excel_filename, test_sites, filename, force)
+
+    assert submission is not None
+    number_of_physical_samples: int = 2
+
+    # FIXME: New should new sites without pre-allocated ID be added to the database?
+
+    sites = filter_table(submission, 'tbl_sites', 'system_id', test_sites)
+    site_locations = filter_table(submission, 'tbl_site_locations', 'site_id', sites.system_id)
+    site_references = filter_table(submission, 'tbl_site_references', 'site_id', sites.system_id)
+    sample_groups = filter_table(submission, 'tbl_sample_groups', 'site_id', sites.system_id)
+    sample_group_descriptions = filter_table(
+        submission, 'tbl_sample_group_descriptions', 'sample_group_id', sample_groups.system_id
+    )
+    sample_group_coordinates = filter_table(
+        submission, 'tbl_sample_group_coordinates', 'sample_group_id', sample_groups.system_id
+    )
+    sample_group_notes = filter_table(submission, 'tbl_sample_group_notes', 'sample_group_id', sample_groups.system_id)
+    physical_samples = filter_table(
+        submission, 'tbl_physical_samples', 'sample_group_id', sample_groups.system_id
+    ).head(number_of_physical_samples)
+    sample_descriptions = filter_table(
+        submission, 'tbl_sample_descriptions', 'physical_sample_id', physical_samples.system_id
+    )
+    sample_locations = filter_table(
+        submission, 'tbl_sample_locations', 'physical_sample_id', physical_samples.system_id
+    )
+    sample_notes = filter_table(submission, 'tbl_sample_notes', 'physical_sample_id', physical_samples.system_id)
+    sample_alt_refs = filter_table(submission, 'tbl_sample_alt_refs', 'physical_sample_id', physical_samples.system_id)
+    analysis_entities = filter_table(
+        submission, 'tbl_analysis_entities', 'physical_sample_id', physical_samples.system_id
+    )
+    dendro = filter_table(submission, 'tbl_dendro', 'analysis_entity_id', analysis_entities.system_id)
+    dendro_dates = filter_table(submission, 'tbl_dendro_dates', 'analysis_entity_id', analysis_entities.system_id)
+    dendro_date_notes = filter_table(submission, 'tbl_dendro_date_notes', 'dendro_date_note_id', dendro_dates.system_id)
+    datasets = filter_table(submission, 'tbl_datasets', 'dataset_id', analysis_entities.dataset_id.unique(), flip=True)
+    dataset_contacts = filter_table(submission, 'tbl_dataset_contacts', 'dataset_id', datasets.system_id)
+    dataset_submissions = filter_table(submission, 'tbl_dataset_submissions', 'dataset_id', datasets.system_id)
+    projects = filter_table(submission, 'tbl_projects', 'project_id', datasets.project_id.unique(), flip=True)
+    abundances = filter_table(submission, 'tbl_abundances', 'analysis_entity_id', analysis_entities.system_id)
+
+    # add_dummy_row(sample_notes, [1, physical_samples.iloc[0]['system_id'], 1, 'Dummy note', np.nan, np.nan])
+    # add_dummy_row(dendro_date_notes, [1, 'A dummy note', dendro_dates.iloc[0]['system_id'], np.nan])
+
+    reduced_submission: dict[str, pd.DataFrame] = {
+        "tbl_sites": sites,
+        "tbl_site_locations": site_locations,
+        "tbl_site_references": site_references,
+        "tbl_sample_groups": sample_groups,
+        "tbl_sample_group_descriptions": sample_group_descriptions,
+        "tbl_sample_group_coordinates": sample_group_coordinates,
+        "tbl_sample_group_notes": sample_group_notes,
+        "tbl_physical_samples": physical_samples,
+        "tbl_sample_descriptions": sample_descriptions,
+        "tbl_sample_locations": sample_locations,
+        "tbl_sample_notes": sample_notes,
+        "tbl_sample_alt_refs": sample_alt_refs,
+        "tbl_analysis_entities": analysis_entities,
+        "tbl_dendro": dendro,
+        "tbl_dendro_dates": dendro_dates,
+        "tbl_dendro_date_notes": dendro_date_notes,
+        "tbl_datasets": datasets,
+        "tbl_dataset_contacts": dataset_contacts,
+        "tbl_dataset_submissions": dataset_submissions,
+        "tbl_projects": projects,
+        "tbl_abundances": abundances,
+    }
+    data_table_index = pd.DataFrame(
+        {
+            'table_name': [x for x in reduced_submission if x != 'data_table_index'],
+            'only_new_data': True,
+            'new_data': True,
+        }
+    )
+
+    with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:  # pylint: disable=abstract-class-instantiated
+        data_table_index.to_excel(writer, sheet_name='data_table_index', index=False)
+        for table_name, table in reduced_submission.items():
+            table.to_excel(writer, sheet_name=table_name, index=False)
+
+
+def encode_sites(sites: list[int]) -> str:
+    return base64.urlsafe_b64encode(struct.pack(f'{len(sites)}I', *sites)).decode().rstrip('=')
+
+
+def load_test_submission(excel_filename: str, test_sites: list[int], filename: str, force: bool) -> SubmissionData:
+    """Load test data from Excel file, stores and loads pickled data if exists for better performance."""
+    basename: str = os.path.splitext(os.path.basename(filename))[0]
+    pickled_filename: str = f"{basename}_{encode_sites(test_sites)}.pkl"
+    if not os.path.isfile(pickled_filename) or force:
+        metadata: Metadata = Metadata(db_uri=dburi_from_env())
+        submission: SubmissionData = load_excel(metadata=metadata, source=excel_filename)
+        with open(pickled_filename, "wb") as fp:
+            pickle.dump(submission, fp)
+    else:
+        with open(pickled_filename, "rb") as fp:
+            submission: dict[str, pd.DataFrame] = pickle.load(fp)
+    return submission
