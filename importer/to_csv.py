@@ -6,6 +6,9 @@ import os
 import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
+from sqlalchemy.types import TEXT
+
+import pandas as pd
 
 from .utility import Registry
 
@@ -109,23 +112,42 @@ def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_
     return filename
 
 
+def get_connection_uri(connection: Any) -> str:
+    conn_info = connection.get_dsn_parameters()
+    user: str = conn_info.get('user')
+    host: str = conn_info.get('host')
+    port: str = conn_info.get('port')
+    dbname: str = conn_info.get('dbname')
+    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
+    return uri
+
 def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: str) -> None:
     """Using the csv files created by to_csv, import the data into the PostgreSQL database using psycopg2"""
-    with open(filename, 'r') as fp:
-        columns: list[str] = next(fp).strip().split('\t')
-        columns_spec: list[str] = [f"{x} text null" for x in columns]
 
-        with connection.cursor() as cursor:
-            cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
-            cursor.execute(f"truncate {target_schema}.{target_table}")
+    # if False:
 
-        connection.commit()
+    uri: str = get_connection_uri(connection)
+    data: pd.DataFrame = pd.read_csv(filename, sep='\t', na_values='NULL', keep_default_na=True, dtype=str)
+    data.to_sql(target_table, uri, schema=target_schema, if_exists='replace', index=False, dtype={
+        column_name: TEXT for column_name in data.columns
+    })
 
-        with connection.cursor() as cursor:
-            cursor.execute(f"set search_path = {target_schema}")
-            cursor.copy_from(fp, target_table, sep='\t', null='NULL', columns=columns)
+    # else:
+    #     with open(filename, 'r') as fp:
+    #         columns: list[str] = next(fp).strip().split('\t')
+    #         columns_spec: list[str] = [f"{x} text null" for x in columns]
 
-        connection.commit()
+    #         with connection.cursor() as cursor:
+    #             cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
+    #             cursor.execute(f"truncate {target_schema}.{target_table}")
+
+    #         connection.commit()
+
+    #         with connection.cursor() as cursor:
+    #             cursor.execute(f"set search_path = {target_schema}")
+    #             cursor.copy_from(fp, target_table, sep='\t', null='NULL', columns=columns)
+
+    #         connection.commit()
 
 
 def xml_to_csv_to_db(connection: Any, xml_filename: str, csv_folder: str, target_schema: str) -> None:
