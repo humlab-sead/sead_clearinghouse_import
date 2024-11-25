@@ -10,7 +10,7 @@ from sqlalchemy.types import TEXT
 
 import pandas as pd
 
-from .utility import Registry
+from ..utility import Registry
 
 Table = namedtuple("Table", "table_type, record_count")
 

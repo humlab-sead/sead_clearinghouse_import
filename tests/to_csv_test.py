@@ -1,4 +1,4 @@
-from importer.to_csv import (
+from importer.uploader.xml_to_to_csv import (
     Column,
     Record,
     RecordValue,
