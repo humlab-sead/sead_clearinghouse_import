@@ -7,7 +7,9 @@ from loguru import logger
 
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
+from importer.scripts.utility import update_arguments_from_options_file
 from importer.submission import SubmissionData, load_excel
+from importer.utility import strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -16,6 +18,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 @click.command()
 @click.argument("filename")
+@click.option('--options-filename', type=str, default=None, help='Name of options file.')
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option("--output-folder", type=str, envvar="OUTPUT_FOLDER", help="Output folder")
 @click.option("--host", "-h", "dbhost", type=str, envvar="DBHOST", help="Target database server")
@@ -56,6 +59,7 @@ def import_file(
     timestamp: bool,
     tidy_xml: bool,
     transfer_format: str,
+    options_filename: str = None,
 ) -> None:
     """
     Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
@@ -70,8 +74,12 @@ def import_file(
       - The file must contain a sheet named as in SEADe' for each table in the submission.
 
     """
+    arguments: dict = update_arguments_from_options_file(
+        arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(filename)
+    )
+
     logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-    opts: Options = Options(**locals())
+    opts: Options = Options(**arguments)
     return workflow(opts)
 
 
@@ -88,8 +96,8 @@ def workflow(opts: Options) -> None:
     metadata: Metadata = Metadata(opts.db_uri())
 
     if opts.filename.isnumeric():
-        opts.submission_id: int = int(opts.filename)
-        opts.filename: str = None
+        opts.submission_id = int(opts.filename)
+        opts.filename = None
 
     if not opts.use_existing_submission:
 
@@ -117,4 +125,5 @@ if __name__ == "__main__":
 
     # import_file(data_filename='dendro_build_data_latest_20191213.xlsm', data_types="Dendro building", xml_filename="./data/output/dendro_build_data_latest_20191213_20191217-151636_tidy.xml")
     # import_file(data_filename='dendro_ark_data_latest_20191213.xlsm',  data_types="Dendro archeology", xml_filename="./data/output/dendro_ark_data_latest_20191213_20191217-152152_tidy.xml")
+    # import_file(data_filename='isotope_data_latest_20191218.xlsm', data_types="Isotope", xml_filename="./data/output/isotope_data_latest_20191218_20191218-134724_tidy.xml")
     # import_file(data_filename='isotope_data_latest_20191218.xlsm', data_types="Isotope", xml_filename="./data/output/isotope_data_latest_20191218_20191218-134724_tidy.xml")
