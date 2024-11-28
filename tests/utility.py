@@ -8,10 +8,10 @@ import pandas as pd
 
 from importer.metadata import Metadata
 from importer.submission import SubmissionData, load_excel
-from importer.utility import dburi_from_env
+from importer.configuration import dburi_from_env
 
 
-def load_excel_by_regression(filename):
+def load_excel_by_regression(filename: str) -> dict[str, pd.DataFrame]:
     def recode_excel_sheet_name(row):
         value = row['excel_sheet']
         if pd.notnull(value) and len(value) > 0 and value != 'nan':
