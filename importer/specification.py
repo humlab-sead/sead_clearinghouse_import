@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from .metadata import Metadata, TableSpec
+from .metadata import Metadata, Table
 from .submission import SubmissionData
 from .utility import Registry, log_decorator
 
@@ -46,8 +46,7 @@ class SpecificationBase(abc.ABC):
         self.messages.warnings = []
 
     @abc.abstractmethod
-    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
-        ...
+    def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None: ...
 
 
 class SubmissionSpecification(SpecificationBase):
@@ -109,7 +108,7 @@ class SubmissionTableExistsSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
         if submission.exists(table_name) and table_name not in submission.data_table_names:
             # Check if it has an alias
-            table_spec: TableSpec = self.metadata[table_name]
+            table_spec: Table = self.metadata[table_name]
             alias_name: str = table_spec.excel_sheet or "no_alias"
             if alias_name not in submission.data_table_names:
                 """Not in submission table index sheet"""
@@ -279,8 +278,8 @@ class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
             if fk_table_name not in submission.data_tables:
                 self.errors.append(f"ERROR Foreign key column {fk_table_name} missing in data")
                 continue
-            fk_table_spec: TableSpec = self.metadata[fk_table_name]
-            if fk_table_spec.is_lookup_table:
+            fk_table_spec: Table = self.metadata[fk_table_name]
+            if fk_table_spec.is_lookup:
                 continue
             # fk_table: pd.DataFrame = submission.data_tables[fk_table_name]
             # if fk_table is None:
@@ -321,7 +320,7 @@ class LookupDataSpecification(SpecificationBase):
         if not submission.exists(table_name):
             return
 
-        if not self.metadata[table_name].is_lookup_table:
+        if not self.metadata[table_name].is_lookup:
             return
 
         data_table: pd.DataFrame = submission.data_tables[table_name]

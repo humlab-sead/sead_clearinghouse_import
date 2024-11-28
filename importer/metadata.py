@@ -1,5 +1,5 @@
 import types
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from functools import cached_property
 from typing import Any
 
@@ -11,7 +11,7 @@ from .utility import camel_case_name, load_sead_data
 
 
 @dataclass
-class ColumnSpec:
+class Column:
     table_name: str
     column_name: str
     xml_column_name: str
@@ -48,23 +48,25 @@ class ColumnSpec:
 
 
 @dataclass
-class TableSpec(types.SimpleNamespace):
+class Table:
     table_name: str
     pk_name: str
     java_class: str
     excel_sheet: str
-    is_lookup_table: bool
-    columns: dict[str, ColumnSpec]
+    is_lookup: bool
+    is_new: bool = field(default=False)
+    is_unknown: bool = field(default=False)
+    columns: dict[str, Column] = field(default_factory=dict)
 
     def __contains__(self, key: str) -> bool:
         return key in self.columns
 
-    def __getitem__(self, key: str) -> ColumnSpec:
+    def __getitem__(self, key: str) -> Column:
         if key == "columns":
             return self.columns
         return self.columns[key]
 
-    def __iter__(self) -> ColumnSpec:
+    def __iter__(self) -> Column:
         return iter(self.columns.values())
 
     def __len__(self) -> int:
@@ -73,19 +75,22 @@ class TableSpec(types.SimpleNamespace):
     def keys(self) -> list[str]:
         return asdict(self).keys()
 
-    def values(self) -> list[ColumnSpec]:
+    def values(self) -> list[Column]:
         return asdict(self).values()
 
 
-class SeadSchema(dict[str, TableSpec]):
+class SeadSchema(dict[str, Table]):
     @cached_property
-    def sead_schema_by_class(self) -> dict[str, TableSpec]:
+    def sead_schema_by_class(self) -> dict[str, Table]:
         return SeadSchema({t.java_class: t for t in self.values()})
 
-    def get_table_spec(self, table_name: str) -> TableSpec:
+    def get_table_spec(self, table_name: str) -> Table:
         return self.get(table_name) if table_name in self else self.sead_schema_by_class.get(table_name)
 
-
+    @cached_property
+    def lookup_tables(self) -> list[Table]:
+        return [t for t in self.values() if t.is_lookup]
+    
 class Metadata:
     """Logic related to Excel metadata file"""
 
@@ -96,20 +101,22 @@ class Metadata:
     @cached_property
     def sead_tables(self) -> pd.DataFrame:
         """Returns a dataframe of tables from SEAD with attributes."""
-        return load_sead_data(self.db_uri, "sead_tables", ["table_name"])
+        sql: str = "select * from clearing_house.clearinghouse_import_tables"
+        return load_sead_data(self.db_uri, sql, ["table_name"])
 
     @cached_property
     def sead_columns(self) -> pd.DataFrame:
         """Returns a dataframe of table columns from SEAD with attributes."""
-        return load_sead_data(self.db_uri, "sead_columns", ["table_name", "column_name"], ["table_name", "position"])
+        sql: str = "select * from clearing_house.clearinghouse_import_columns"
+        return load_sead_data(self.db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
 
     @cached_property
     def sead_schema(self) -> SeadSchema:
         """Returns a dictionary of table attributes i.e. a row from sead_tables as a dictionary"""
 
-        def get_column_spec(table_name: str) -> ColumnSpec:
+        def get_column_spec(table_name: str) -> Column:
             return {
-                k: ColumnSpec(**v)
+                k: Column(**v)
                 for k, v in self.sead_columns[self.sead_columns.table_name == table_name]
                 .set_index('column_name', drop=False)
                 .to_dict(orient='index')
@@ -117,13 +124,13 @@ class Metadata:
             }
 
         schema: SeadSchema = SeadSchema(
-            {k: TableSpec(columns=get_column_spec(k), **v) for k, v in self.sead_tables.to_dict(orient='index').items()}
+            {k: Table(columns=get_column_spec(k), **v) for k, v in self.sead_tables.to_dict(orient='index').items()}
         )
         return schema
 
-    def __getitem__(self, what: str) -> TableSpec | ColumnSpec:
+    def __getitem__(self, what: str) -> Table | Column:
         table_name, column_name = what if isinstance(what, tuple) else (what, None)
-        table: TableSpec = self.sead_schema.get_table_spec(table_name)
+        table: Table = self.sead_schema.get_table_spec(table_name)
         if table is None:
             raise KeyError(f"Table {table_name} not found in metadata")
         if column_name is not None:

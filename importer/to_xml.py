@@ -8,7 +8,7 @@ import pandas as pd
 from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
-from .metadata import ColumnSpec, Metadata, TableSpec
+from .metadata import Column, Metadata, Table
 from .submission import SubmissionData
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
@@ -57,7 +57,7 @@ class XmlProcessor:
             if table_name not in metadata:
                 raise ValueError(f"Table {table_name}: not found in metadata")
 
-            table_spec: TableSpec = metadata[table_name]
+            table_spec: Table = metadata[table_name]
             data_table: pd.DataFrame = submission.data_tables[table_name]
 
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
@@ -132,7 +132,7 @@ class XmlProcessor:
             self.emit(f"</{table_spec.java_class}>", 1)
 
     def process_fk(
-        self, data_row: dict, column_spec: ColumnSpec, fk_table_spec: TableSpec, fk_data_table: pd.DataFrame
+        self, data_row: dict, column_spec: Column, fk_table_spec: Table, fk_data_table: pd.DataFrame
     ) -> None:
         """The value is a FK system_id"""
         class_name: str = column_spec.class_name
@@ -174,7 +174,7 @@ class XmlProcessor:
                 3,
             )
 
-    def process_pk_and_non_fk(self, data_row: dict, public_id: int, system_id: int, column_spec: ColumnSpec):
+    def process_pk_and_non_fk(self, data_row: dict, public_id: int, system_id: int, column_spec: Column):
         """The value is a PK or non-FK attribte"""
         value = data_row[column_spec.column_name]
         class_name: str = column_spec.class_name
