@@ -6,9 +6,9 @@ import os
 import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
-from sqlalchemy.types import TEXT
 
 import pandas as pd
+from sqlalchemy.types import TEXT
 
 from ..utility import Registry
 
@@ -121,6 +121,7 @@ def get_connection_uri(connection: Any) -> str:
     uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
     return uri
 
+
 def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: str) -> None:
     """Using the csv files created by to_csv, import the data into the PostgreSQL database using psycopg2"""
 
@@ -128,9 +129,14 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
 
     uri: str = get_connection_uri(connection)
     data: pd.DataFrame = pd.read_csv(filename, sep='\t', na_values='NULL', keep_default_na=True, dtype=str)
-    data.to_sql(target_table, uri, schema=target_schema, if_exists='replace', index=False, dtype={
-        column_name: TEXT for column_name in data.columns
-    })
+    data.to_sql(
+        target_table,
+        uri,
+        schema=target_schema,
+        if_exists='replace',
+        index=False,
+        dtype={column_name: TEXT for column_name in data.columns},
+    )
 
     # else:
     #     with open(filename, 'r') as fp:
