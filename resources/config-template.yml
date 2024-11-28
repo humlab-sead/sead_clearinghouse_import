@@ -1,0 +1,8 @@
+options:
+  db_opts:
+    host: dbhost
+    name: dbname
+    user: dbuser
+    port: dbport
+  log_folder: ./logs
+  transfer_format: xml
