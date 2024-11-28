@@ -6,15 +6,15 @@ with content_statistics as (
 	select 'content_tables' as "table", submission_id, count(*)
 	from clearing_house.tbl_clearinghouse_submission_xml_content_tables
 	group by submission_id
-	union 
+	union
 	select 'content_columns' as "table", submission_id, count(*)
 	from clearing_house.tbl_clearinghouse_submission_xml_content_columns
 	group by submission_id
-	union 
+	union
 	select 'content_records' as "table", submission_id, count(*)
 	from clearing_house.tbl_clearinghouse_submission_xml_content_records
 	group by submission_id
-	union 
+	union
 	select 'content_values' as "table", submission_id, count(*)
 	from clearing_house.tbl_clearinghouse_submission_xml_content_values
 	group by submission_id
@@ -110,8 +110,8 @@ select * from clearing_house.tbl_abundances where local_db_id = 18197
 select clearing_house.fn_extract_and_store_submission_columns(2)
 select clearing_house.fn_extract_and_store_submission_records(2)
 select clearing_house.fn_extract_and_store_submission_values(2)
-*/	
-		
+*/
+
 select *
 from clearing_house.fn_select_xml_content_records(81)
 
@@ -153,14 +153,14 @@ with xml_test as (
 		  <dateUpdated class="java.util.Date"/>
 		</com.sead.database.TblAbundances>
 		'::xml as xml
-) select 
+) select
 	replace(substring(d.xml::text from '^<([[:alnum:]\.]+).*>'), 'com.sead.database.', '')	as table_name,
 	((xpath('/*/@id', d.xml))[1])::character varying(255)									as local_db_id,
 	((xpath('/*/@clonedId', d.xml))[1])::character varying(255)							as public_db_id_attribute,
 	((xpath('/*/clonedId/text()', d.xml))[1])::character varying(255)						as public_db_id_value
   from xml_test as d
-  
-  
+
+
   		select
                   d.table_name																as table_name,
                 substring(d.xml::text from '^<([[:alnum:]]+).*>')::character varying(255)	as column_name,
@@ -175,8 +175,8 @@ with xml_test as (
               And Not xml Is Null
               And xml Is Document
         ) as d;
-		
-		
+
+
 With record_xml As (
 	Select x.submission_id, unnest(xpath('/sead-data-upload/*/*', x.xml))			As xml
 	From clearing_house.tbl_clearinghouse_submissions x
@@ -225,5 +225,127 @@ where next_content_tables.table_id is null
 	| tbl_clearinghouse_submission_xml_content_columns    | Unique column names and types in uploaded data |
 	| tbl_clearinghouse_submission_xml_content_records    | Unique records (rows) in uploaded data         |
 	| tbl_clearinghouse_submission_xml_content_values	  | Values in uploaded data                        |
-*/ 
+*/
+
+
+
+select format('LEFT JOIN (select %2$s, analysis_entity_id from %1$s) USING (analysis_entity_id) as %1$s', FK.table_name, PK.column_name)
+--select format('select ''%1$s'' as table_name, %2$s as entity_id from %1$s', table_name, column_name)
+from sead_utility.table_columns FK
+inner join sead_utility.table_columns PK
+  on PK.table_name = FK.table_name
+ and PK.is_pk = 'YES'
+where 1 = 1
+  and FK.is_pk = 'NO'
+  and FK.column_name = 'analysis_entity_id'
+
+
+
+select master_name as category,
+	count(distinct site_id) as site_count,
+	count(distinct location_id) as location_count
+	count(distinct dataset_id) as dataset_count,
+	count(distinct sample_group_id) as sample_group_count,
+	count(distinct physical_sample_id) as sample_count,
+	count(distinct analysis_entity_id) as analysis_count,
+	count(distinct abundance_id) as abundunce_row_count,
+	count(distinct measured_value_id) as value_count,
+	count(distinct isotope_id) as isotope_count,
+	count(distinct ceramics_id) as ceramic_count,
+	count(distinct dendro_id) as dendro_count,
+from tbl_dataset_masters
+join tbl_datasets using (master_set_id)
+left join tbl_analysis_entities using (dataset_id)
+left join tbl_physical_samples using (physical_sample_id)
+left join tbl_sample_groups using (sample_group_id)
+left join tbl_sites using (site_id)
+left join tbl_site_locations using (site_id)
+LEFT JOIN (select abundance_id, analysis_entity_id from tbl_abundances) USING (analysis_entity_id) as tbl_abundances
+LEFT JOIN (select measured_value_id, analysis_entity_id from tbl_measured_values) USING (analysis_entity_id) as tbl_measured_values
+LEFT JOIN (select isotope_id, analysis_entity_id from tbl_isotopes) USING (analysis_entity_id) as tbl_isotopes
+LEFT JOIN (select ceramics_id, analysis_entity_id from tbl_ceramics) USING (analysis_entity_id) as tbl_ceramics
+LEFT JOIN (select dendro_id, analysis_entity_id from tbl_dendro) USING (analysis_entity_id) as tbl_dendro
+-- LEFT JOIN (select aggregate_sample_id, analysis_entity_id from tbl_aggregate_samples) USING (analysis_entity_id) as tbl_aggregate_samples
+-- LEFT JOIN (select analysis_entity_age_id, analysis_entity_id from tbl_analysis_entity_ages) USING (analysis_entity_id) as tbl_analysis_entity_ages
+-- LEFT JOIN (select analysis_entity_dimension_id, analysis_entity_id from tbl_analysis_entity_dimensions) USING (analysis_entity_id) as tbl_analysis_entity_dimensions
+-- LEFT JOIN (select analysis_entity_prep_method_id, analysis_entity_id from tbl_analysis_entity_prep_methods) USING (analysis_entity_id) as tbl_analysis_entity_prep_methods
+-- LEFT JOIN (select dendro_date_id, analysis_entity_id from tbl_dendro_dates) USING (analysis_entity_id) as tbl_dendro_dates
+-- LEFT JOIN (select geochron_id, analysis_entity_id from tbl_geochronology) USING (analysis_entity_id) as tbl_geochronology
+-- LEFT JOIN (select relative_date_id, analysis_entity_id from tbl_relative_dates) USING (analysis_entity_id) as tbl_relative_dates
+-- LEFT JOIN (select tephra_date_id, analysis_entity_id from tbl_tephra_dates) USING (analysis_entity_id) as tbl_tephra_dates
+where 1 = 1
+group by master_name
+
+
+
+select n.nspname as schema_name, c.relname as table_name, col.attname as column_name, d.description as comment
+from pg_class c
+join pg_namespace n on c.relnamespace = n.oid
+left join pg_description d on c.oid = d.objoid
+left join pg_attribute col on c.oid = col.attrelid and col.attnum = d.objsubid
+where c.relkind = 'r' -- only tables
+  or (c.relkind = 'v' and col.attnum is null) -- views without specific column comments
+order by n.nspname, c.relname, col.attnum
+select site_name
+from sead_utility.table_columns
+
+
+with sead_columns as (
+	select 	table_name,
+		   	column_name,
+		   	clearing_house.fn_underscore_to_pascal(column_name, TRUE) as xml_version,
+			ordinal_position as position,
+		   	data_type as "type",
+			numeric_precision,
+			numeric_scale,
+			character_maximum_length as length,
+			is_nullable,
+			is_pk,
+			is_fk,
+			fk_table_name,
+			fk_column_name,
+			case
+				when is_fk = 'YES' then sead_utility.underscore_to_pascal_case(fk_table_name)
+				when data_type = 'integer' then 'java.lang.Integer'
+				when data_type = 'bigint' then 'java.lang.Integer'
+				when data_type = 'smallint' then 'java.lang.Short'
+				when data_type = 'date' then 'java.sql.Date'
+				when data_type = 'boolean' then	'java.lang.Boolean'
+				when data_type = 'character varying' then 'java.lang.String'
+				when data_type = 'text' then 'java.lang.String'
+				when data_type like 'timestamp%' then 'java.util.Date'
+				when data_type = 'date' then 'java.sql.Date'
+				when data_type = 'numeric' then 'java.math.BigDecimal'
+				else 'error['  || data_type || ']' end as class_name
+	from sead_utility.table_columns
+	where table_schema = 'public'
+	  and table_name like 'tbl_%'
+) select table_name, column_name,
+	case when s.xml_version = xl.xml_version then 'OK' else 'DIFF' end as xml_name_check,
+	case when s.position = xl.position then 'OK' else 'DIFF' end as position_check,
+	case when s.type = xl.type then 'OK' else 'DIFF' end as type_check,
+	case when coalesce(s.length, 0) = coalesce(xl.length, 0) then 'OK' else 'DIFF' end as length_check,
+	case when coalesce(s.class_name, '') = coalesce(xl.class, '') then 'OK' else 'DIFF' end as class_check,
+	xl.class, s.class_name, s.type 
+  from sead_columns s
+  join import_metadata_columns xl using (table_name, column_name)
+  where TRUE
+    -- and s.is_fk = 'NO'
+  	and coalesce(s.class_name, '') <> coalesce(xl.class, '')
 	
+	and table_name not in ('tbl_updates_log')
+	and not (xl.class = 'java.long.Short' and s.class_name = 'java.lang.Short')
+	and not (lower(xl.class) = lower(s.class_name))
+
+-- | "table_name"                   | "column_name"               | "class_check" | "class"                   | "class_name"          | "type"            |
+-- | :----------------------------- | :-------------------------- | :------------ | :------------------------ | :-------------------- | :---------------- |
+-- | tbl_aggregate_sample_ages      | analysis_entity_age_id      | DIFF          | TblAnalysisEntities       | TblAnalysisEntityAges | integer           | Wrong type in excel
+-- | tbl_analysis_entity_dimensions | dimension_value             | DIFF          | java.lang.Long            | java.math.BigDecimal  | numeric           | Wrong type in excel
+-- | tbl_biblio                     | year                        | DIFF          | java.lang.Integer         | java.lang.String      | character varying | Wrong type in excel
+-- | tbl_chronologies               | relative_age_type_id        | DIFF          | TblRelativeAgeTypes       | java.lang.Integer     | integer           | Missing FK?
+-- | tbl_contacts                   | location_id                 | DIFF          | TblLocations              | java.lang.Integer     | integer           | Missing FK?
+-- | tbl_dataset_submissions        | date_submitted              | DIFF          | java.lang.String          | java.sql.Date         | date              | Wrong type in SEAD 
+-- | tbl_mcr_names                  | taxon_id                    | DIFF          | java.lang.Integer         | TblTaxaTreeMaster     | integer           | Wrong type in excel
+-- | tbl_sites                      | site_preservation_status_id | DIFF          | TblSitePreservationStatus | java.lang.Integer     | integer           | Missing FK? site pekar på status & status pekar på site!
+-- | tbl_isotopes                   | measurement_value           | DIFF          | java.math.BigDecimal      | java.lang.String      | text              | Wrong type in excel?
+
