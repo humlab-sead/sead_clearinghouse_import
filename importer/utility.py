@@ -4,14 +4,95 @@ import io
 import logging
 import os
 import zlib
-from os.path import abspath, dirname, join
+from datetime import datetime
+from os.path import abspath, basename, dirname, join, splitext
 from typing import Any, Callable
 from xml.dom import minidom
 
-import dotenv
 import pandas as pd
+import yaml
 from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+
+def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
+    if path is None or not data:
+        return default
+
+    ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
+
+    d = None
+
+    for p in ps:
+        d = dotget(data, p)
+
+        if d is not None:
+            return d
+
+    return d or default
+
+
+def dotexists(data: dict, *paths: list[str]) -> bool:
+    for path in paths:
+        if dotget(data, path, default="@@") != "@@":
+            return True
+    return False
+
+
+def dotexpand(path: str) -> list[str]:
+    """Expands paths with ',' and ':'."""
+    paths: list[str] = []
+    for p in path.replace(' ', '').split(','):
+        if not p:
+            continue
+        if ':' in p:
+            paths.extend([p.replace(":", "."), p.replace(":", "_")])
+        else:
+            paths.append(p)
+    return paths
+
+
+def dotget(data: dict, path: str, default: Any = None) -> Any:
+    """Gets element from dict. Path can be x.y.y or x_y_y or x:y:y.
+    if path is x:y:y then element is search using borh x.y.y or x_y_y."""
+
+    for key in dotexpand(path):
+        d: dict = data
+        for attr in key.split('.'):
+            d: dict = d.get(attr) if isinstance(d, dict) else None
+            if d is None:
+                break
+        if d is not None:
+            return d
+    return default
+
+
+def dotset(data: dict, path: str, value: Any) -> dict:
+    """Sets element in dict using dot notation x.y.z or x:y:z"""
+
+    d: dict = data
+    attrs: list[str] = path.replace(":", ".").split('.')
+    for attr in attrs[:-1]:
+        if not attr:
+            continue
+        d: dict = d.setdefault(attr, {})
+    d[attrs[-1]] = value
+
+    return data
+
+
+def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = True) -> dict[str, str]:
+    """Loads environment variables starting with prefix into."""
+    if data is None:
+        data = {}
+    if not prefix:
+        return data
+    for key, value in os.environ.items():
+        if lower_key:
+            key = key.lower()
+        if key.startswith(prefix.lower()):
+            dotset(data, key[len(prefix) + 1 :], value)
+    return data
 
 
 def log_decorator(
@@ -32,24 +113,18 @@ def log_decorator(
     return decorator
 
 
-def load_sql_from_file(identifier: str) -> str:
-    sql_path: str = join(dirname(abspath(__file__)), "sql", identifier + ".sql")
-    with open(sql_path, "r") as file:
-        return file.read()
+# def load_sql_from_file(identifier: str) -> str:
+#     sql_path: str = join(dirname(abspath(__file__)), "sql", identifier + ".sql")
+#     if not os.path.exists(sql_path):
+#         return
+#     with open(sql_path, "r") as file:
+#         return file.read()
 
 
 def load_json_from_file(identifier: str) -> str:
     sql_path: str = join(dirname(abspath(__file__)), "json", identifier + ".json")
     with open(sql_path, "r") as file:
         return file.read()
-
-
-def dburi_from_env() -> str:
-    """
-    Returns the database URI from the environment variables.
-    """
-    dotenv.load_dotenv(".env")
-    return f"postgresql://{os.environ['DBUSER']}@{os.environ['DBHOST']}:5432/{os.environ['DBNAME']}"
 
 
 def upload_dataframe_to_postgres(df: pd.DataFrame, table_name: str, db_uri: str) -> None:
@@ -79,16 +154,12 @@ def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str = None, d
     return pd.read_sql_query(sql, con=engine, index_col=index_col, dtype=dtype)
 
 
-def load_sead_data(db_uri: str, sql_id: str | pd.DataFrame, index: list[str], sortby: list[str] = None) -> pd.DataFrame:
+def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortby: list[str] = None) -> pd.DataFrame:
     """Returns a dataframe of tables from SEAD with attributes."""
     index = index if isinstance(index, list) else [index]
     sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
     data: pd.DataFrame = (
-        (
-            sql_id
-            if isinstance(sql_id, pd.DataFrame)
-            else load_dataframe_from_postgres(load_sql_from_file(sql_id), db_uri, index_col=None)
-        )
+        (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
         .set_index(index, drop=False)
         .rename_axis([f'index_{x}' for x in index])
         .sort_values(by=sortby if sortby else index)
@@ -166,3 +237,71 @@ class Registry:
     @classmethod
     def is_registered(cls, key: str) -> bool:
         return key in cls.items
+
+
+def strip_path_and_extension(filename: str | list[str]) -> str | list[str]:
+    """Remove path and extension from filename(s). Return list."""
+    if isinstance(filename, str):
+        return splitext(basename(filename))[0]
+    return [splitext(basename(x))[0] for x in filename]
+
+
+def strip_extensions(filename: str | list[str]) -> str | list[str]:
+    if isinstance(filename, str):
+        return splitext(filename)[0]
+    return [splitext(x)[0] for x in filename]
+
+
+def replace_extension(filename: str, extension: str) -> str:
+    if filename.endswith(extension):
+        return filename
+    base, _ = splitext(filename)
+    return f"{base}{'' if extension.startswith('.') else '.'}{extension}"
+
+
+def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
+    name, extension = splitext(path)
+    return f'{name}{suffix}{extension if new_extension is None else new_extension}'
+
+
+def path_add_timestamp(path: str, fmt: str = "%Y%m%d%H%M") -> str:
+    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+
+
+def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
+    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+
+
+def ts_data_path(directory: str, filename: str) -> str:
+    return join(directory, f'{datetime.now().strftime("%Y%m%d%H%M")}_{filename}')
+
+
+def read_yaml(file: Any) -> dict:
+    """Read yaml file. Return dict."""
+    if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
+        with open(file, "r", encoding='utf-8') as fp:
+            return yaml.load(fp, Loader=yaml.FullLoader)
+    data: list[dict] = yaml.load(file, Loader=yaml.FullLoader)
+    return {} if len(data) == 0 else data[0]
+
+
+def write_yaml(data: dict, file: str) -> None:
+    """Write yaml to file.."""
+    with open(file, "w", encoding='utf-8') as fp:
+        return yaml.dump(data=data, stream=fp)
+
+
+def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
+    """Update dict `data` with values found in `yaml_file`."""
+    if yaml_file is None:
+        return data
+    options: dict = read_yaml(yaml_file)
+    data.update(options)
+    return data
+
+
+def create_db_uri(*, host: str, port: int | str, user: str, name: str) -> str:
+    """
+    Returns the database URI from the environment variables.
+    """
+    return f"postgresql://{user}@{host}:{port}/{name}"
