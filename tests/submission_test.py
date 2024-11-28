@@ -3,23 +3,22 @@ from os.path import isfile
 import pandas as pd
 import pytest
 
+from importer.configuration import ConfigValue
 from importer.metadata import Metadata
 from importer.specification import SubmissionSpecification
 from importer.submission import SubmissionData
-from tests.utility import dburi_from_env, generate_test_excel
-
-from . import REDUCED_EXCEL_FILENAME, SOURCE_EXCEL_FILENAME, TEST_SITES
+from tests.utility import generate_test_excel, get_db_uri
 
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name
 
 
-@pytest.mark.skipif(isfile(REDUCED_EXCEL_FILENAME), reason="Test file already exists")
+@pytest.mark.skipif(isfile(ConfigValue("test:reduced_excel_filename").resolve()))
 def test_generate_test_excel():
-    submission_filename: str = SOURCE_EXCEL_FILENAME
+    submission_filename: str = ConfigValue("test:source_excel_filename").resolve()
     generate_test_excel(
         excel_filename=submission_filename,
-        test_sites=TEST_SITES,
-        filename=REDUCED_EXCEL_FILENAME,
+        test_sites=ConfigValue("test:sites").resolve(),
+        filename=ConfigValue("test:reduced_excel_filename").resolve(),
     )
 
 
@@ -78,7 +77,7 @@ def test_referenced_keyset(submission: SubmissionData, metadata: Metadata):
 
 
 def test_tables_specifications(submission: SubmissionData):
-    metadata: Metadata = Metadata(dburi_from_env())
+    metadata: Metadata = Metadata(get_db_uri())
     specifixation: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=['date_updated'])
     specifixation.is_satisfied_by(submission)
     assert specifixation.messages.errors == []
