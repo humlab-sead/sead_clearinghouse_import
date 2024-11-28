@@ -5,6 +5,7 @@ import click
 import dotenv
 from loguru import logger
 
+from importer.configuration.inject import ConfigStore
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
@@ -13,18 +14,19 @@ from importer.utility import strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
-# pylint: disable=no-value-for-parameter,unused-argument
+# pylint: disable=no-value-for-parameter,unused-argument,too-many-positional-arguments
 
 
 @click.command()
+@click.argument('config_filename')
 @click.argument("filename")
 @click.option('--options-filename', type=str, default=None, help='Name of options file.')
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
-@click.option("--output-folder", type=str, envvar="OUTPUT_FOLDER", help="Output folder")
-@click.option("--host", "-h", "dbhost", type=str, envvar="DBHOST", help="Target database server")
-@click.option("--database", "-d", "dbname", type=str, envvar="DBNAME", help="Database name")
-@click.option("--user", "-u", "dbuser", type=str, envvar="DBUSER", help="Database user")
-@click.option("--port", type=int, default=5432, help="Server port number.")
+@click.option("--output-folder", type=str, help="Output folder")
+@click.option("--host", "-h", "dbhost", type=str, help="Target database server")
+@click.option("--database", "-d", "dbname", type=str, help="Database name")
+@click.option("--user", "-u", "dbuser", type=str, help="Database user")
+@click.option("--port", "p", "dbport", type=int, default=5432, help="Server port number.")
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
 @click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
 @click.option("--table-names", type=str, default=None, help="Only load specified tables.")
@@ -41,13 +43,14 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 )
 @click.option("--transfer-format", type=str, default='xml', help="Explode XML into public tables.")
 def import_file(
+    config_filename: str,
     filename: str,
     data_types: str,
     dbhost: str,
     dbname: str,
     dbuser: str,
+    dbport: str,
     output_folder: str,
-    port: str,
     skip: str,
     submission_id: str,
     table_names: str,
@@ -74,8 +77,12 @@ def import_file(
       - The file must contain a sheet named as in SEADe' for each table in the submission.
 
     """
+    args: dict[str, str] = locals()
+
+    ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="CLEARINGHOUSE_IMPORT")
+
     arguments: dict = update_arguments_from_options_file(
-        arguments=locals(), filename_key='options_filename', suffix=strip_path_and_extension(filename)
+        arguments=args, filename_key='options_filename', suffix=strip_path_and_extension(filename)
     )
 
     logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
@@ -115,7 +122,13 @@ def workflow(opts: Options) -> None:
                 return
 
     submission: SubmissionData | str = (
-        opts.submission_id if opts.use_existing_submission else opts.xml_filename if isinstance(opts.xml_filename, str) else load_excel(metadata=metadata, source=opts.filename)
+        opts.submission_id
+        if opts.use_existing_submission
+        else (
+            opts.xml_filename
+            if isinstance(opts.xml_filename, str)
+            else load_excel(metadata=metadata, source=opts.filename)
+        )
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 

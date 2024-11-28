@@ -4,6 +4,7 @@ import pickle
 
 import pandas as pd
 
+from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.submission import SubmissionData, load_excel
@@ -12,13 +13,10 @@ from importer.submission import SubmissionData, load_excel
 def test_create_options():
     opts: Options = Options(
         **{
-            'filename': 'data/input/building_dendro_2023-12_import.xlsx',
+            'filename': 'data/input/dummy.xlsx',
             'data_types': 'dendrochronology',
-            'dbhost': 'host',
-            'dbname': 'database_name',
-            'dbuser': 'username',
+            'db_opts': ConfigValue("options:db_opts").resolve(),
             'output_folder': 'data/output',
-            'port': 5432,
             'skip': False,
             'submission_id': None,
             'table_names': None,
@@ -28,23 +26,20 @@ def test_create_options():
             'timestamp': True,
         }
     )
-    assert opts.basename == 'building_dendro_2023-12_import'
+    assert opts.basename == 'dummy'
     assert opts.timestamp
     assert opts.target is not None
     assert opts.ignore_columns is not None
     assert opts.db_uri().startswith('postgresql://')
 
 
-def test_import_submission():
+def test_import_a_dna_submission():
     opts: Options = Options(
         **{
-            'filename': 'data/input/building_dendro_2023-12_import.xlsx',
+            'filename': 'data/input/SEAD_aDNA_data_20241114_RM.xlsx',
             'data_types': 'dendrochronology',
-            'dbhost': 'humlabseadserv.srv.its.umu.se',
-            'dbname': 'sead_staging_202212',
-            'dbuser': 'humlab_admin',
+            'db_opts': ConfigValue("options:db_opts").resolve(),
             'output_folder': 'data/output',
-            'port': 5432,
             'skip': False,
             'submission_id': None,
             'table_names': None,
@@ -54,6 +49,12 @@ def test_import_submission():
         }
     )
     metadata: Metadata = Metadata(opts.db_uri())
+
+    assert metadata is not None
+
+    assert 'tbl_analysis_values' in metadata.sead_tables.table_name.values
+    
+    assert metadata.sead_schema.lookup_tables is not None
 
     submission: SubmissionData = load_or_cache_submission(opts, metadata)
 
@@ -68,11 +69,8 @@ def test_import_reduced_submission():
         **{
             'filename': 'tests/test_data/building_dendro_reduced.xlsx',
             'data_types': 'dendrochronology',
-            'dbhost': 'humlabseadserv.srv.its.umu.se',
-            'dbname': 'sead_staging_202212',
-            'dbuser': 'humlab_admin',
+            'db_opts': ConfigValue("options:db_opts").resolve(),
             'output_folder': 'data/output',
-            'port': 5432,
             'skip': False,
             'submission_id': None,
             'table_names': None,

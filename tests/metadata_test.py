@@ -1,71 +1,27 @@
-import json
 from os.path import isfile
 
 import pandas as pd
 import pytest
 
 from importer.metadata import Metadata
-from importer.utility import dburi_from_env, load_sql_from_file
-from tests.utility import load_excel_by_regression  # Assuming Metadata is the class name
+from tests.utility import get_db_uri, load_excel_by_regression  # Assuming Metadata is the class name
 
 # pylint: disable=redefined-outer-name,no-member
 
-TEST_TABLES: list[str] = [
-    # 'tbl_sites',
-    'tbl_abundances',
-    'tbl_analysis_entities',
-    'tbl_dataset_contacts',
-    'tbl_dataset_submissions',
-    'tbl_datasets',
-    'tbl_dendro_date_notes',
-    'tbl_dendro_dates',
-    'tbl_dendro',
-    'tbl_locations',
-    'tbl_methods',
-    'tbl_physical_samples',
-    'tbl_projects',
-    'tbl_record_types',
-    'tbl_sample_alt_refs',
-    'tbl_sample_descriptions',
-    'tbl_sample_group_coordinates',
-    'tbl_sample_group_descriptions',
-    'tbl_sample_group_notes',
-    'tbl_sample_group_sampling_contexts',
-    'tbl_sample_groups',
-    'tbl_sample_locations',
-    'tbl_sample_notes',
-    'tbl_site_locations',
-    'tbl_site_references',
-    'tbl_sites',
-]
+
+# def test_load_sql_from_file():
+#     sql: str = load_sql_from_file("sead_tables")
+#     assert "select" in sql.lower()
+#     sql: str = load_sql_from_file("sead_columns")
+#     assert "select" in sql.lower()
 
 
-# @pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
-def test_load_metadata_from_postgres():
-    metadata: Metadata = Metadata(dburi_from_env())
-
-    with open('tests/test_data/sead_tables.json', 'w') as outfile:
-        data: dict = metadata.sead_tables[metadata.sead_tables.table_name.isin(TEST_TABLES)].to_dict('records')
-        json.dump(data, outfile, indent=4)
-
-    with open('tests/test_data/sead_columns.json', 'w') as outfile:
-        data: dict = metadata.sead_columns.fillna(0)[metadata.sead_columns.table_name.isin(TEST_TABLES)].to_dict(
-            'records'
-        )
-        json.dump(data, outfile, indent=4)
-
-    assert isinstance(metadata, Metadata)
+def test_metadata_load_metadata():
+    metadata: Metadata = Metadata(get_db_uri())
     assert isinstance(metadata.sead_tables, pd.DataFrame)
     assert isinstance(metadata.sead_columns, pd.DataFrame)
-    assert isinstance(metadata.sead_tables, pd.DataFrame)
     assert isinstance(metadata.sead_schema, dict)
-
-
-def test_load_sql_from_file():
-    sql: str = load_sql_from_file("sead_tables")
-    assert "select" in sql.lower()
-    sql: str = load_sql_from_file("sead_columns")
-    assert "select" in sql.lower()
+    assert isinstance(metadata.foreign_keys, pd.DataFrame)
 
 
 def test_tables_specifications(metadata: Metadata):
@@ -101,7 +57,7 @@ def test_is_fk(metadata: Metadata):
 
 
 def test_get_tablenames_referencing():
-    metadata: Metadata = Metadata(dburi_from_env())
+    metadata: Metadata = Metadata(get_db_uri())
 
     assert set(metadata.get_tablenames_referencing('tbl_sites')) == {
         'tbl_sample_groups',
@@ -147,40 +103,3 @@ def test_regression_of_foreign_keys(metadata: Metadata):
     assert (merged['_merge'] == 'both').all()
 
     # self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'fk_table_name', 'class_name']]
-
-
-###### REMOVE CODE BELOW WHEN DONE
-@pytest.mark.skipif(not isfile('data/metadata_20231223.xlsx'), reason='metadata_20231223.xlsx not found')
-def test_load_by_sql_is_same_as_load_by_excel(metadata: Metadata):
-    excel_columns: pd.DataFrame = load_excel_by_regression('data/metadata_20231223.xlsx').get('columns')
-    excel_columns = excel_columns[excel_columns.table_name.isin(TEST_TABLES)]
-
-    assert isinstance(metadata.sead_columns, pd.DataFrame)
-
-    assert len(metadata.sead_columns.shape) == len(excel_columns.shape)
-
-    for table_name in TEST_TABLES:
-        # for table_name in ['tbl_dendro_dates']: #TEST_TABLES:
-
-        if table_name == 'tbl_dendro_dates':
-            continue
-
-        expected_columns: pd.DataFrame = excel_columns[excel_columns.table_name == table_name]
-        actual_columns: pd.DataFrame = metadata.sead_columns[metadata.sead_columns.table_name == table_name]
-
-        assert len(expected_columns) == len(actual_columns), table_name
-
-        assert actual_columns.table_name.tolist() == expected_columns.table_name.tolist(), table_name
-        assert actual_columns.column_name.tolist() == expected_columns.column_name.tolist(), table_name
-        assert actual_columns.position.tolist() == expected_columns.position.tolist(), table_name
-        assert actual_columns.is_nullable.tolist() == [
-            x == "YES" for x in expected_columns.nullable.tolist()
-        ], table_name
-        assert actual_columns.data_type.tolist() == expected_columns.type.tolist(), table_name
-        assert actual_columns.character_maximum_length.fillna(0).tolist() == [
-            int(x) for x in expected_columns.length.fillna(0).tolist()
-        ], table_name
-        assert actual_columns.class_name.fillna(0).tolist() == expected_columns["class"].fillna(0).tolist(), table_name
-        assert actual_columns.xml_column_name.tolist() == expected_columns.xml_version.tolist(), table_name
-
-    assert True
