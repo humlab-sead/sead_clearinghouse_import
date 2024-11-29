@@ -1,11 +1,9 @@
-import pandas as pd
 import pytest
 
 from importer.configuration import ConfigStore
 from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
 from importer.submission import SubmissionData, load_excel
-from importer.utility import load_sead_data
 from tests.utility import get_db_uri
 
 # pylint: disable=redefined-outer-name
