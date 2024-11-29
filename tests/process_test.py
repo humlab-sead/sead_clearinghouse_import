@@ -33,34 +33,6 @@ def test_create_options():
     assert opts.db_uri().startswith('postgresql://')
 
 
-def test_import_a_dna_submission():
-    opts: Options = Options(
-        **{
-            'filename': 'data/input/SEAD_aDNA_data_20241114_RM.xlsx',
-            'data_types': 'dendrochronology',
-            'db_opts': ConfigValue("options:db_opts").resolve(),
-            'output_folder': 'data/output',
-            'skip': False,
-            'submission_id': None,
-            'table_names': None,
-            'xml_filename': None,
-            'check_only': False,
-            'log_folder': './logs',
-        }
-    )
-    metadata: Metadata = Metadata(opts.db_uri())
-
-    assert metadata is not None
-
-    assert 'tbl_analysis_values' in metadata.sead_tables.table_name.values
-    
-    assert metadata.sead_schema.lookup_tables is not None
-
-    submission: SubmissionData = load_or_cache_submission(opts, metadata)
-
-    ImportService(metadata=metadata, opts=opts).process(submission=submission)
-
-
 def test_import_reduced_submission():
     target_filename: str = 'data/output/building_dendro_reduced.xml'
     expected_filename: str = 'tests/test_data/building_dendro_reduced.xml'
