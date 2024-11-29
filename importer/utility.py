@@ -101,10 +101,14 @@ def log_decorator(
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if enter_message is not None:
+
+            if not (enter_message or exit_message):
+                return func(*args, **kwargs)
+            
+            if enter_message:
                 logger.log(level, f'{enter_message} ({func.__name__})')
             result = func(*args, **kwargs)
-            if exit_message is not None:
+            if exit_message:
                 logger.log(level, f'{exit_message} ({func.__name__})')
             return result
 
