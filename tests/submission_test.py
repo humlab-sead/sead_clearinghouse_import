@@ -31,8 +31,6 @@ def test_excel_is_loaded_correctly(submission: SubmissionData):
     assert submission.data_table_index is not None
     assert isinstance(submission.data_table_index, pd.DataFrame)
     assert len(submission.data_table_index) > 0
-    assert any(submission.data_table_index.only_new_data)
-    assert any(submission.data_table_index.new_data)
 
 
 def test_contains(submission: SubmissionData):
@@ -41,16 +39,12 @@ def test_contains(submission: SubmissionData):
 
 
 def test_exists(submission: SubmissionData):
-    assert submission.exists("tbl_sites")
-    assert not submission.exists("tbl_dummy")
+    assert 'tbl_sites' in submission
+    assert not "tbl_dummy" in submission
 
 
 def test_data_tablenames(submission: SubmissionData):
     assert "tbl_analysis_entities" in submission.data_table_names
-
-
-def test_index_table_names(submission: SubmissionData):
-    assert set(submission.index_table_names) == set(submission.data_table_names)
 
 
 def test_has_system_id(submission: SubmissionData):

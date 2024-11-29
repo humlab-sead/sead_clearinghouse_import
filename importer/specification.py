@@ -80,7 +80,7 @@ class SubmissionSpecification(SpecificationBase):
             specification: SpecificationBase = cls(
                 self.metadata, messages=self.messages, ignore_columns=self.ignore_columns
             )
-            for table_name in submission.index_table_names:
+            for table_name in submission.data_tables.keys():
                 specification.is_satisfied_by(submission, table_name)
 
         self.log_messages(self.messages.warnings, logging.WARNING)
@@ -106,7 +106,7 @@ class SubmissionTableExistsSpecification(SpecificationBase):
     """Specification class that tests if table exists in submission"""
 
     def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
-        if submission.exists(table_name) and table_name not in submission.data_table_names:
+        if table_name in submission:
             # Check if it has an alias
             table_spec: Table = self.metadata[table_name]
             alias_name: str = table_spec.excel_sheet or "no_alias"
@@ -114,7 +114,7 @@ class SubmissionTableExistsSpecification(SpecificationBase):
                 """Not in submission table index sheet"""
                 self.errors.append(f"ERROR Table {table_name} not defined as submission table")
 
-        if not submission.exists(table_name):
+        if table_name not in submission:
             """No data sheet"""
             self.errors.append(f"ERROR {table_name} has NO DATA!")
 
@@ -250,17 +250,20 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
         """All submission tables MUST have a non null "system_id" """
         data_table: pd.DataFrame = submission.data_tables[table_name]
-        for _, column_spec in self.metadata[table_name].columns.items():
-            if len(data_table[column_spec.column_name]) == 0:
+        for _, column in self.metadata[table_name].columns.items():
+            if column.column_name not in data_table.columns:
+                self.warnings.append(f"WARNING! Column {table_name}.{column.column_name} not found in data")
                 continue
-            if column_spec.is_fk:
-                has_nan: bool = data_table[column_spec.column_name].isnull().values.any()
-                all_nan: bool = data_table[column_spec.column_name].isnull().values.all()
-                if all_nan and not column_spec.is_nullable:
-                    self.errors.append(f"ERROR Foreign key column {table_name}.{column_spec.column_name} has no values")
-                if has_nan and not column_spec.is_nullable:
+            if len(data_table[column.column_name]) == 0:
+                continue
+            if column.is_fk:
+                has_nan: bool = data_table[column.column_name].isnull().values.any()
+                all_nan: bool = data_table[column.column_name].isnull().values.all()
+                if all_nan and not column.is_nullable:
+                    self.errors.append(f"ERROR Foreign key column {table_name}.{column.column_name} has no values")
+                if has_nan and not column.is_nullable:
                     self.errors.append(
-                        f"ERROR Non-nullable foreign key column {table_name}.{column_spec.column_name} has missing values"
+                        f"ERROR Non-nullable foreign key column {table_name}.{column.column_name} has missing values"
                     )
 
 
@@ -298,7 +301,7 @@ class NoMissingColumnSpecification(SpecificationBase):
         meta_column_names: list[str] = sorted(self.metadata[table_name].columns.keys())
         data_column_names: list[str] = (
             sorted(submission.data_tables[table_name].columns.values.tolist())
-            if submission.exists(table_name) and table_name in self.metadata
+            if table_name in submission and table_name in self.metadata
             else []
         )
 
@@ -317,7 +320,7 @@ class NoMissingColumnSpecification(SpecificationBase):
 @SpecificationRegistry.register()
 class LookupDataSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: SubmissionData, table_name: str) -> None:
-        if not submission.exists(table_name):
+        if table_name not in submission:
             return
 
         if not self.metadata[table_name].is_lookup:

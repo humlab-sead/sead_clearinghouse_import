@@ -149,7 +149,7 @@ class ImportService:
 
 def update_missing_system_id_to_public_id(metadata: Metadata, submission: SubmissionData) -> None:
     """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
-    for table_name in submission.index_table_names:
+    for table_name in submission.data_tables.keys():
         try:
             data_table: pd.DataFrame = submission.data_tables[table_name]
             table_spec: Table = metadata[table_name]

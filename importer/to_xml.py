@@ -217,7 +217,7 @@ class XmlProcessor:
         table_names: list[str] = None,
         extra_names: list[str] = None,
     ) -> None:
-        tables_to_process: list[str] = submission.index_table_names if table_names is None else table_names
+        tables_to_process: list[str] = list(submission.data_tables.keys()) if table_names is None else table_names
         extra_names: set[str] = (
             set(metadata.sead_schema.keys()) - set(submission.data_table_names) if extra_names is None else extra_names
         )
