@@ -1,4 +1,3 @@
-import types
 from dataclasses import asdict, dataclass, field
 from functools import cached_property
 from typing import Any
@@ -90,7 +89,8 @@ class SeadSchema(dict[str, Table]):
     @cached_property
     def lookup_tables(self) -> list[Table]:
         return [t for t in self.values() if t.is_lookup]
-    
+
+
 class Metadata:
     """Logic related to Excel metadata file"""
 

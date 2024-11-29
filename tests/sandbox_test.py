@@ -8,7 +8,6 @@ from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
 from tests.utility import get_db_uri, load_excel_by_regression
 
-
 # @pytest.mark.skip(reason="sandbox test")
 # def test_download_sead_comments():
 #     """Stores SEAD comments in a markdown file"""
