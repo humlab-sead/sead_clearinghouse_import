@@ -1,7 +1,7 @@
 import abc
-from fnmatch import fnmatch
 import logging
 from dataclasses import dataclass, field
+from fnmatch import fnmatch
 
 import numpy as np
 import pandas as pd

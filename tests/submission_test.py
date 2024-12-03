@@ -68,8 +68,6 @@ def test_referenced_keyset(submission: Submission, metadata: Metadata):
 def test_tables_specifications(submission: Submission):
     metadata: Metadata = Metadata(get_db_uri())
     ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
-    specifixation: SubmissionSpecification = SubmissionSpecification(
-        metadata=metadata, ignore_columns=ignore_columns
-    )
+    specifixation: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=ignore_columns)
     specifixation.is_satisfied_by(submission)
     assert specifixation.messages.errors == []

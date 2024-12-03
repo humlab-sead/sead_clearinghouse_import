@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from loguru import logger
-import pandas as pd
-from .configuration.inject import ConfigValue
-from .metadata import Table, Metadata
-from .utility import Registry
 from typing import TYPE_CHECKING
+
+import pandas as pd
+from loguru import logger
+
+from .configuration.inject import ConfigValue
+from .metadata import Metadata, Table
+from .utility import Registry
 
 if TYPE_CHECKING:
     from importer.submission import Submission
@@ -108,7 +110,7 @@ class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
 
 @UpdatePolicies.register()
 class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
-    """ Rule: assign temporary public primary key to new lookup table rows.
+    """Rule: assign temporary public primary key to new lookup table rows.
 
     For new lookup table rows,
         set the public primary key to the negative of the system_id

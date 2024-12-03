@@ -5,8 +5,8 @@ import pandas as pd
 from loguru import logger
 
 from .metadata import Metadata, SeadSchema
-from .utility import flatten_sets, log_decorator
 from .policies import UpdatePolicies
+from .utility import flatten_sets, log_decorator
 
 
 def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:

@@ -104,7 +104,7 @@ def log_decorator(
 
             if not (enter_message or exit_message):
                 return func(*args, **kwargs)
-            
+
             if enter_message:
                 logger.log(level, f'{enter_message} ({func.__name__})')
             result = func(*args, **kwargs)
