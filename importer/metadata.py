@@ -77,6 +77,12 @@ class Table:
     def values(self) -> list[Column]:
         return asdict(self).values()
 
+    def column_names(self, skip_nullable: bool = False) -> list[str]:
+        return sorted(c.column_name for c in self.columns.values() if not (skip_nullable and c.is_nullable))
+
+    def nullable_column_names(self) -> list[str]:
+        return sorted(c.column_name for c in self.columns.values() if c.is_nullable)
+
 
 class SeadSchema(dict[str, Table]):
     @cached_property

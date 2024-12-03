@@ -1,12 +1,11 @@
 from os.path import isfile
 
-import pandas as pd
 import pytest
 
 from importer.configuration import ConfigValue
 from importer.metadata import Metadata
 from importer.specification import SubmissionSpecification
-from importer.submission import SubmissionData
+from importer.submission import Submission
 from tests.utility import generate_test_excel, get_db_uri
 
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name
@@ -22,37 +21,33 @@ def test_generate_test_excel():
     )
 
 
-def test_excel_is_loaded_correctly(submission: SubmissionData):
+def test_excel_is_loaded_correctly(submission: Submission):
     assert submission is not None
     assert submission.data_tables is not None
     assert len(submission.data_tables) > 0
     assert isinstance(submission.data_tables, dict)
 
-    assert submission.data_table_index is not None
-    assert isinstance(submission.data_table_index, pd.DataFrame)
-    assert len(submission.data_table_index) > 0
 
-
-def test_contains(submission: SubmissionData):
+def test_contains(submission: Submission):
     assert "tbl_sites" in submission
     assert "tbl_dummy" not in submission
 
 
-def test_exists(submission: SubmissionData):
+def test_exists(submission: Submission):
     assert 'tbl_sites' in submission
     assert not "tbl_dummy" in submission
 
 
-def test_data_tablenames(submission: SubmissionData):
+def test_data_tablenames(submission: Submission):
     assert "tbl_analysis_entities" in submission.data_table_names
 
 
-def test_has_system_id(submission: SubmissionData):
+def test_has_system_id(submission: Submission):
     assert submission.has_system_id("tbl_sites")
     assert not submission.has_system_id("tbl_dummy")
 
 
-def test_referenced_keyset(submission: SubmissionData, metadata: Metadata):
+def test_referenced_keyset(submission: Submission, metadata: Metadata):
     """Note that submission is areduced versions of the real things, so all references do not exists."""
 
     def compute_unique_system_ids_referenced_by_fk(table_name: str, pk_name: str) -> int:
@@ -70,8 +65,11 @@ def test_referenced_keyset(submission: SubmissionData, metadata: Metadata):
     assert {10} == submission.get_referenced_keyset(metadata, 'tbl_methods')
 
 
-def test_tables_specifications(submission: SubmissionData):
+def test_tables_specifications(submission: Submission):
     metadata: Metadata = Metadata(get_db_uri())
-    specifixation: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=['date_updated'])
+    ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
+    specifixation: SubmissionSpecification = SubmissionSpecification(
+        metadata=metadata, ignore_columns=ignore_columns
+    )
     specifixation.is_satisfied_by(submission)
     assert specifixation.messages.errors == []
