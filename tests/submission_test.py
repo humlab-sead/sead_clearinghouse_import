@@ -11,7 +11,7 @@ from tests.utility import generate_test_excel, get_db_uri
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name
 
 
-@pytest.mark.skipif(isfile(ConfigValue("test:reduced_excel_filename").resolve()))
+@pytest.mark.skipif(isfile(ConfigValue("test:reduced_excel_filename").resolve()), reason="Test file already exists")
 def test_generate_test_excel():
     submission_filename: str = ConfigValue("test:source_excel_filename").resolve()
     generate_test_excel(
