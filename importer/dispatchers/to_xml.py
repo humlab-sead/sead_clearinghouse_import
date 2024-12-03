@@ -8,8 +8,9 @@ import pandas as pd
 from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
-from .metadata import Column, Metadata, Table
-from .submission import Submission
+from ..metadata import Column, Metadata, Table
+from ..submission import Submission
+from . import IDispatcher
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 
@@ -21,7 +22,7 @@ LOOKUP_TEMPLATE: str = """
 """
 
 
-class XmlProcessor:
+class XmlProcessor(IDispatcher):
     """
     Main class that processes the Excel file and produces a corresponging XML-file.
     The format of the XML-file is conforms to clearinghouse specifications

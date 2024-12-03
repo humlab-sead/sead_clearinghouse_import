@@ -8,8 +8,9 @@ import pandas as pd
 from loguru import logger
 
 from importer.configuration.inject import ConfigValue
+from .dispatchers import to_xml
 
-from . import DataImportError, to_xml, utility
+from . import DataImportError, utility
 from .metadata import Metadata, Table
 from .repository import SubmissionRepository
 from .specification import SpecificationError, SubmissionSpecification
