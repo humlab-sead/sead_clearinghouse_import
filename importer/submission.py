@@ -88,4 +88,7 @@ class Submission:
 
         submission: Submission = Submission(data_tables, metadata)
 
+        for policy in UpdatePolicies.items.values():
+            policy(metadata, submission).apply()
+
         return submission
