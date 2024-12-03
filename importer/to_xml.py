@@ -9,7 +9,7 @@ from jinja2 import Environment, Template, select_autoescape
 from loguru import logger
 
 from .metadata import Column, Metadata, Table
-from .submission import SubmissionData
+from .submission import Submission
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 
@@ -44,7 +44,7 @@ class XmlProcessor:
         self.emit(f"</{tag}>", indent)
 
     def process_tables(
-        self, metadata: Metadata, submission: SubmissionData, table_names: list[str], max_rows: int = 0
+        self, metadata: Metadata, submission: Submission, table_names: list[str], max_rows: int = 0
     ) -> None:
         """
         Import assumes that all FK references points to a local "system_id" in referenced table
@@ -194,7 +194,7 @@ class XmlProcessor:
 
         return value
 
-    def process_lookups(self, metadata: Metadata, submission: SubmissionData, table_names: list[str]) -> None:
+    def process_lookups(self, metadata: Metadata, submission: Submission, table_names: list[str]) -> None:
         template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
 
         for table_name in sorted(table_names):
@@ -213,7 +213,7 @@ class XmlProcessor:
     def process(
         self,
         metadata: Metadata,
-        submission: SubmissionData,
+        submission: Submission,
         table_names: list[str] = None,
         extra_names: list[str] = None,
     ) -> None:

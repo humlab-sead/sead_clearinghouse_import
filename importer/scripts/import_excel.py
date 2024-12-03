@@ -9,7 +9,7 @@ from importer.configuration.inject import ConfigStore
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
-from importer.submission import SubmissionData, load_excel
+from importer.submission import Submission
 from importer.utility import strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
@@ -73,8 +73,7 @@ def import_file(
 
     The Excel file must satisfy the following requirements:
       - The file must be in the Excel 2007+ format (xlsx)
-      - The file must contain a sheet named `data_table_index' listing all tables in the submission having new or changed data.
-      - The file must contain a sheet named as in SEADe' for each table in the submission.
+      - The file must contain a sheet named as in SEAD' for each table in the submission.
 
     """
     args: dict[str, str] = locals()
@@ -121,13 +120,13 @@ def workflow(opts: Options) -> None:
                 logger.error("The --check-only option is not supported when using an existing XML file")
                 return
 
-    submission: SubmissionData | str = (
+    submission: Submission | str = (
         opts.submission_id
         if opts.use_existing_submission
         else (
             opts.xml_filename
             if isinstance(opts.xml_filename, str)
-            else load_excel(metadata=metadata, source=opts.filename)
+            else Submission.load(metadata=metadata, source=opts.filename)
         )
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)

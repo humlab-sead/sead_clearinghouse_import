@@ -2,7 +2,7 @@ from importer.configuration import ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.specification import SubmissionSpecification
-from importer.submission import SubmissionData, load_excel
+from importer.submission import Submission
 from importer.utility import create_db_uri
 from tests.process_test import load_or_cache_submission
 
@@ -44,7 +44,7 @@ def test_load_adna_source():
     uri: str = create_db_uri(**ConfigValue("test:adna:database").resolve())
     source: str = ConfigValue("test:adna:source:filename").resolve()
     metadata: Metadata = Metadata(uri)
-    submission: SubmissionData = load_excel(metadata=metadata, source=source)
+    submission: Submission = Submission.load(metadata=metadata, source=source)
 
     assert submission is not None
     assert submission.data_tables is not None
@@ -52,18 +52,16 @@ def test_load_adna_source():
 
     assert all(len(df) > 0 for df in submission.data_tables.values())
 
-    assert submission.data_table_index is not None
-
-    assert len(submission.data_tables) == len(submission.data_table_index)
-    assert len(submission.data_tables) == len(submission.data_table_names)
-
 
 def test_adna_tables_specifications():
     uri: str = create_db_uri(**ConfigValue("test:adna:database").resolve())
     source: str = ConfigValue("test:adna:source:filename").resolve()
+    ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
     metadata: Metadata = Metadata(uri)
-    submission: SubmissionData = load_excel(metadata=metadata, source=source)
-    specification: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=['date_updated'])
+    submission: Submission = Submission.load(metadata=metadata, source=source)
+    specification: SubmissionSpecification = SubmissionSpecification(
+        metadata=metadata, ignore_columns=ignore_columns, raise_errors=False
+    )
     specification.is_satisfied_by(submission)
     assert specification.messages.errors == []
 
@@ -91,6 +89,6 @@ def test_import_a_dna_submission():
 
     assert metadata.sead_schema.lookup_tables is not None
 
-    submission: SubmissionData = load_or_cache_submission(opts, metadata)
+    submission: Submission = load_or_cache_submission(opts, metadata)
 
     ImportService(metadata=metadata, opts=opts).process(submission=submission)

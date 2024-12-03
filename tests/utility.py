@@ -8,7 +8,7 @@ import pandas as pd
 
 from importer.configuration import ConfigValue
 from importer.metadata import Metadata
-from importer.submission import SubmissionData, load_excel
+from importer.submission import Submission
 from importer.utility import create_db_uri
 
 
@@ -102,7 +102,7 @@ def generate_test_excel(
         print(f"{table_name}: {len(data)}")
         return data
 
-    submission: SubmissionData = load_test_submission(excel_filename, test_sites, filename, force)
+    submission: Submission = load_test_submission(excel_filename, test_sites, filename, force)
 
     assert submission is not None
     number_of_physical_samples: int = 2
@@ -187,16 +187,8 @@ def generate_test_excel(
         "tbl_projects": projects,
         "tbl_abundances": abundances,
     }
-    # data_table_index = pd.DataFrame(
-    #     {
-    #         'table_name': [x for x in reduced_submission if x != 'data_table_index'],
-    #         'only_new_data': True,
-    #         'new_data': True,
-    #     }
-    # )
 
     with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:  # pylint: disable=abstract-class-instantiated
-        # data_table_index.to_excel(writer, sheet_name='data_table_index', index=False)
         for table_name, table in reduced_submission.items():
             table.to_excel(writer, sheet_name=table_name, index=False)
 
@@ -205,13 +197,13 @@ def encode_sites(sites: list[int]) -> str:
     return base64.urlsafe_b64encode(struct.pack(f'{len(sites)}I', *sites)).decode().rstrip('=')
 
 
-def load_test_submission(excel_filename: str, test_sites: list[int], filename: str, force: bool) -> SubmissionData:
+def load_test_submission(excel_filename: str, test_sites: list[int], filename: str, force: bool) -> Submission:
     """Load test data from Excel file, stores and loads pickled data if exists for better performance."""
     basename: str = os.path.splitext(os.path.basename(filename))[0]
     pickled_filename: str = f"{basename}_{encode_sites(test_sites)}.pkl"
     if not os.path.isfile(pickled_filename) or force:
         metadata: Metadata = Metadata(db_uri=get_db_uri())
-        submission: SubmissionData = load_excel(metadata=metadata, source=excel_filename)
+        submission: Submission = Submission.load(metadata=metadata, source=excel_filename)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)
     else:

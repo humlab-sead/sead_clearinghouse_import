@@ -7,7 +7,7 @@ import pandas as pd
 from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
-from importer.submission import SubmissionData, load_excel
+from importer.submission import Submission
 
 
 def test_create_options():
@@ -58,7 +58,7 @@ def test_import_reduced_submission():
 
     metadata: Metadata = Metadata(opts.db_uri())
 
-    submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
+    submission: Submission = Submission.load(metadata=metadata, source=opts.filename)
 
     service: ImportService = ImportService(metadata=metadata, opts=opts)
     service.process(submission=submission)
@@ -66,10 +66,10 @@ def test_import_reduced_submission():
     assert filecmp.cmp(target_filename, expected_filename, shallow=False)
 
 
-def load_or_cache_submission(opts, metadata) -> SubmissionData:
+def load_or_cache_submission(opts, metadata) -> Submission:
     pickled_filename: str = f"{opts.basename}.pkl"
     if not os.path.isfile(pickled_filename):
-        submission: SubmissionData = load_excel(metadata=metadata, source=opts.filename)
+        submission: Submission = Submission.load(metadata=metadata, source=opts.filename)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)
     else:

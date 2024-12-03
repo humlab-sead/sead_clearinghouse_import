@@ -3,7 +3,7 @@ import pytest
 from importer.configuration import ConfigStore
 from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
-from importer.submission import SubmissionData, load_excel
+from importer.submission import Submission
 from tests.utility import get_db_uri
 
 # pylint: disable=redefined-outer-name
@@ -35,5 +35,5 @@ def metadata() -> Metadata:
 
 
 @pytest.fixture(scope="session")
-def submission(metadata: Metadata) -> SubmissionData:
-    return load_excel(metadata=metadata, source=ConfigValue("test:reduced_excel_filename").resolve())
+def submission(metadata: Metadata) -> Submission:
+    return Submission.load(metadata=metadata, source=ConfigValue("test:reduced_excel_filename").resolve())
