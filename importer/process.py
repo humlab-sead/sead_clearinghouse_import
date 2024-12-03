@@ -2,13 +2,14 @@ import io
 import time
 from dataclasses import dataclass, field
 from os.path import basename, join, splitext
+from typing import Type
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 
 from importer.configuration.inject import ConfigValue
-from .dispatchers import to_xml
+from .dispatchers import IDispatcher, to_xml
 
 from . import DataImportError, utility
 from .metadata import Metadata, Table
@@ -74,20 +75,20 @@ class ImportService:
         opts: Options,
         metadata: Metadata = None,
         repository: SubmissionRepository = None,
-        xml_processor: to_xml.XmlProcessor = None,
+        dispatcher_cls: Type[IDispatcher] = None,
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(
             opts.db_opts, uploader=opts.transfer_format
         )
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
-        self.xml_processor: to_xml.XmlProcessor = xml_processor or to_xml.XmlProcessor
+        self.dispatcher_cls: Type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(
             metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
 
-    @utility.log_decorator(enter_message=" ---> generating XML file...", exit_message=" ---> XML created")
-    def to_xml(self, submission: Submission, format_document: bool = False) -> str:
+    @utility.log_decorator(enter_message=" ---> generating target file(s)...", exit_message=" ---> target file(s) created")
+    def dispatch(self, submission: Submission, format_document: bool = False) -> str:
         """
         Reads Excel files and convert content to an CH XML-file.
         Stores submission in output_filename and returns filename for a cleaned up version of the XML
@@ -96,12 +97,12 @@ class ImportService:
         update_missing_system_id_to_public_id(self.metadata, submission)
 
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
-            self.xml_processor(outstream).process(self.metadata, submission, self.opts.table_names)
+            self.dispatcher_cls(outstream).dispatch(self.metadata, submission, self.opts.table_names)
 
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)
 
-        logger.info(f" ---> XML file created: {self.opts.target}")
+        logger.info(f" ---> target file created: {self.opts.target}")
 
         return self.opts.target
 
@@ -134,7 +135,7 @@ class ImportService:
                 opts.xml_filename = (
                     submission
                     if isinstance(submission, str)
-                    else self.to_xml(submission, format_document=opts.tidy_xml)
+                    else self.dispatch(submission, format_document=opts.tidy_xml)
                 )
 
                 if opts.register:

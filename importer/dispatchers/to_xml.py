@@ -211,7 +211,7 @@ class XmlProcessor(IDispatcher):
             )
             self.emit(xml)
 
-    def process(
+    def dispatch(
         self,
         metadata: Metadata,
         submission: Submission,
