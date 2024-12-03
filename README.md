@@ -30,10 +30,8 @@ Usage: import_excel.py [OPTIONS] FILENAME
   processed and stored as an XML  file conforming to the clearinghouse data
   import XML schema. The Excel file
   must satisfy the following requirements: - The file must be in the Excel
-  2007+ format (xlsx) - The file must contain a sheet named `data_table_index'
-  listing all tables in the submission having new or changed data. - The file
-  must contain a sheet named as in SEADe' for each table in the submission.
-
+  2007+ format (xlsx) -
+  
 Options:
   -t, --data-types TEXT         Types of data (short description)  [required]
   --output-folder TEXT          Output folder
