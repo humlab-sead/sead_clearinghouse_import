@@ -6,13 +6,34 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}"
             }
+        },
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "purpose": [
+                "debug-test"
+            ],
+            "name": "PyTest",
+            "stopOnEntry": false,
+            // "python": "${command:python.interpreterPath}",
+            "justMyCode": true,
+            // "envFile": "${workspaceRoot}/.venv",
+            "cwd": "${workspaceRoot}",
+            "console": "internalConsole",
+            "redirectOutput": true,
+            "args": [
+                "-sv"
+            ],
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}"
+            },
         }
     ]
 }
