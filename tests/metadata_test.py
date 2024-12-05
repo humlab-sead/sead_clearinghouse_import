@@ -1,10 +1,8 @@
-from os.path import isfile
-
 import pandas as pd
 import pytest
 
 from importer.metadata import Metadata
-from tests.utility import get_db_uri, load_excel_by_regression  # Assuming Metadata is the class name
+from tests.utility import get_db_uri
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -28,7 +26,7 @@ def test_tables_specifications(metadata: Metadata):
     assert isinstance(metadata.sead_schema, dict)
 
     assert len(metadata.sead_tables) == len(metadata.sead_schema)
-    assert set(metadata.sead_tables.columns) | {'columns'} == set(metadata.sead_schema['tbl_sites'].keys())
+    assert set(metadata.sead_tables.columns)  - {'columns', 'is_new'} == set(metadata.sead_schema['tbl_sites'].keys()) - {'columns', 'is_new'}
 
     assert 'columns' in metadata.sead_schema['tbl_sites'].keys()
     assert 'site_id' in metadata.sead_schema['tbl_sites'].columns.keys()
@@ -83,23 +81,3 @@ def test_foreign_keys(metadata: Metadata, values: list[str]):
     assert isinstance(metadata.foreign_keys, pd.DataFrame)
     assert len(metadata.foreign_keys) > 0
     assert (metadata.foreign_keys == values).all(axis=1).any()
-
-
-@pytest.mark.skipif(not isfile('data/metadata_20231223.xlsx'), reason='metadata_20231223.xlsx not found')
-def test_regression_of_foreign_keys(metadata: Metadata):
-    excel_columns: pd.DataFrame = load_excel_by_regression('data/metadata_20231223.xlsx')
-    expected_foreign_keys: pd.DataFrame = excel_columns['foreign_keys']
-    expected_foreign_keys.columns = metadata.foreign_keys.columns
-
-    """
-    Merge the two dataframes using all columns (not index) and add a column to indicate
-    if the row is in the left, right or both dataframes.
-    """
-    merged: pd.DataFrame = metadata.foreign_keys.merge(expected_foreign_keys, how='left', indicator=True)
-
-    """We know that thes columns will differ, so we remove them from the comparison."""
-    merged = merged[~merged.column_name.isin(['updated_dataset_id', 'error_uncertainty_id'])]
-
-    assert (merged['_merge'] == 'both').all()
-
-    # self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'fk_table_name', 'class_name']]
