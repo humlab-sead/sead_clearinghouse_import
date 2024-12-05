@@ -1,3 +1,4 @@
+import contextlib
 import logging
 import numbers
 from typing import Any
@@ -20,6 +21,21 @@ LOOKUP_TEMPLATE: str = """
 {% endfor -%}
 </{{class_name}}>
 """
+
+
+def _to_int_or_none(value: Any) -> int | None:
+    with contextlib.suppress(Exception):
+        if value is None or pd.isna(value):
+            return None
+        return int(value)
+    return value
+
+
+def _to_none(value: Any) -> int | None:
+    with contextlib.suppress(Exception):
+        if value is None or pd.isna(value):
+            return None
+    return value
 
 
 class XmlProcessor(IDispatcher):
@@ -67,25 +83,34 @@ class XmlProcessor(IDispatcher):
             if data_table is None:
                 continue
 
+            if data_table.shape[0] == 0:
+                continue
+                
             self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
 
-            for index, record in data_table.iterrows():
+            #datarows = [x for x in data_table.iterrows()]
+            # for index, record in enumerate(data_table.to_dict(orient='records')):
+            for record in data_table.to_dict(orient='records'):
                 try:
-                    data_row: dict = record.to_dict()
-                    public_id: int = data_row[table_spec.pk_name] if table_spec.pk_name in data_row else np.NAN
+                    data_row: dict = record # record.to_dict()
 
-                    if np.isnan(public_id) and np.isnan(data_row["system_id"]):
+                    public_id: int | None = _to_int_or_none(
+                        data_row[table_spec.pk_name] if table_spec.pk_name in data_row else None
+                    )
+                    system_id: int | None = _to_int_or_none(data_row["system_id"])
+
+                    if public_id is None and system_id is None:
                         logger.warning(f"Table {table_name}: Skipping row since both CloneId and SystemID is NULL")
                         continue
 
-                    system_id = int(data_row["system_id"] if not np.isnan(data_row["system_id"]) else public_id)
+                    if system_id is None:
+                        system_id = public_id
 
                     referenced_keyset.discard(system_id)
 
-                    assert not (np.isnan(public_id) and np.isnan(system_id))
+                    assert not (public_id is None and system_id is None)
 
-                    if not np.isnan(public_id):
-                        public_id = int(public_id)
+                    if public_id is not None:
                         self.emit(f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
                         continue
 
@@ -96,29 +121,27 @@ class XmlProcessor(IDispatcher):
                             continue
 
                         if column_name not in data_row.keys():
-                            logger.warning(
-                                f"Table {table_name}, FK column {column_name}: META field name not found in submission"
-                            )
+                            logger.warning(f"Table {table_name}, column {column_name} not found in submission")
                             continue
 
                         if not column_spec.is_fk:
                             self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
                         else:
                             fk_table_spec: str = metadata[column_spec.class_name]
-                            fk_data_table: pd.DataFrame = submission.data_tables[fk_table_spec.table_name]
+                            fk_data_table: pd.DataFrame = submission.data_tables.get(fk_table_spec.table_name)
                             self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
                     # ClonedId tag is always emitted (NULL id missing)
                     self.emit(
-                        f'<clonedId class="java.util.Integer">{"NULL" if np.isnan(public_id) else int(public_id)}</clonedId>',
+                        f'<clonedId class="java.util.Integer">{"NULL" if public_id is None else public_id}</clonedId>',
                         3,
                     )
                     self.emit('<dateUpdated class="java.util.Date"/>', 3)
 
                     self.emit(f"</{table_namespace}>", 2)
 
-                    if 0 < max_rows < index:
-                        break
+                    # if 0 < max_rows < index:
+                    #     break
 
                 except Exception as x:
                     logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
@@ -132,42 +155,40 @@ class XmlProcessor(IDispatcher):
                     self.emit(f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2)
             self.emit(f"</{table_spec.java_class}>", 1)
 
-    def process_fk(
-        self, data_row: dict, column_spec: Column, fk_table_spec: Table, fk_data_table: pd.DataFrame
-    ) -> None:
+    def process_fk(self, data_row: dict, column: Column, fk_table_spec: Table, fk_data_table: pd.DataFrame) -> None:
         """The value is a FK system_id"""
-        class_name: str = column_spec.class_name
-        camel_case_column_name: str = column_spec.camel_case_column_name
+        class_name: str = column.class_name
+        camel_case_column_name: str = column.camel_case_column_name
 
         if fk_table_spec.table_name is None:
             logger.warning(
-                f"Table {column_spec.table_name}, FK column {column_spec.column_name}: unable to resolve FK class {class_name}"
+                f"Table {column.table_name}, FK column {column.column_name}: unable to resolve FK class {class_name}"
             )
             return
 
-        value: Any = data_row[column_spec.column_name]
-        if np.isnan(value):
+        fk_system_id: int | None = _to_int_or_none(data_row[column.column_name])
+        if fk_system_id is None:
             self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>', 3)
             return
 
-        fk_system_id: int = int(value)
+        fk_public_id: int | None = None
         if fk_data_table is None:
             fk_public_id = fk_system_id
         else:
-            if column_spec.column_name not in fk_data_table.columns:
+            if column.column_name not in fk_data_table.columns:
                 logger.warning(
-                    f"Table {column_spec.table_name}, FK column {column_spec.column_name}: FK column not found in {fk_table_spec.table_name}, id={fk_system_id}"
+                    f"Table {column.table_name}, FK column {column.column_name}: FK column not found in {fk_table_spec.table_name}, id={fk_system_id}"
                 )
                 return
             fk_data_row: pd.DataFrame = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]
             if fk_data_row.empty or len(fk_data_row) != 1:
-                fk_public_id: int = fk_system_id
+                fk_public_id = fk_system_id
             else:
-                fk_public_id = fk_data_row[column_spec.column_name].iloc[0]
+                fk_public_id = _to_int_or_none(fk_data_row[column.column_name].iloc[0])
 
         class_name = class_name.split(".")[-1]
 
-        if np.isnan(fk_public_id):
+        if fk_public_id is None:
             self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>', 3)
         else:
             self.emit(
@@ -175,21 +196,20 @@ class XmlProcessor(IDispatcher):
                 3,
             )
 
-    def process_pk_and_non_fk(self, data_row: dict, public_id: int, system_id: int, column_spec: Column):
+    def process_pk_and_non_fk(self, data_row: dict, public_id: int | None, system_id: int | None, column: Column):
         """The value is a PK or non-FK attribte"""
-        value = data_row[column_spec.column_name]
-        class_name: str = column_spec.class_name
+        value: Any = data_row[column.column_name]
 
-        if column_spec.is_pk:
-            value = int(public_id) if not np.isnan(public_id) else system_id
-        elif isinstance(value, numbers.Number) and np.isnan(value):
+        if column.is_pk:
+            value = int(public_id) if public_id is not None else system_id
+        elif _to_none(value) is None:
             value = "NULL"
         else:
             if isinstance(value, str) and any((c in "<>&") for c in value):
                 value: str = escape(value)
 
         self.emit(
-            f'<{column_spec.camel_case_column_name} class="{class_name}">{value}</{column_spec.camel_case_column_name}>',
+            f'<{column.camel_case_column_name} class="{column.class_name}">{value}</{column.camel_case_column_name}>',
             3,
         )
 
@@ -205,9 +225,8 @@ class XmlProcessor(IDispatcher):
                 logger.info(f"Skipping {table_name}: not referenced")
                 continue
 
-            class_name: str = metadata[table_name].java_class
             xml: str = template.render(
-                lookup_ids=referenced_keyset, class_name=class_name, length=len(referenced_keyset)
+                lookup_ids=referenced_keyset, class_name=metadata[table_name].java_class, length=len(referenced_keyset)
             )
             self.emit(xml)
 
