@@ -1,10 +1,6 @@
 <?xml version="1.0" ?>
 <sead-data-upload>
 
-<TblAbundanceElements length="1">
- <com.sead.database.TblAbundanceElements id="44" clonedId="44"/>
-</TblAbundanceElements>
-
 <TblAgeTypes length="1">
  <com.sead.database.TblAgeTypes id="1" clonedId="1"/>
 </TblAgeTypes>
@@ -18,10 +14,6 @@
  <com.sead.database.TblBiblio id="352" clonedId="352"/>
  <com.sead.database.TblBiblio id="129" clonedId="129"/>
 </TblBiblio>
-
-<TblContactTypes length="1">
- <com.sead.database.TblContactTypes id="2" clonedId="2"/>
-</TblContactTypes>
 
 <TblContacts length="4">
  <com.sead.database.TblContacts id="56" clonedId="56"/>
@@ -46,12 +38,6 @@
 <TblDatasetMasters length="1">
  <com.sead.database.TblDatasetMasters id="10" clonedId="10"/>
 </TblDatasetMasters>
-
-<TblDatasetSubmissionTypes length="3">
- <com.sead.database.TblDatasetSubmissionTypes id="10" clonedId="10"/>
- <com.sead.database.TblDatasetSubmissionTypes id="3" clonedId="3"/>
- <com.sead.database.TblDatasetSubmissionTypes id="5" clonedId="5"/>
-</TblDatasetSubmissionTypes>
 
 <TblDendroLookup length="14">
  <com.sead.database.TblDendroLookup id="128" clonedId="128"/>
@@ -83,14 +69,6 @@
  <com.sead.database.TblMethods id="10" clonedId="10"/>
 </TblMethods>
 
-<TblProjectStages length="1">
- <com.sead.database.TblProjectStages id="6" clonedId="6"/>
-</TblProjectStages>
-
-<TblProjectTypes length="1">
- <com.sead.database.TblProjectTypes id="8" clonedId="8"/>
-</TblProjectTypes>
-
 <TblSampleDescriptionTypes length="1">
  <com.sead.database.TblSampleDescriptionTypes id="30" clonedId="30"/>
 </TblSampleDescriptionTypes>
@@ -106,10 +84,6 @@
  <com.sead.database.TblSampleGroupDescriptionTypes id="62" clonedId="62"/>
 </TblSampleGroupDescriptionTypes>
 
-<TblSampleGroupSamplingContexts length="1">
- <com.sead.database.TblSampleGroupSamplingContexts id="17" clonedId="17"/>
-</TblSampleGroupSamplingContexts>
-
 <TblSampleLocationTypes length="6">
  <com.sead.database.TblSampleLocationTypes id="72" clonedId="72"/>
  <com.sead.database.TblSampleLocationTypes id="73" clonedId="73"/>
@@ -119,10 +93,6 @@
  <com.sead.database.TblSampleLocationTypes id="77" clonedId="77"/>
 </TblSampleLocationTypes>
 
-<TblSampleTypes length="1">
- <com.sead.database.TblSampleTypes id="12" clonedId="12"/>
-</TblSampleTypes>
-
 <TblSeasons length="1">
  <com.sead.database.TblSeasons id="3" clonedId="3"/>
 </TblSeasons>
@@ -130,13 +100,16 @@
 <TblTaxaTreeMaster length="1">
  <com.sead.database.TblTaxaTreeMaster id="18197" clonedId="18197"/>
 </TblTaxaTreeMaster>
+  <TblAbundanceElements length="1">
+    <com.sead.database.TblAbundanceElements id="44" clonedId="44"/>
+  </TblAbundanceElements>
   <TblAbundances length="2">
     <com.sead.database.TblAbundances id="3930">
       <abundanceId class="java.lang.Integer">3930</abundanceId>
       <taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4191"/>
       <abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>
-      <abundance class="java.lang.Integer">1.0</abundance>
+      <abundance class="java.lang.Integer">1</abundance>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAbundances>
@@ -145,7 +118,7 @@
       <taxonId class="com.sead.database.TblTaxaTreeMaster" id="18197" clonedId="18197"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="4192"/>
       <abundanceElementId class="com.sead.database.TblAbundanceElements" id="44" clonedId="44"/>
-      <abundance class="java.lang.Integer">1.0</abundance>
+      <abundance class="java.lang.Integer">1</abundance>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAbundances>
@@ -236,6 +209,9 @@
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblAnalysisEntities>
   </TblAnalysisEntities>
+  <TblContactTypes length="1">
+    <com.sead.database.TblContactTypes id="2" clonedId="2"/>
+  </TblContactTypes>
   <TblDatasetContacts length="12">
     <com.sead.database.TblDatasetContacts id="4191">
       <datasetContactId class="java.lang.Integer">4191</datasetContactId>
@@ -334,6 +310,11 @@
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblDatasetContacts>
   </TblDatasetContacts>
+  <TblDatasetSubmissionTypes length="3">
+    <com.sead.database.TblDatasetSubmissionTypes id="3" clonedId="3"/>
+    <com.sead.database.TblDatasetSubmissionTypes id="5" clonedId="5"/>
+    <com.sead.database.TblDatasetSubmissionTypes id="10" clonedId="10"/>
+  </TblDatasetSubmissionTypes>
   <TblDatasetSubmissions length="36">
     <com.sead.database.TblDatasetSubmissions id="12188">
       <datasetSubmissionId class="java.lang.Integer">12188</datasetSubmissionId>
@@ -1053,7 +1034,7 @@
       <dendroLookupId class="com.sead.database.TblDendroLookup" id="137" clonedId="137"/>
       <ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14223"/>
-      <ageOlder class="java.lang.Integer">1774.0</ageOlder>
+      <ageOlder class="java.lang.Integer">1774</ageOlder>
       <ageYounger class="java.lang.Integer">NULL</ageYounger>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
@@ -1065,7 +1046,7 @@
       <dendroLookupId class="com.sead.database.TblDendroLookup" id="137" clonedId="137"/>
       <ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="14224"/>
-      <ageOlder class="java.lang.Integer">1865.0</ageOlder>
+      <ageOlder class="java.lang.Integer">1865</ageOlder>
       <ageYounger class="java.lang.Integer">NULL</ageYounger>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
@@ -1077,7 +1058,7 @@
       <dendroLookupId class="com.sead.database.TblDendroLookup" id="134" clonedId="134"/>
       <ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="29267"/>
-      <ageOlder class="java.lang.Integer">1774.0</ageOlder>
+      <ageOlder class="java.lang.Integer">1774</ageOlder>
       <ageYounger class="java.lang.Integer">NULL</ageYounger>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
@@ -1089,7 +1070,7 @@
       <dendroLookupId class="com.sead.database.TblDendroLookup" id="134" clonedId="134"/>
       <ageTypeId class="com.sead.database.TblAgeTypes" id="1" clonedId="1"/>
       <analysisEntityId class="com.sead.database.TblAnalysisEntities" id="29268"/>
-      <ageOlder class="java.lang.Integer">1865.0</ageOlder>
+      <ageOlder class="java.lang.Integer">1865</ageOlder>
       <ageYounger class="java.lang.Integer">NULL</ageYounger>
       <clonedId class="java.util.Integer">NULL</clonedId>
       <dateUpdated class="java.util.Date"/>
@@ -1118,6 +1099,12 @@
     </com.sead.database.TblPhysicalSamples>
     <com.sead.database.TblPhysicalSamples id="11952" clonedId="11952"/>
   </TblPhysicalSamples>
+  <TblProjectStages length="1">
+    <com.sead.database.TblProjectStages id="6" clonedId="6"/>
+  </TblProjectStages>
+  <TblProjectTypes length="1">
+    <com.sead.database.TblProjectTypes id="8" clonedId="8"/>
+  </TblProjectTypes>
   <TblProjects length="1">
     <com.sead.database.TblProjects id="550">
       <projectId class="java.lang.Integer">550</projectId>
@@ -1133,7 +1120,7 @@
   <TblSampleAltRefs length="2">
     <com.sead.database.TblSampleAltRefs id="2095">
       <sampleAltRefId class="java.lang.Integer">2095</sampleAltRefId>
-      <altRef class="java.lang.String">1.0</altRef>
+      <altRef class="java.lang.String">1</altRef>
       <altRefTypeId class="com.sead.database.TblAltRefTypes" id="2" clonedId="2"/>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53971"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
@@ -1141,7 +1128,7 @@
     </com.sead.database.TblSampleAltRefs>
     <com.sead.database.TblSampleAltRefs id="2096">
       <sampleAltRefId class="java.lang.Integer">2096</sampleAltRefId>
-      <altRef class="java.lang.String">2.0</altRef>
+      <altRef class="java.lang.String">2</altRef>
       <altRefTypeId class="com.sead.database.TblAltRefTypes" id="2" clonedId="2"/>
       <physicalSampleId class="com.sead.database.TblPhysicalSamples" id="53972"/>
       <clonedId class="java.util.Integer">NULL</clonedId>
@@ -1252,6 +1239,9 @@
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblSampleGroupNotes>
   </TblSampleGroupNotes>
+  <TblSampleGroupSamplingContexts length="1">
+    <com.sead.database.TblSampleGroupSamplingContexts id="17" clonedId="17"/>
+  </TblSampleGroupSamplingContexts>
   <TblSampleGroups length="1">
     <com.sead.database.TblSampleGroups id="11952">
       <sampleGroupId class="java.lang.Integer">11952</sampleGroupId>
@@ -1373,6 +1363,9 @@
       <dateUpdated class="java.util.Date"/>
     </com.sead.database.TblSampleNotes>
   </TblSampleNotes>
+  <TblSampleTypes length="1">
+    <com.sead.database.TblSampleTypes id="12" clonedId="12"/>
+  </TblSampleTypes>
   <TblSiteLocations length="6">
     <com.sead.database.TblSiteLocations id="391">
       <siteLocationId class="java.lang.Integer">391</siteLocationId>
