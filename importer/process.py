@@ -94,8 +94,6 @@ class ImportService:
         Stores submission in output_filename and returns filename for a cleaned up version of the XML
         """
 
-        update_missing_system_id_to_public_id(self.metadata, submission)
-
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
             self.dispatcher_cls(outstream).dispatch(self.metadata, submission, self.opts.table_names)
 
@@ -153,31 +151,3 @@ class ImportService:
         except SpecificationError:
             logger.exception(f"aborted critical error {opts.basename}")
 
-
-def update_missing_system_id_to_public_id(metadata: Metadata, submission: Submission) -> None:
-    """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
-    for table_name in submission.data_tables.keys():
-        try:
-            data_table: pd.DataFrame = submission.data_tables[table_name]
-            table_spec: Table = metadata[table_name]
-
-            pk_name: str = table_spec.pk_name
-
-            if pk_name == "ceramics_id":
-                pk_name = "ceramic_id"
-
-            if data_table is None or pk_name not in data_table.columns:
-                continue
-
-            if "system_id" not in data_table.columns:
-                raise DataImportError(f'critical error Table {table_name} has no column named "system_id"')
-
-            # Update system_id to public_id if isnan. This should be avoided though.
-            data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
-                np.isnan(data_table.system_id), pk_name
-            ]
-
-        except DataImportError as _:
-            logger.error(f"error {table_name} when updating system_id ")
-            logger.exception("update_system_id")
-            continue
