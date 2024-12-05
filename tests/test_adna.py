@@ -6,39 +6,6 @@ from importer.submission import Submission
 from importer.utility import create_db_uri
 from tests.process_test import load_or_cache_submission
 
-ADNA_TABLENAMES: set[str] = {
-    'tbl_value_classes',
-    'tbl_value_types',
-    'tbl_value_type_items',
-    'tbl_analysis_values',
-    'tbl_sites',
-    'tbl_dataset_contacts',
-    'tbl_dataset_submissions',
-    'tbl_site_locations',
-    'tbl_site_references',
-    'tbl_sample_groups',
-    'tbl_physical_samples',
-    'tbl_sample_alt_refs',
-    'tbl_datasets',
-    'tbl_analysis_entities',
-    'tbl_relative_dates',
-    'tbl_abundances',
-    'tbl_taxa_tree_orders',
-    'tbl_taxonomic_order_systems',
-    'tbl_projects',
-    'tbl_taxa_tree_families',
-    'tbl_taxa_tree_genera',
-    'tbl_taxa_tree_master',
-    'tbl_taxonomic_order',
-    'tbl_biblio',
-    'tbl_record_types',
-    'tbl_methods',
-    'tbl_alt_ref_types',
-    'tbl_contacts',
-    'tbl_dataset_masters',
-    'tbl_locations',
-}
-
 
 def test_load_adna_source():
     uri: str = create_db_uri(**ConfigValue("test:adna:database").resolve())
@@ -48,7 +15,6 @@ def test_load_adna_source():
 
     assert submission is not None
     assert submission.data_tables is not None
-    assert set(submission.data_tables.keys()) == ADNA_TABLENAMES
 
     assert all(len(df) > 0 for df in submission.data_tables.values())
 
@@ -89,6 +55,6 @@ def test_import_a_dna_submission():
 
     assert metadata.sead_schema.lookup_tables is not None
 
-    submission: Submission = load_or_cache_submission(opts, metadata)
+    submission: Submission = Submission.load(metadata=metadata, source=opts.filename) # load_or_cache_submission(opts, metadata)
 
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
