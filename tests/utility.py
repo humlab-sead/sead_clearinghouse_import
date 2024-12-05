@@ -15,73 +15,73 @@ from importer.utility import create_db_uri
 def get_db_uri() -> str:
     return create_db_uri(**ConfigValue("options:db_opts").resolve())
 
+# @deprecated('table_name_index data sheet has been removed')
+# def load_excel_by_regression(filename: str) -> dict[str, pd.DataFrame]:
+#     def recode_excel_sheet_name(row):
+#         value = row['excel_sheet']
+#         if pd.notnull(value) and len(value) > 0 and value != 'nan':
+#             return value
+#         return row['table_name']
 
-def load_excel_by_regression(filename: str) -> dict[str, pd.DataFrame]:
-    def recode_excel_sheet_name(row):
-        value = row['excel_sheet']
-        if pd.notnull(value) and len(value) > 0 and value != 'nan':
-            return value
-        return row['table_name']
+#     tables: pd.DataFrame = pd.read_excel(
+#         filename,
+#         'Tables',
+#         dtype={'table_name': 'str', 'java_class': 'str', 'pk_name': 'str', 'excel_sheet': 'str', 'notes': 'str'},
+#     )
 
-    tables: pd.DataFrame = pd.read_excel(
-        filename,
-        'Tables',
-        dtype={'table_name': 'str', 'java_class': 'str', 'pk_name': 'str', 'excel_sheet': 'str', 'notes': 'str'},
-    )
+#     columns: pd.DataFrame = pd.read_excel(
+#         filename,
+#         'Columns',
+#         dtype={
+#             'table_name': 'str',
+#             'column_name': 'str',
+#             'nullable': 'str',
+#             'type': 'str',
+#             'type2': 'str',
+#             'class': 'str',
+#         },
+#     )
 
-    columns: pd.DataFrame = pd.read_excel(
-        filename,
-        'Columns',
-        dtype={
-            'table_name': 'str',
-            'column_name': 'str',
-            'nullable': 'str',
-            'type': 'str',
-            'type2': 'str',
-            'class': 'str',
-        },
-    )
+#     tables['table_name_index'] = tables['table_name']
+#     tables = tables.set_index('table_name_index')
 
-    tables['table_name_index'] = tables['table_name']
-    tables = tables.set_index('table_name_index')
+#     tables['excel_sheet'] = tables.apply(recode_excel_sheet_name, axis=1)
 
-    tables['excel_sheet'] = tables.apply(recode_excel_sheet_name, axis=1)
+#     primary_keys: pd.DataFrame = pd.merge(
+#         tables,
+#         columns,
+#         how='inner',
+#         left_on=['table_name', 'pk_name'],
+#         right_on=['table_name', 'column_name'],
+#     )[['table_name', 'column_name', 'java_class']]
+#     primary_keys.columns = ['table_name', 'column_name', 'class_name']
 
-    primary_keys: pd.DataFrame = pd.merge(
-        tables,
-        columns,
-        how='inner',
-        left_on=['table_name', 'pk_name'],
-        right_on=['table_name', 'column_name'],
-    )[['table_name', 'column_name', 'java_class']]
-    primary_keys.columns = ['table_name', 'column_name', 'class_name']
+#     foreign_keys: pd.DataFrame = pd.merge(
+#         columns,
+#         primary_keys,
+#         how='inner',
+#         left_on=['column_name', 'class'],
+#         right_on=['column_name', 'class_name'],
+#     )[['table_name_x', 'column_name', 'table_name_y', 'class_name']]
+#     foreign_keys = foreign_keys[foreign_keys.table_name_x != foreign_keys.table_name_y]
 
-    foreign_keys: pd.DataFrame = pd.merge(
-        columns,
-        primary_keys,
-        how='inner',
-        left_on=['column_name', 'class'],
-        right_on=['column_name', 'class_name'],
-    )[['table_name_x', 'column_name', 'table_name_y', 'class_name']]
-    foreign_keys = foreign_keys[foreign_keys.table_name_x != foreign_keys.table_name_y]
+#     foreign_keys_lookup: dict[str, bool] = {
+#         x: True for x in list(foreign_keys.table_name_x + '#' + foreign_keys.column_name)
+#     }
 
-    foreign_keys_lookup: dict[str, bool] = {
-        x: True for x in list(foreign_keys.table_name_x + '#' + foreign_keys.column_name)
-    }
+#     primary_keys_lookup: dict[str, bool] = {x: True for x in tables.table_name + '#' + tables.pk_name}
 
-    primary_keys_lookup: dict[str, bool] = {x: True for x in tables.table_name + '#' + tables.pk_name}
+#     classname_cache: dict[str, dict] = tables.set_index('java_class')['table_name'].to_dict()
 
-    classname_cache: dict[str, dict] = tables.set_index('java_class')['table_name'].to_dict()
-
-    return {
-        'tables': tables,
-        'columns': columns,
-        'primary_keys': primary_keys,
-        'foreign_keys': foreign_keys,
-        'foreign_keys_lookup': foreign_keys_lookup,
-        'primary_keys_lookup': primary_keys_lookup,
-        'classname_cache': classname_cache,
-    }
+#     return {
+#         'tables': tables,
+#         'columns': columns,
+#         'primary_keys': primary_keys,
+#         'foreign_keys': foreign_keys,
+#         'foreign_keys_lookup': foreign_keys_lookup,
+#         'primary_keys_lookup': primary_keys_lookup,
+#         'classname_cache': classname_cache,
+#     }
 
 
 def add_dummy_row(table: pd.DataFrame, row: list[Any]):
