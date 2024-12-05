@@ -6,7 +6,7 @@ import pytest
 
 from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
-from tests.utility import get_db_uri, load_excel_by_regression
+from tests.utility import get_db_uri
 
 # @pytest.mark.skip(reason="sandbox test")
 # def test_download_sead_comments():
@@ -57,40 +57,3 @@ def test_load_metadata_from_postgres():
     assert isinstance(metadata.sead_tables, pd.DataFrame)
     assert isinstance(metadata.sead_schema, dict)
 
-
-###### REMOVE CODE BELOW WHEN DONE
-@pytest.mark.skipif(not isfile('data/metadata_20231223.xlsx'), reason='metadata_20231223.xlsx not found')
-def test_load_by_sql_is_same_as_load_by_excel(metadata: Metadata):
-    excel_columns: pd.DataFrame = load_excel_by_regression('data/metadata_20231223.xlsx').get('columns')
-    test_tables: list[str] = ConfigValue("test:tables").resolve()
-    excel_columns = excel_columns[excel_columns.table_name.isin(test_tables)]
-
-    assert isinstance(metadata.sead_columns, pd.DataFrame)
-
-    assert len(metadata.sead_columns.shape) == len(excel_columns.shape)
-
-    for table_name in test_tables:
-        # for table_name in ['tbl_dendro_dates']: #test_tables:
-
-        if table_name == 'tbl_dendro_dates':
-            continue
-
-        expected_columns: pd.DataFrame = excel_columns[excel_columns.table_name == table_name]
-        actual_columns: pd.DataFrame = metadata.sead_columns[metadata.sead_columns.table_name == table_name]
-
-        assert len(expected_columns) == len(actual_columns), table_name
-
-        assert actual_columns.table_name.tolist() == expected_columns.table_name.tolist(), table_name
-        assert actual_columns.column_name.tolist() == expected_columns.column_name.tolist(), table_name
-        assert actual_columns.position.tolist() == expected_columns.position.tolist(), table_name
-        assert actual_columns.is_nullable.tolist() == [
-            x == "YES" for x in expected_columns.nullable.tolist()
-        ], table_name
-        assert actual_columns.data_type.tolist() == expected_columns.type.tolist(), table_name
-        assert actual_columns.character_maximum_length.fillna(0).tolist() == [
-            int(x) for x in expected_columns.length.fillna(0).tolist()
-        ], table_name
-        assert actual_columns.class_name.fillna(0).tolist() == expected_columns["class"].fillna(0).tolist(), table_name
-        assert actual_columns.xml_column_name.tolist() == expected_columns.xml_version.tolist(), table_name
-
-    assert True
