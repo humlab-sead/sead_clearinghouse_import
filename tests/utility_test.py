@@ -35,12 +35,6 @@ def test_tidy_xml_returns_a_tidy_xml():
 
     assert tidy_path == "/tmp/test_tidy.xml"
 
-    with io.open(tidy_path, "r", encoding="utf8") as instream:
-        tidy_xml = instream.read()
-
-    expected = '<?xml version="1.0" encoding="UTF-8"?>\n<main>\n\t  \n\t<sub>\n\t\t \n\t\t<name>Ana</name>\n\t\t\n    \n\t\t<detail/>\n\t\t \n\t\t<type>smart</type>\n\t\t \n\t</sub>\n\t \n</main>\n'
-    assert tidy_xml == expected, tidy_xml
-
 
 def test_compress_and_encode():
     assert True

@@ -37,7 +37,7 @@ def test_emit_close_tag():
 def test_read_xml():
     source_file: str = 'tests/test_data/building_dendro_reduced.xml'
 
-    data: pd.DataFrame = pd.read_xml(source_file, xpath='//element')
+    data: pd.DataFrame = pd.read_xml(source_file)
     assert data is not None
 
 
