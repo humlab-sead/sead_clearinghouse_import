@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import numpy as np
 import pandas as pd
 from loguru import logger
 
@@ -109,6 +110,35 @@ class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
 
 
 @UpdatePolicies.register()
+class UpdateTypesBasedOnSeadSchema(PolicyBase):
+    """Rule: update data types based on SEAD schema
+
+    For each table in the submission,
+        update the data types of the columns based on the SEAD schema
+    """
+
+    ID: str = "update_types_based_on_sead_schema"
+
+    def apply(self) -> None:
+
+        for table_name in self.submission.data_tables:
+
+            data_table: pd.DataFrame = self.submission.data_tables[table_name]
+            table_spec: Table = self.metadata[table_name]
+
+            for column_name, column_spec in table_spec.columns.items():
+
+                if column_name not in data_table.columns:
+                    continue
+
+                if column_spec.data_type == 'smallint':
+                    data_table[column_name] = data_table[column_name].astype('Int16')
+                elif column_spec.data_type == 'integer':
+                    data_table[column_name] = data_table[column_name].astype('Int32')
+                elif column_spec.data_type == 'bigint':
+                    data_table[column_name] = data_table[column_name].astype('Int64')
+
+@UpdatePolicies.register()
 class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
     """Rule: assign temporary public primary key to new lookup table rows.
 
@@ -137,3 +167,39 @@ class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
             if data_table[pk_name].isnull().any():
                 data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
                 data_table[pk_name] = data_table[pk_name].astype(int)
+
+@UpdatePolicies.register()
+class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
+    """Rule: assign temporary public primary key to new lookup table rows.
+
+    For new lookup table rows,
+        set the public primary key to the negative of the system_id
+            if all public primary keys are missing
+    In this case, the public primary key is assigned upon submission commit to the database
+    """
+
+    ID: str = "if_system_id_is_missing_set_system_id_to_public_id"
+
+    def apply(self) -> None:
+
+        """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
+        for table_name in self.submission.data_tables:
+
+            data_table: pd.DataFrame = self.submission.data_tables[table_name]
+            table_spec: Table = self.metadata[table_name]
+
+            pk_name: str = table_spec.pk_name
+
+            if pk_name == "ceramics_id":
+                pk_name = "ceramic_id"
+
+            if data_table is None or pk_name not in data_table.columns:
+                continue
+
+            if "system_id" not in data_table.columns:
+                raise ValueError(f'critical error Table {table_name} has no column named "system_id"')
+
+            # Update system_id to public_id if isnan. This should be avoided though.
+            data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
+                np.isnan(data_table.system_id), pk_name
+            ]
