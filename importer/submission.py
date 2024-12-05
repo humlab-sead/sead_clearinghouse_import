@@ -22,7 +22,13 @@ class Submission:
         self.metadata: Metadata = metadata
 
     def __getitem__(self, key: str) -> pd.DataFrame:
-        return self.data_tables[key] if key in self.data_tables else None
+        if key in self.data_tables:
+            return self.data_tables[key]
+        if key in self.metadata:
+            excel_sheet: str = self.metadata[key].excel_sheet
+            if excel_sheet in self.data_tables:
+                return self.data_tables[excel_sheet]
+        return None
 
     def __contains__(self, key: str) -> bool:
         if key in self.data_tables:
@@ -57,11 +63,17 @@ class Submission:
         pk_name: str = metadata[table_name].pk_name
         if pk_name is None:
             return []
-        fk_tables: list[str] = metadata.get_tablenames_referencing(table_name)
+        
+        """Find all tables that reference the given table, and have the PK column i the referencing table's data"""
+        fk_tables: list[str] = [
+            fk_table
+            for fk_table in metadata.get_tablenames_referencing(table_name)
+            if fk_table in self.data_tables and pk_name in self.data_tables[fk_table].columns
+        ]
+
         referenced_pk_ids: list[set] = [
-            set(self.data_tables[fk_table][pk_name].loc[~self.data_tables[fk_table][pk_name].isnull()].tolist())
-            for fk_table in fk_tables
-            if fk_table in self
+            set(series.loc[~series.isnull()].tolist())
+            for series in (self.data_tables[fk_table][pk_name] for fk_table in fk_tables)
         ]
         return set(int(x) for x in functools.reduce(flatten_sets, referenced_pk_ids or [], []))
 
