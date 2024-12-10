@@ -57,7 +57,7 @@ class Submission:
         """Returns a list of all table names included in the submission"""
         return list(self.data_tables.keys())
 
-    def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[str]:
+    def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[int]:
         """Returns all unique system ids in `table_name` that are referenced by any foreign key in any other table.
         NOTE: This function assumes PK and FK names are the same."""
         pk_name: str = metadata[table_name].pk_name
@@ -100,7 +100,7 @@ class Submission:
 
         submission: Submission = Submission(data_tables, metadata)
 
-        for policy in UpdatePolicies.items.values():
+        for policy in UpdatePolicies.get_sorted_items():
             policy(metadata, submission).apply()
 
         return submission
