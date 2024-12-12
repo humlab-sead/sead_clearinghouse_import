@@ -119,7 +119,7 @@ from clearing_house.fn_select_xml_content_records(81)
 With submission_xml_data_rows As (
 	Select x.submission_id,
 		   unnest(xpath('/sead-data-upload/*/*', x.xml)) As xml
-	From clearing_house.tbl_clearinghouse_submissions x
+	From clearing_house.tbl_clearinghouse_submission_xml x
 	Where Not xml Is Null
 	  And xml Is Document
 	  And x.submission_id = 81
