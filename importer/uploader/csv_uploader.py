@@ -4,10 +4,10 @@ from psycopg2.extensions import connection as Connection
 
 from ..utility import log_decorator
 from . import BaseUploader, Uploaders
-from .xml_to_to_csv import xml_to_csv_to_db
+from .xml_to_csv import xml_to_csv_to_db
 
 
-@Uploaders.register(key="xml_to_csv")
+@Uploaders.register(key="csv")
 class XmlToCsvUploader(BaseUploader):
     """Upload submission file to database using CSV files."""
 
