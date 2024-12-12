@@ -121,7 +121,8 @@ class XmlProcessor(IDispatcher):
                             continue
 
                         if column_name not in data_row.keys():
-                            logger.warning(f"Table {table_name}, column {column_name} not found in submission")
+                            if not column_spec.is_nullable or column_name.endswith("_uuid"):
+                                logger.warning(f"Table {table_name}, (not nullable) column {column_name} not found in submission ")
                             continue
 
                         if not column_spec.is_fk:
@@ -222,7 +223,7 @@ class XmlProcessor(IDispatcher):
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
 
             if len(referenced_keyset) == 0:
-                logger.info(f"Skipping {table_name}: not referenced")
+                logger.debug(f"Skipping {table_name}: not referenced")
                 continue
 
             xml: str = template.render(
