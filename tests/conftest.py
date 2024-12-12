@@ -9,7 +9,7 @@ from tests.utility import get_db_uri
 # pylint: disable=redefined-outer-name
 
 ConfigStore.configure_context(
-    source="tests/test_data/config.yml", env_filename="tests/test_data/.env", env_prefix="CLEARINGHOUSE_IMPORT"
+    source="tests/test_data/config.yml", env_filename="tests/test_data/.env", env_prefix="SEAD_IMPORT"
 )
 
 
