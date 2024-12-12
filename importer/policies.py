@@ -7,7 +7,7 @@ import pandas as pd
 from loguru import logger
 
 from .configuration.inject import ConfigValue
-from .metadata import Metadata, Table
+from .metadata import Metadata, SeadSchema, Table
 from .utility import Registry
 
 if TYPE_CHECKING:
@@ -15,13 +15,20 @@ if TYPE_CHECKING:
 
 
 class SubmissionUpdateRegistry(Registry):
-    items: dict = {}
+    items: dict[str, PolicyBase] = {}
+
+    def get_sorted_items(self) -> list[PolicyBase]:
+        return sorted(self.items.values(), key=lambda x: x.SORT_ORDER)
 
 
 UpdatePolicies: SubmissionUpdateRegistry = SubmissionUpdateRegistry()
 
 
 class PolicyBase:
+
+    ID: str = "policy_base"
+    SORT_ORDER: int = 0
+
     def __init__(self, metadata: Metadata, submission: Submission) -> None:
         self.metadata: Metadata = metadata
         self.submission: Submission = submission
@@ -37,13 +44,13 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
             table: Table = self.metadata[table_name]
             if table.pk_name not in data.columns:
                 logger.info(
-                    f"INFO: adding missing primary key column '{table.pk_name}' to '{table_name}' (assuming all new records)"
+                    f"Added missing primary key column '{table.pk_name}' to '{table_name}' (assuming all new records)"
                 )
                 data[table.pk_name] = None
 
 
 @UpdatePolicies.register()
-class AddDefaultContactTypeIfMissingPolicy(PolicyBase):
+class AddDefaultForeignKeyPolicy(PolicyBase):
     """Adds default FK value to DataFrame if it is missing"""
 
     ID: str = "add_default_fk_id_if_missing"
@@ -67,10 +74,10 @@ class AddDefaultContactTypeIfMissingPolicy(PolicyBase):
 
             if fk_name in data.columns:
                 if data[fk_name].isnull().all():
-                    logger.info(f"INFO: adding default value '{fk_value}' to '{fk_name}' in '{table_name}'")
+                    logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
                     data[fk_name] = fk_value
             else:
-                logger.info(f"INFO: adding missing column '{fk_name}' to {table_name} using value '{fk_value}'")
+                logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
                 data[fk_name] = fk_value
 
 
@@ -106,7 +113,7 @@ class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
                 {'system_id': referenced_keys, pk_name: list(referenced_keys)}
             )
 
-            logger.info(f"INFO: table '{table_name}' added to submission with system_id")
+            logger.info(f"Added table '{table_name}' added to submission with identity system_id/{pk_name} mapping")
 
 
 @UpdatePolicies.register()
@@ -138,6 +145,7 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
                 elif column_spec.data_type == 'bigint':
                     data_table[column_name] = data_table[column_name].astype('Int64')
 
+
 @UpdatePolicies.register()
 class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
     """Rule: assign temporary public primary key to new lookup table rows.
@@ -168,6 +176,7 @@ class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
                 data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
                 data_table[pk_name] = data_table[pk_name].astype(int)
 
+
 @UpdatePolicies.register()
 class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
     """Rule: assign temporary public primary key to new lookup table rows.
@@ -181,7 +190,6 @@ class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
     ID: str = "if_system_id_is_missing_set_system_id_to_public_id"
 
     def apply(self) -> None:
-
         """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
         for table_name in self.submission.data_tables:
 
@@ -203,3 +211,46 @@ class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
             data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
                 np.isnan(data_table.system_id), pk_name
             ]
+
+
+@UpdatePolicies.register()
+class IfForeignKeyValueIsMissing_AddIdentityMappingToForeignKeyTable(PolicyBase):
+    """Any foreign key value that is missing in the submission is added to the foreign key table."""
+
+    ID: str = "if_foreignkey_value_is_missing_add_identity_mapping_to_foreignkey_table"
+    SORT_ORDER: int = 1
+
+    def apply(self) -> pd.DataFrame:
+
+        sead_schema: SeadSchema = self.metadata.sead_schema
+
+        for table in sead_schema.lookup_tables:
+
+            table_name: str = table.table_name
+
+            referenced_keys: list[int] = sorted(self.submission.get_referenced_keyset(self.metadata, table_name))
+
+            if not referenced_keys:
+                continue
+
+            if table_name not in self.submission:
+                """This case is handled by another policy"""
+                continue
+
+            data_table: pd.DataFrame = self.submission.data_tables[table_name]
+            pk_name: str = sead_schema[table_name].pk_name
+
+            missing_keys: list[int] = [k for k in referenced_keys if k not in data_table['system_id'].values]
+
+            if not missing_keys:
+                continue
+
+            template: dict[str, int] = {c: None for c in data_table.columns}
+            rows_to_add: list[dict[str, int]] = [
+                template | {'system_id': system_id, pk_name: system_id} for system_id in missing_keys
+            ]
+            data_table = pd.concat([data_table, pd.DataFrame(rows_to_add)], ignore_index=True)
+
+            self.submission.data_tables[table_name] = data_table
+
+            
