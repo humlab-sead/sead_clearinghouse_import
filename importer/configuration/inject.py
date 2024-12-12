@@ -6,7 +6,7 @@ from dataclasses import dataclass, field, fields
 from inspect import isclass
 from typing import Any, Callable, Generic, Self, Type, TypeVar
 
-from ..utility import dget
+from ..utility import dget, recursive_filter_dict, recursive_update
 from .config import Config
 
 T = TypeVar("T", str, int, float)
@@ -109,6 +109,25 @@ class ConfigStore:
         )
 
         return cls._set_config(context=context, cfg=cfg, switch_to_context=switch_to_context)
+
+    @classmethod
+    def consolidate(
+        cls, opts: dict[str, Any], ignore_keys: set[str] = None, context: str = "default", section: str = None
+    ) -> Self:
+
+        if not cls.store.get(context):
+            raise ValueError(f"Config context {context} undefined, cannot consolidate")
+
+        if not section:
+            raise ValueError(f"Config section cannot be undefined, cannot consolidate")
+
+        ignore_keys: set[str] = ignore_keys or set(opts.keys())
+
+        opts = recursive_update(opts, recursive_filter_dict(cls.store[context].get(section, {}), filter_keys=ignore_keys, filter_mode="exclude"))
+
+        cls.store[context].data[section] = opts
+
+        return opts
 
     @classmethod
     def _set_config(
