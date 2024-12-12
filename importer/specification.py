@@ -114,23 +114,20 @@ class SubmissionSpecification(SpecificationBase):
 
         self.messages.uniqify()
 
-        self.log_messages(self.messages.warnings, logging.WARNING)
-        self.log_messages(self.messages.errors, logging.ERROR)
-        self.log_messages(self.messages.infos, logging.INFO)
+        self.log_messages()
 
         if self.raise_errors and len(specification.errors) > 0:
             raise SpecificationError(self.messages)
 
         return len(self.errors) == 0
 
-    def log_messages(self, messages: list[str], level: int) -> None:
-        if len(messages) > 0:
-            for message in messages:
-                try:
-                    logger.log(level, message)
-                except UnicodeEncodeError as ex:
-                    logger.warning("Failed to output warning message")
-                    logger.exception(ex)
+    def log_messages(self) -> None:
+        for message in self.errors:
+            logger.error(message)
+        for message in self.warnings:
+            logger.warning(message)
+        for message in self.infos:
+            logger.info(message)
 
 
 @SpecificationRegistry.register()
