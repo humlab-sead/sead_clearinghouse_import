@@ -1,6 +1,6 @@
 options:
   database:
-    name: sead_staging_development
+    dbname: sead_staging_development
     port: 5433
   log_folder: ./logs
   transfer_format: xml
@@ -55,10 +55,5 @@ test:
     - tbl_site
 
   adna:
-    database:
-      host: humlabseadserv.srv.its.umu.se
-      name: sead_staging_development
-      user: humlab_admin
-      port: 5433
     source:
       filename: data/input/SEAD_aDNA_data_20241114_RM.xlsx

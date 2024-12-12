@@ -8,7 +8,7 @@ from tests.process_test import load_or_cache_submission
 
 
 def test_load_adna_source():
-    uri: str = create_db_uri(**ConfigValue("test:adna:database").resolve())
+    uri: str = create_db_uri(**ConfigValue("options:database").resolve())
     source: str = ConfigValue("test:adna:source:filename").resolve()
     metadata: Metadata = Metadata(uri)
     submission: Submission = Submission.load(metadata=metadata, source=source)
@@ -20,7 +20,7 @@ def test_load_adna_source():
 
 
 def test_adna_tables_specifications():
-    uri: str = create_db_uri(**ConfigValue("test:adna:database").resolve())
+    uri: str = create_db_uri(**ConfigValue("options:database").resolve())
     source: str = ConfigValue("test:adna:source:filename").resolve()
     ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
     metadata: Metadata = Metadata(uri)
@@ -37,7 +37,7 @@ def test_import_a_dna_submission():
         **{
             'filename': ConfigValue("test:adna:source:filename").resolve(),
             'data_types': 'dendrochronology',
-            'database': ConfigValue("test:adna:database").resolve(),
+            'database': ConfigValue("options:database").resolve(),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,

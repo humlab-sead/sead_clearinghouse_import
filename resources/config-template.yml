@@ -1,7 +1,7 @@
 options:
   database:
     host: DBHOST
-    name: DBNAME
+    dbname: DBNAME
     user: DBUSER
     port: DBPORT
   log_folder: ./logs
@@ -57,10 +57,5 @@ test:
     - tbl_site
 
   adna:
-    database:
-      host: DBHOST
-      name: DBNAME
-      user: DBUSER
-      port: DBPORT
     source:
       filename: data/input/SEAD_aDNA_data_20241114_RM.xlsx
