@@ -45,7 +45,6 @@ class Column:
     def camel_case_column_name(self) -> str:
         return camel_case_name(self.column_name)
 
-
 @dataclass
 class Table:
     table_name: str
@@ -86,7 +85,7 @@ class Table:
 
 class SeadSchema(dict[str, Table]):
     @cached_property
-    def sead_schema_by_class(self) -> dict[str, Table]:
+    def sead_schema_by_class(self) -> "SeadSchema":
         return SeadSchema({t.java_class: t for t in self.values()})
 
     def get_table_spec(self, table_name: str) -> Table:
