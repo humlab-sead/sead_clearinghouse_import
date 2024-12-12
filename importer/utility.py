@@ -1,18 +1,70 @@
 import base64
 import functools
+import importlib
 import io
 import logging
 import os
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
-from typing import Any, Callable
+from typing import Any, Callable, Literal
 from xml.dom import minidom
 
 import pandas as pd
 import yaml
 from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+
+def import_sub_modules(module_folder: str) -> Any:
+    __all__ = []
+    # current_dir: str = os.path.dirname(__file__)
+    for filename in os.listdir(module_folder):
+        if filename.endswith(".py") and filename != "__init__.py":
+            module_name: str = filename[:-3]
+            __all__.append(module_name)
+            importlib.import_module(f".{module_name}", package=__name__)
+
+
+def recursive_update(d1: dict, d2: dict) -> dict:
+    """
+    Recursively updates d1 with values from d2. If a value in d1 is a dictionary,
+    and the corresponding value in d2 is also a dictionary, it recursively updates that dictionary.
+    """
+    for key, value in d2.items():
+        if isinstance(value, dict) and key in d1 and isinstance(d1[key], dict):
+            recursive_update(d1[key], value)
+        else:
+            d1[key] = value
+    return d1
+
+
+def recursive_filter_dict(
+    D: dict[str, Any], filter_keys: set[str], filter_mode: Literal['keep', 'exclude'] = 'exclude'
+) -> dict[str, Any]:
+    """
+    Recursively filters a dictionary to include only keys in the given set.
+
+    Args:
+        D (dict): The dictionary to filter.
+        filter_keys (set): The set of keys to keep or exclude.
+        filter_mode (str): mode of operation, either 'keep' or 'exclude'.
+
+    Returns:
+        dict: A new dictionary containing only the keys in K, with nested dictionaries also filtered.
+    """
+    if not isinstance(D, dict):
+        return D
+
+    return {
+        key: (
+            recursive_filter_dict(value, filter_keys=filter_keys, filter_mode=filter_mode)
+            if isinstance(value, dict)
+            else value
+        )
+        for key, value in D.items()
+        if (key in filter_keys if filter_mode == 'keep' else key not in filter_keys)
+    }
 
 
 def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
@@ -91,7 +143,7 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
         if lower_key:
             key = key.lower()
         if key.startswith(prefix.lower()):
-            dotset(data, key[len(prefix) + 1 :], value)
+            dotset(data, key[len(prefix) + 1 :].replace('_', ':'), value)
     return data
 
 
