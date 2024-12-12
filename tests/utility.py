@@ -13,7 +13,7 @@ from importer.utility import create_db_uri
 
 
 def get_db_uri() -> str:
-    return create_db_uri(**ConfigValue("options:db_opts").resolve())
+    return create_db_uri(**ConfigValue("options:database").resolve())
 
 # @deprecated('table_name_index data sheet has been removed')
 # def load_excel_by_regression(filename: str) -> dict[str, pd.DataFrame]:

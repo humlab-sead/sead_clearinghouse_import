@@ -37,7 +37,7 @@ def test_import_a_dna_submission():
         **{
             'filename': ConfigValue("test:adna:source:filename").resolve(),
             'data_types': 'dendrochronology',
-            'db_opts': ConfigValue("test:adna:database").resolve(),
+            'database': ConfigValue("test:adna:database").resolve(),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,

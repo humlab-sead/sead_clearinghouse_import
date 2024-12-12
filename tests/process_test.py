@@ -15,7 +15,7 @@ def test_create_options():
         **{
             'filename': 'data/input/dummy.xlsx',
             'data_types': 'dendrochronology',
-            'db_opts': ConfigValue("options:db_opts").resolve(),
+            'database': ConfigValue("options:database").resolve(),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,
@@ -41,7 +41,7 @@ def test_import_reduced_submission():
         **{
             'filename': 'tests/test_data/building_dendro_reduced.xlsx',
             'data_types': 'dendrochronology',
-            'db_opts': ConfigValue("options:db_opts").resolve(),
+            'database': ConfigValue("options:database").resolve(),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,

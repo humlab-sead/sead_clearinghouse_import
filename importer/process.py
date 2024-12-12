@@ -42,7 +42,7 @@ class Options:
     target: str = field(init=False, default=None)
 
     output_folder: str = field(default="data/output")
-    db_opts: dict[str, str] = field(default_factory=dict)
+    database: dict[str, str] = field(default_factory=dict)
     log_folder: str = field(default="./logs")
     transfer_format: str = field(default="xml")
 
@@ -61,7 +61,7 @@ class Options:
         )
 
     def db_uri(self) -> str:
-        return utility.create_db_uri(**self.db_opts)
+        return utility.create_db_uri(**self.database)
 
     @property
     def use_existing_submission(self) -> bool:
@@ -79,7 +79,7 @@ class ImportService:
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(
-            opts.db_opts, uploader=opts.transfer_format
+            opts.database, uploader=opts.transfer_format
         )
         self.metadata: Metadata = metadata or Metadata(opts.db_uri())
         self.dispatcher_cls: Type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
@@ -115,7 +115,7 @@ class ImportService:
         try:
             opts: Options = self.opts
             if opts.skip is True:
-                logger.info("Skipping: %s", opts.basename)
+                logger.debug("Skipping: %s", opts.basename)
                 return
 
             if isinstance(submission, Submission):
