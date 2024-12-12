@@ -16,7 +16,7 @@ def update_arguments_from_options_file(
     filename_key: str,
     log_args: bool = True,
     ctx: click.Context = None,
-    skip_keys: str = 'ctx,options_filename',
+    skip_keys: str = 'ctx,config_filename',
     suffix: str = None,
 ) -> dict:
     """Updates `arguments` based on values found in file specified by `filename_key`.
@@ -25,8 +25,9 @@ def update_arguments_from_options_file(
     options_filename: Optional[str] = arguments.get(filename_key)
     del arguments[filename_key]
 
-    arguments = utility.update_dict_from_yaml(options_filename, arguments)
-    arguments.update(passed_cli_arguments(ctx, arguments))
+    if options_filename:
+        arguments = utility.update_dict_from_yaml(options_filename, arguments)
+        arguments.update(passed_cli_arguments(ctx, arguments))
 
     for k in skip_keys.split(','):
         if k in arguments:

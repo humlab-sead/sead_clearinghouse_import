@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
+import sys
+from typing import Any
 
 import click
 import dotenv
 from loguru import logger
 
-from importer.configuration.inject import ConfigStore
+from importer.configuration.inject import ConfigStore, ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
@@ -22,11 +24,11 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.argument("filename")
 @click.option('--options-filename', type=str, default=None, help='Name of options file.')
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
-@click.option("--output-folder", type=str, help="Output folder")
-@click.option("--host", "-h", "dbhost", type=str, help="Target database server")
-@click.option("--database", "-d", "dbname", type=str, help="Database name")
-@click.option("--user", "-u", "dbuser", type=str, help="Database user")
-@click.option("--port", "p", "dbport", type=int, default=5432, help="Server port number.")
+@click.option("--output-folder", type=str, help="Output folder", required=True)
+@click.option("--host", "-h", "host", type=str, help="Target database server")
+@click.option("--database", "-d", "name", type=str, help="Database name")
+@click.option("--user", "-u", "user", type=str, help="Database user")
+@click.option("--port", "-p", "port", type=int, default=5432, help="Server port number.")
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
 @click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
 @click.option("--table-names", type=str, default=None, help="Only load specified tables.")
@@ -42,14 +44,16 @@ dotenv.load_dotenv(dotenv.find_dotenv())
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
 @click.option("--transfer-format", type=str, default='xml', help="Explode XML into public tables.")
+@click.pass_context
 def import_file(
+    ctx,
     config_filename: str,
     filename: str,
     data_types: str,
-    dbhost: str,
-    dbname: str,
-    dbuser: str,
-    dbport: str,
+    host: str,
+    name: str,
+    user: str,
+    port: str,
     output_folder: str,
     skip: str,
     submission_id: str,
@@ -76,17 +80,34 @@ def import_file(
       - The file must contain a sheet named as in SEAD' for each table in the submission.
 
     """
-    args: dict[str, str] = locals()
 
-    ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="CLEARINGHOUSE_IMPORT")
+    setup_configuration(ctx, dict(locals()))
 
-    arguments: dict = update_arguments_from_options_file(
-        arguments=args, filename_key='options_filename', suffix=strip_path_and_extension(filename)
+    return workflow(opts=Options(**ConfigValue('options').resolve()))
+
+
+def setup_configuration(ctx, opts: dict[str, Any]) -> None:
+
+    config_filename: str = opts.pop('config_filename')
+
+    if not os.path.isfile(config_filename):
+        logger.error(f" ---> file '{config_filename}' does not exist")
+        sys.exit(1)
+
+    opts = update_arguments_from_options_file(
+        arguments=opts, filename_key='options_filename', suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
     )
+    opts['database'] = {k: opts.pop(k) for k in ['host', 'name', 'user', 'port']}
 
-    logger.add(f"{log_folder}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
-    opts: Options = Options(**arguments)
-    return workflow(opts)
+    ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="SEAD_IMPORT")
+
+    ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=_get_specified_cli_opts(ctx))
+
+    logger.add(f"{opts.get('log_folder')}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+
+
+def _get_specified_cli_opts(ctx) -> set[str]:
+    return {key for key in ctx.params if ctx.get_parameter_source(key) == click.core.ParameterSource.COMMANDLINE}
 
 
 def workflow(opts: Options) -> None:
@@ -133,8 +154,31 @@ def workflow(opts: Options) -> None:
 
 
 if __name__ == "__main__":
-    import_file()
+    # import_file()
 
+    from click.testing import CliRunner
+
+    runner = CliRunner()
+    runner.invoke(
+        import_file,
+        [
+            "./config.yml",
+            "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
+            "--no-timestamp",
+            "--database",
+            "sead_staging_development",
+            "--port",
+            "5433",
+            "--register",
+            "--explode",
+            "--data-types",
+            "adna",
+            "--transfer-format",
+            "xml_to_csv",
+            "--output-folder",
+            "./data/output/",
+        ],
+    )
     # import_file(data_filename='dendro_build_data_latest_20191213.xlsm', data_types="Dendro building", xml_filename="./data/output/dendro_build_data_latest_20191213_20191217-151636_tidy.xml")
     # import_file(data_filename='dendro_ark_data_latest_20191213.xlsm',  data_types="Dendro archeology", xml_filename="./data/output/dendro_ark_data_latest_20191213_20191217-152152_tidy.xml")
     # import_file(data_filename='isotope_data_latest_20191218.xlsm', data_types="Isotope", xml_filename="./data/output/isotope_data_latest_20191218_20191218-134724_tidy.xml")
