@@ -1,6 +1,6 @@
 options:
   database:
-    name: sead_staging_development
+    dbname: sead_staging_development
   log_folder: ./logs
   transfer_format: xml
   ignore_columns:

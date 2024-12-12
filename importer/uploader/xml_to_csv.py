@@ -117,8 +117,8 @@ def get_connection_uri(connection: Any) -> str:
     user: str = conn_info.get('user')
     host: str = conn_info.get('host')
     port: str = conn_info.get('port')
-    name: str = conn_info.get('name')
-    uri: str = f"postgresql://{user}@{host}:{port}/{name}"
+    dbname: str = conn_info.get('dbname')
+    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
     return uri
 
 

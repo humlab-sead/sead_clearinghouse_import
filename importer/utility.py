@@ -356,8 +356,8 @@ def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
     return data
 
 
-def create_db_uri(*, host: str, port: int | str, user: str, name: str) -> str:
+def create_db_uri(*, host: str, port: int | str, user: str, dbname: str) -> str:
     """
     Returns the database URI from the environment variables.
     """
-    return f"postgresql://{user}@{host}:{port}/{name}"
+    return f"postgresql://{user}@{host}:{port}/{dbname}"

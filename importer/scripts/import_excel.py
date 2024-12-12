@@ -26,7 +26,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option("--output-folder", type=str, help="Output folder", required=True)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
-@click.option("--database", "-d", "name", type=str, help="Database name")
+@click.option("--database", "-d", "dbname", type=str, help="Database name")
 @click.option("--user", "-u", "user", type=str, help="Database user")
 @click.option("--port", "-p", "port", type=int, default=5432, help="Server port number.")
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
@@ -51,7 +51,7 @@ def import_file(
     filename: str,
     data_types: str,
     host: str,
-    name: str,
+    dbname: str,
     user: str,
     port: str,
     output_folder: str,
@@ -97,7 +97,7 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
     opts = update_arguments_from_options_file(
         arguments=opts, filename_key='options_filename', suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
     )
-    opts['database'] = {k: opts.pop(k) for k in ['host', 'name', 'user', 'port']}
+    opts['database'] = {k: opts.pop(k) for k in ['host', 'dbname', 'user', 'port']}
 
     ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="SEAD_IMPORT")
 
@@ -152,7 +152,6 @@ def workflow(opts: Options) -> None:
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
-
 if __name__ == "__main__":
     # import_file()
 
@@ -165,18 +164,13 @@ if __name__ == "__main__":
             "./config.yml",
             "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
             "--no-timestamp",
-            "--database",
-            "sead_staging_development",
-            "--port",
-            "5433",
+            "--database", "sead_staging_development",
+            "--port", "5433",
             "--register",
             "--explode",
-            "--data-types",
-            "adna",
-            "--transfer-format",
-            "xml_to_csv",
-            "--output-folder",
-            "./data/output/",
+            "--data-types", "adna",
+            "--transfer-format", "csv",
+            "--output-folder", "./data/output/",
         ],
     )
     # import_file(data_filename='dendro_build_data_latest_20191213.xlsm', data_types="Dendro building", xml_filename="./data/output/dendro_build_data_latest_20191213_20191217-151636_tidy.xml")
