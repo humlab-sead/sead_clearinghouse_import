@@ -137,7 +137,8 @@ class XmlProcessor(IDispatcher):
                         f'<clonedId class="java.util.Integer">{"NULL" if public_id is None else public_id}</clonedId>',
                         3,
                     )
-                    self.emit('<dateUpdated class="java.util.Date"/>', 3)
+                    if "date_updated" in table_spec.column_names():
+                        self.emit('<dateUpdated class="java.util.Date"/>', 3)
 
                     self.emit(f"</{table_namespace}>", 2)
 
