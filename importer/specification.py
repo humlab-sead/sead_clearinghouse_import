@@ -63,13 +63,13 @@ class SpecificationBase(abc.ABC):
         self.messages.infos = []
 
     def warn(self, message: str) -> None:
-        self.warnings.append(f'WARNING {message}')
+        self.warnings.append(f'{message}')
 
     def error(self, message: str) -> None:
-        self.errors.append(f'ERROR {message}')
+        self.errors.append(f'{message}')
 
     def info(self, message: str) -> None:
-        self.infos.append(f'INFO {message}')
+        self.infos.append(f'{message}')
 
     def get_columns(self, table_name: str) -> list[Table]:
         return [column for column in self.metadata[table_name].columns.values() if self.is_ignored(column.column_name)]
@@ -299,7 +299,6 @@ class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
         """All submission tables MUST have a non null "system_id" """
         data_table: pd.DataFrame = submission.data_tables[table_name]
-        meta_table: Table = self.metadata[table_name]
         if len(data_table) == 0:
             return
 
@@ -389,8 +388,39 @@ class NoMissingColumnSpecification(SpecificationBase):
 
 
 @SpecificationRegistry.register()
-class LookupDataSpecification(SpecificationBase):
+class NonNullableColumnHasValueSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
+        """All fields in metadata.Table.Fields MUST exist in DataTable.columns"""
+
+        if table_name not in submission or table_name not in self.metadata:
+            return
+
+        data: pd.DataFrame = submission.data_tables[table_name]
+        table: Table = self.metadata[table_name]
+
+        non_nullable_columns: list[str] = {
+            x
+            for x in data.columns
+            if x in table.column_names(skip_nullable=True)
+            and not self.is_ignored(x)
+            and not table.columns[x].is_pk
+            and not table.columns[x].is_fk
+            and x != "system_id"
+        }
+
+        for column_name in non_nullable_columns:
+            if data[column_name].isnull().any():
+                self.error(f"Table {table_name} has NULL values in non-nullable column {column_name}")
+
+# DISABLED: @SpecificationRegistry.register()
+class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
+    DISABLED: bool = True
+
+    def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
+        if self.DISABLED:
+            logger.warning("NewLookupDataIsNotAllowedSpecification is disabled")
+            return
+        
         if table_name not in submission:
             return
 
