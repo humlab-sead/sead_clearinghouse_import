@@ -26,26 +26,26 @@ class SubmissionRepository:
 
     @log_decorator(enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded")
     def explode_to_public_tables(
-        self,
-        submission_id: int,
-        p_dry_run: bool = False,
-        p_add_missing_columns: bool = False,
+        self, submission_id: int, p_dry_run: bool = False, p_add_missing_columns: bool = False
     ) -> None:
         """Explode submission into public tables."""
         with self as connection:
             for table_name_underscored in self.get_table_names(submission_id):
-                logger.info(f"   --> Processing table {table_name_underscored}")
+                logger.info(f"   --> Exploding table {table_name_underscored}")
+                if p_dry_run:
+                    continue
+
                 if p_add_missing_columns:
                     with connection.cursor() as cursor:
                         cursor.callproc(
                             "clearing_house.fn_add_new_public_db_columns", (submission_id, table_name_underscored)
                         )
-                if not p_dry_run:
-                    with connection.cursor() as cursor:
-                        cursor.callproc(
-                            "clearing_house.fn_copy_extracted_values_to_entity_table",
-                            (submission_id, table_name_underscored),
-                        )
+
+                with connection.cursor() as cursor:
+                    cursor.callproc(
+                        "clearing_house.fn_copy_extracted_values_to_entity_table",
+                        (submission_id, table_name_underscored),
+                    )
 
     @log_decorator(enter_message=" ---> removing submission...", exit_message=" ---> submission removed")
     def remove(self, submission_id: int, clear_header: bool = False, clear_exploded: bool = True) -> None:
@@ -53,10 +53,7 @@ class SubmissionRepository:
         logger.info("   --> Cleaning up existing data for submission...")
         with self as connection:
             with connection.cursor() as cursor:
-                cursor.callproc(
-                    "clearing_house.fn_delete_submission",
-                    (submission_id, clear_header, clear_exploded),
-                )
+                cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))
 
     @log_decorator(enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending")
     def set_pending(self, submission_id: int) -> None:
@@ -80,8 +77,8 @@ class SubmissionRepository:
         with self as connection:
             with connection.cursor() as cursor:
                 sql = """
-                    insert into clearing_house.tbl_clearinghouse_submissions(submission_state_id, data_types, upload_user_id, xml, status_text)
-                    values (%s, %s, %s, NULL, %s) returning submission_id;
+                    insert into clearing_house.tbl_clearinghouse_submissions(submission_state_id, data_types, upload_user_id, status_text)
+                    values (%s, %s, %s, %s) returning submission_id;
                 """
                 cursor.execute(sql, (1, data_types, 4, "New"))
                 submission_id: int = cursor.fetchone()[0]
@@ -98,25 +95,7 @@ class SubmissionRepository:
         with self.connection.cursor() as cursor:
             cursor.execute(tables_names_sql, (submission_id,))
             table_names: list[tuple[Any, ...]] = cursor.fetchall()
-        return table_names
-
-    # def table_exists(self, table_schema: str, table_name: str) -> bool:
-    #     with self.connection.cursor() as cursor:
-    #         cursor.execute(
-    #             """
-    #             select exists (
-    #                 select from information_schema.tables
-    #                 where  table_schema = %s
-    #                 and  table_name = %s
-    #             )
-    #         """,
-    #             (table_schema, table_name),
-    #         )
-    #         return cursor.fetchone()[0]
-
-    # def execute(self, proc_name: str, args: tuple) -> None:
-    #     with self.connection.cursor() as cursor:
-    #         cursor.callproc(proc_name, args)
+        return [t[0] for t in table_names]
 
     def __enter__(self) -> Connection:
         if self.connection is None:
