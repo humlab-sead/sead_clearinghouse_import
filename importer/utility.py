@@ -4,6 +4,7 @@ import importlib
 import io
 import logging
 import os
+import re
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
@@ -14,6 +15,17 @@ import pandas as pd
 import yaml
 from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+
+def pascal_to_snake_case(s: str) -> str:
+    """
+    Converts a string from PascalCase to snake_case.
+    """
+    return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
+
+
+def snake_to_pascal_case(s: str) -> str:
+    return ''.join(part.capitalize() for part in s.split('_'))
 
 
 def import_sub_modules(module_folder: str) -> Any:
