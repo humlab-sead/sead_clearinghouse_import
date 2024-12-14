@@ -9,6 +9,7 @@ from importer.policies import (
     AddPrimaryKeyColumnIfMissingPolicy,
     IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable,
     IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId,
+    IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId,
     IfSystemIdIsMissingSetSystemIdToPublicId,
     PolicyBase,
     UpdateTypesBasedOnSeadSchema,
@@ -31,25 +32,7 @@ def test_get_policy_id():
     submission = MagicMock(spec=Submission)
 
     policy = PolicyBase(metadata=metadata, submission=submission)
-    assert policy.get_policy_id() == "policy_base"
-
-
-def test_initialization():
-    metadata = MagicMock(spec=Metadata)
-    submission = MagicMock(spec=Submission)
-
-    policy = PolicyBase(metadata=metadata, submission=submission)
-
-    assert policy.metadata == metadata
-    assert policy.submission == submission
-
-
-def test_get_policy_id():
-    metadata = MagicMock(spec=Metadata)
-    submission = MagicMock(spec=Submission)
-
-    policy = PolicyBase(metadata=metadata, submission=submission)
-    assert policy.get_policy_id() == "policy_base"
+    assert policy.get_id() == "policy_base"
 
 
 def test_add_primary_key_column_if_missing_policy():
@@ -170,3 +153,73 @@ def test_if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_tab
 
     assert list(submission.data_tables[table.table_name]["system_id"]) == [1, 2, 3]
     assert list(submission.data_tables[table.table_name][table.pk_name]) == [1, 2, 3]
+
+
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__not_lookup():
+    metadata = MagicMock(spec=Metadata)
+    submission = MagicMock(spec=Submission)
+    table = MagicMock(spec=Table)
+    table.is_lookup = False
+    metadata.__getitem__.return_value = table
+    submission.data_tables = {"table1": pd.DataFrame(columns=["system_id", "public_id", "col1", "col2"])}
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(metadata=metadata, submission=submission)
+    policy.update()
+
+    assert "col1" in submission.data_tables["table1"].columns
+    assert "col2" in submission.data_tables["table1"].columns
+
+
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__pk_not_in_data_table():
+    metadata = MagicMock(spec=Metadata)
+    submission = MagicMock(spec=Submission)
+    table = MagicMock(spec=Table)
+    table.is_lookup = True
+    table.pk_name = "public_id"
+    metadata.__getitem__.return_value = table
+    submission.data_tables = {"table1": pd.DataFrame(columns=["system_id", "col1", "col2"])}
+
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(metadata=metadata, submission=submission)
+    policy.update()
+
+    assert "col1" in submission.data_tables["table1"].columns
+    assert "col2" in submission.data_tables["table1"].columns
+
+
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__all_pk_values_null():
+    metadata = MagicMock(spec=Metadata)
+    submission = MagicMock(spec=Submission)
+    table = MagicMock(spec=Table)
+    table.is_lookup = True
+    table.pk_name = "public_id"
+    metadata.__getitem__.return_value = table
+    submission.data_tables = {
+        "table1": pd.DataFrame(
+            {"system_id": [1, 2, 3], "public_id": [None, None, None], "col1": [4, 5, 6], "col2": [7, 8, 9]}
+        )
+    }
+
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(metadata=metadata, submission=submission)
+    policy.update()
+
+    assert "col1" in submission.data_tables["table1"].columns
+    assert "col2" in submission.data_tables["table1"].columns
+
+
+def test_not_all_pk_values_null():
+    metadata = MagicMock(spec=Metadata)
+    submission = MagicMock(spec=Submission)
+    table = MagicMock(spec=Table)
+    table.is_lookup = True
+    table.pk_name = "public_id"
+    metadata.__getitem__.return_value = table
+    submission.data_tables = {
+        "table1": pd.DataFrame(
+            {"system_id": [1, 2, 3], "public_id": [None, 2, None], "col1": [4, 5, 6], "col2": [7, 8, 9]}
+        )
+    }
+
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(metadata=metadata, submission=submission)
+    policy.update()
+
+    assert "col1" in submission.data_tables["table1"].columns
+    assert "col2" in submission.data_tables["table1"].columns
