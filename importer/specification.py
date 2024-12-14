@@ -412,6 +412,7 @@ class NonNullableColumnHasValueSpecification(SpecificationBase):
             if data[column_name].isnull().any():
                 self.error(f"Table {table_name} has NULL values in non-nullable column {column_name}")
 
+
 # DISABLED: @SpecificationRegistry.register()
 class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
     DISABLED: bool = True
@@ -420,7 +421,7 @@ class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
         if self.DISABLED:
             logger.warning("NewLookupDataIsNotAllowedSpecification is disabled")
             return
-        
+
         if table_name not in submission:
             return
 

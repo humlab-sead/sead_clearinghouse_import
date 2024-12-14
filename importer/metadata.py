@@ -45,6 +45,7 @@ class Column:
     def camel_case_column_name(self) -> str:
         return camel_case_name(self.column_name)
 
+
 @dataclass
 class Table:
     table_name: str

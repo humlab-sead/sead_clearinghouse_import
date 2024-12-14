@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 import sys
+from datetime import datetime
 from typing import Any
 
 import click
@@ -152,6 +152,7 @@ def workflow(opts: Options) -> None:
     )
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
+
 if __name__ == "__main__":
     # import_file()
 
@@ -164,16 +165,13 @@ if __name__ == "__main__":
             "./config.yml",
             "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
             "--no-timestamp",
-            "--database", "sead_staging_development",
-            "--port", "5433",
             "--register",
             "--explode",
-            "--data-types", "adna",
-            "--transfer-format", "csv",
-            "--output-folder", "./data/output/",
+            "--data-types",
+            "adna",
+            "--transfer-format",
+            "csv",
+            "--output-folder",
+            "./data/output/",
         ],
     )
-    # import_file(data_filename='dendro_build_data_latest_20191213.xlsm', data_types="Dendro building", xml_filename="./data/output/dendro_build_data_latest_20191213_20191217-151636_tidy.xml")
-    # import_file(data_filename='dendro_ark_data_latest_20191213.xlsm',  data_types="Dendro archeology", xml_filename="./data/output/dendro_ark_data_latest_20191213_20191217-152152_tidy.xml")
-    # import_file(data_filename='isotope_data_latest_20191218.xlsm', data_types="Isotope", xml_filename="./data/output/isotope_data_latest_20191218_20191218-134724_tidy.xml")
-    # import_file(data_filename='isotope_data_latest_20191218.xlsm', data_types="Isotope", xml_filename="./data/output/isotope_data_latest_20191218_20191218-134724_tidy.xml")

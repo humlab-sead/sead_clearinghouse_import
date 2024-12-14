@@ -85,14 +85,14 @@ class XmlProcessor(IDispatcher):
 
             if data_table.shape[0] == 0:
                 continue
-                
+
             self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
 
-            #datarows = [x for x in data_table.iterrows()]
+            # datarows = [x for x in data_table.iterrows()]
             # for index, record in enumerate(data_table.to_dict(orient='records')):
             for record in data_table.to_dict(orient='records'):
                 try:
-                    data_row: dict = record # record.to_dict()
+                    data_row: dict = record  # record.to_dict()
 
                     public_id: int | None = _to_int_or_none(
                         data_row[table_spec.pk_name] if table_spec.pk_name in data_row else None
@@ -122,7 +122,9 @@ class XmlProcessor(IDispatcher):
 
                         if column_name not in data_row.keys():
                             if not column_spec.is_nullable or column_name.endswith("_uuid"):
-                                logger.warning(f"Table {table_name}, (not nullable) column {column_name} not found in submission ")
+                                logger.warning(
+                                    f"Table {table_name}, (not nullable) column {column_name} not found in submission "
+                                )
                             continue
 
                         if not column_spec.is_fk:

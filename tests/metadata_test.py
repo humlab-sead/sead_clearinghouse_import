@@ -1,8 +1,10 @@
 import pandas as pd
 import pytest
 
+from importer.configuration.config import Config
+from importer.configuration.inject import ConfigStore
 from importer.metadata import Metadata
-from tests.utility import get_db_uri
+from importer.utility import create_db_uri
 
 # pylint: disable=redefined-outer-name,no-member
 
@@ -14,8 +16,8 @@ from tests.utility import get_db_uri
 #     assert "select" in sql.lower()
 
 
-def test_metadata_load_metadata():
-    metadata: Metadata = Metadata(get_db_uri())
+def test_metadata_load_metadata(cfg: Config, metadata: Metadata):
+    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
     assert isinstance(metadata.sead_tables, pd.DataFrame)
     assert isinstance(metadata.sead_columns, pd.DataFrame)
     assert isinstance(metadata.sead_schema, dict)
@@ -26,7 +28,9 @@ def test_tables_specifications(metadata: Metadata):
     assert isinstance(metadata.sead_schema, dict)
 
     assert len(metadata.sead_tables) == len(metadata.sead_schema)
-    assert set(metadata.sead_tables.columns)  - {'columns', 'is_new'} == set(metadata.sead_schema['tbl_sites'].keys()) - {'columns', 'is_new'}
+    assert set(metadata.sead_tables.columns) - {'columns', 'is_new'} == set(
+        metadata.sead_schema['tbl_sites'].keys()
+    ) - {'columns', 'is_new'}
 
     assert 'columns' in metadata.sead_schema['tbl_sites'].keys()
     assert 'site_id' in metadata.sead_schema['tbl_sites'].columns.keys()
@@ -54,8 +58,8 @@ def test_is_fk(metadata: Metadata):
     assert metadata.is_fk('tbl_locations', 'location_id') is False
 
 
-def test_get_tablenames_referencing():
-    metadata: Metadata = Metadata(get_db_uri())
+def test_get_tablenames_referencing(cfg: Config):
+    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
 
     assert set(metadata.get_tablenames_referencing('tbl_sites')) == {
         'tbl_sample_groups',

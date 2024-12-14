@@ -63,7 +63,7 @@ class Submission:
         pk_name: str = metadata[table_name].pk_name
         if pk_name is None:
             return []
-        
+
         """Find all tables that reference the given table, and have the PK column i the referencing table's data"""
         fk_tables: list[str] = [
             fk_table

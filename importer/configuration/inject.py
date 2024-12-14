@@ -123,7 +123,10 @@ class ConfigStore:
 
         ignore_keys: set[str] = ignore_keys or set(opts.keys())
 
-        opts = recursive_update(opts, recursive_filter_dict(cls.store[context].get(section, {}), filter_keys=ignore_keys, filter_mode="exclude"))
+        opts = recursive_update(
+            opts,
+            recursive_filter_dict(cls.store[context].get(section, {}), filter_keys=ignore_keys, filter_mode="exclude"),
+        )
 
         cls.store[context].data[section] = opts
 

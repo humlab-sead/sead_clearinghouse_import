@@ -4,15 +4,13 @@ from dataclasses import dataclass, field
 from os.path import basename, join, splitext
 from typing import Type
 
-import numpy as np
-import pandas as pd
 from loguru import logger
 
 from importer.configuration.inject import ConfigValue
-from .dispatchers import IDispatcher, to_xml
 
-from . import DataImportError, utility
-from .metadata import Metadata, Table
+from . import utility
+from .dispatchers import IDispatcher, to_xml
+from .metadata import Metadata
 from .repository import SubmissionRepository
 from .specification import SpecificationError, SubmissionSpecification
 from .submission import Submission
@@ -87,7 +85,9 @@ class ImportService:
             metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
 
-    @utility.log_decorator(enter_message=" ---> generating target file(s)...", exit_message=" ---> target file(s) created")
+    @utility.log_decorator(
+        enter_message=" ---> generating target file(s)...", exit_message=" ---> target file(s) created"
+    )
     def dispatch(self, submission: Submission, format_document: bool = False) -> str:
         """
         Reads Excel files and convert content to an CH XML-file.
