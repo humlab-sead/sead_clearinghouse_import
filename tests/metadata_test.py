@@ -2,7 +2,6 @@ import pandas as pd
 import pytest
 
 from importer.configuration.config import Config
-from importer.configuration.inject import ConfigStore
 from importer.metadata import Metadata
 from importer.utility import create_db_uri
 

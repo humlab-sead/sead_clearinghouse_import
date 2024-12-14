@@ -1,4 +1,4 @@
-from typing import Any, Iterator
+from typing import Iterator
 
 import pytest
 from dotenv import load_dotenv

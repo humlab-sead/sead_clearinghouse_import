@@ -1,10 +1,8 @@
 import contextlib
 import logging
-import numbers
 from typing import Any
 from xml.sax.saxutils import escape
 
-import numpy as np
 import pandas as pd
 from jinja2 import Environment, Template, select_autoescape
 from loguru import logger

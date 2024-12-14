@@ -119,7 +119,7 @@ class ConfigStore:
             raise ValueError(f"Config context {context} undefined, cannot consolidate")
 
         if not section:
-            raise ValueError(f"Config section cannot be undefined, cannot consolidate")
+            raise ValueError("Config section cannot be undefined, cannot consolidate")
 
         ignore_keys: set[str] = ignore_keys or set(opts.keys())
 

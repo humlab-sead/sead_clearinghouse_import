@@ -1,5 +1,4 @@
 import abc
-import logging
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
 
@@ -279,7 +278,6 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
             if column.column_name not in data_table.columns:
                 if not column.is_nullable:
                     self.error(f"Foreign key column '{table_name}.{column.column_name}' not in data")
-                    continue
                 else:
                     self.warn(f"Foreign key column '{table_name}.{column.column_name}' not in data (but is nullable)")
                 continue
