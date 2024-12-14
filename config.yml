@@ -7,7 +7,7 @@ options:
     - "date_updated"
     - "*_uuid"
 policies:
-  add_default_fk_id_if_missing:
+  add_default_foreign_key_policy:
     tbl_dataset_contacts:
       fk_name: contact_type_id
       fk_value: 2
