@@ -1,15 +1,14 @@
-from importer.configuration import ConfigValue
+from importer.configuration.config import Config
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission
 from importer.utility import create_db_uri
-from tests.process_test import load_or_cache_submission
 
 
-def test_load_adna_source():
-    uri: str = create_db_uri(**ConfigValue("options:database").resolve())
-    source: str = ConfigValue("test:adna:source:filename").resolve()
+def test_load_adna_source(cfg: Config):
+    uri: str = create_db_uri(**cfg.get("options:database"))
+    source: str = cfg.get("test:adna:source:filename")
     metadata: Metadata = Metadata(uri)
     submission: Submission = Submission.load(metadata=metadata, source=source)
 
@@ -19,10 +18,10 @@ def test_load_adna_source():
     assert all(len(df) > 0 for df in submission.data_tables.values())
 
 
-def test_adna_tables_specifications():
-    uri: str = create_db_uri(**ConfigValue("options:database").resolve())
-    source: str = ConfigValue("test:adna:source:filename").resolve()
-    ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
+def test_adna_tables_specifications(cfg: Config):
+    uri: str = create_db_uri(**cfg.get("options:database"))
+    source: str = cfg.get("test:adna:source:filename")
+    ignore_columns: list[str] = cfg.get("options:ignore_columns")
     metadata: Metadata = Metadata(uri)
     submission: Submission = Submission.load(metadata=metadata, source=source)
     specification: SubmissionSpecification = SubmissionSpecification(
@@ -32,12 +31,12 @@ def test_adna_tables_specifications():
     assert specification.messages.errors == []
 
 
-def test_import_a_dna_submission():
+def test_import_a_dna_submission(cfg: Config):
     opts: Options = Options(
         **{
-            'filename': ConfigValue("test:adna:source:filename").resolve(),
+            'filename': cfg.get("test:adna:source:filename"),
             'data_types': 'dendrochronology',
-            'database': ConfigValue("options:database").resolve(),
+            'database': cfg.get("options:database"),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,
@@ -55,6 +54,8 @@ def test_import_a_dna_submission():
 
     assert metadata.sead_schema.lookup_tables is not None
 
-    submission: Submission = Submission.load(metadata=metadata, source=opts.filename) # load_or_cache_submission(opts, metadata)
+    submission: Submission = Submission.load(
+        metadata=metadata, source=opts.filename
+    )  # load_or_cache_submission(opts, metadata)
 
     ImportService(metadata=metadata, opts=opts).process(submission=submission)

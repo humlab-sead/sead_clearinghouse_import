@@ -4,15 +4,15 @@ from os.path import isfile
 import pandas as pd
 import pytest
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration.config import Config
 from importer.metadata import Metadata
-from tests.utility import get_db_uri
+from importer.utility import create_db_uri
 
 # @pytest.mark.skip(reason="sandbox test")
 # def test_download_sead_comments():
 #     """Stores SEAD comments in a markdown file"""
 
-#     uri: str = get_db_uri()
+#     uri: str = create_db_uri(**cfg.get("options:database"))
 #     sql = "select * from sead_utility.sead_comments2"
 #     df = pd.read_sql(sql, uri)
 #     # df.to_excel('sead_comments_20240201.xlsx', index=False)
@@ -37,10 +37,10 @@ from tests.utility import get_db_uri
 
 
 @pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
-def test_load_metadata_from_postgres():
+def test_load_metadata_from_postgres(cfg: Config):
     """Use this test to store SEAD metadata in json files for regression testing"""
-    metadata: Metadata = Metadata(get_db_uri())
-    test_tables: list[str] = ConfigValue("test:tables").resolve()
+    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
+    test_tables: list[str] = cfg.get("test:tables")
     with open('tests/test_data/sead_tables.json', 'w') as outfile:
         data: dict = metadata.sead_tables[metadata.sead_tables.table_name.isin(test_tables)].to_dict('records')
         json.dump(data, outfile, indent=4)
@@ -56,4 +56,3 @@ def test_load_metadata_from_postgres():
     assert isinstance(metadata.sead_columns, pd.DataFrame)
     assert isinstance(metadata.sead_tables, pd.DataFrame)
     assert isinstance(metadata.sead_schema, dict)
-

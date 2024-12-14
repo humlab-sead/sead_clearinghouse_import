@@ -4,18 +4,18 @@ import pickle
 
 import pandas as pd
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration.config import Config
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.submission import Submission
 
 
-def test_create_options():
+def test_create_options(cfg: Config):
     opts: Options = Options(
         **{
             'filename': 'data/input/dummy.xlsx',
             'data_types': 'dendrochronology',
-            'database': ConfigValue("options:database").resolve(),
+            'database': cfg.get("options:database"),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,
@@ -33,7 +33,7 @@ def test_create_options():
     assert opts.db_uri().startswith('postgresql://')
 
 
-def test_import_reduced_submission():
+def test_import_reduced_submission(cfg: Config):
     target_filename: str = 'data/output/building_dendro_reduced.xml'
     expected_filename: str = 'tests/test_data/building_dendro_reduced.xml'
 
@@ -41,7 +41,7 @@ def test_import_reduced_submission():
         **{
             'filename': 'tests/test_data/building_dendro_reduced.xlsx',
             'data_types': 'dendrochronology',
-            'database': ConfigValue("options:database").resolve(),
+            'database': cfg.get("options:database"),
             'output_folder': 'data/output',
             'skip': False,
             'submission_id': None,

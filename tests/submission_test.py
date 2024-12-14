@@ -1,23 +1,25 @@
 from os.path import isfile
 
-import pytest
-
-from importer.configuration import ConfigValue
+from importer.configuration import Config
 from importer.metadata import Metadata
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission
-from tests.utility import generate_test_excel, get_db_uri
+from importer.utility import create_db_uri
+from tests.utility import generate_test_excel
 
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name
 
 
-@pytest.mark.skipif(isfile(ConfigValue("test:reduced_excel_filename").resolve()), reason="Test file already exists")
-def test_generate_test_excel():
-    submission_filename: str = ConfigValue("test:source_excel_filename").resolve()
+# @pytest.mark.skipif(isfile(ConfigValue("test:reduced_excel_filename").resolve()), reason="Test file already exists")
+def test_generate_test_excel(cfg: Config):
+
+    if isfile(cfg.get("test:reduced_excel_filename")):
+        return
+
     generate_test_excel(
-        excel_filename=submission_filename,
-        test_sites=ConfigValue("test:sites").resolve(),
-        filename=ConfigValue("test:reduced_excel_filename").resolve(),
+        excel_filename=cfg.get("test:source_excel_filename"),
+        test_sites=cfg.get("test:sites"),
+        filename=cfg.get("test:reduced_excel_filename"),
     )
 
 
@@ -65,9 +67,9 @@ def test_referenced_keyset(submission: Submission, metadata: Metadata):
     assert {10} == submission.get_referenced_keyset(metadata, 'tbl_methods')
 
 
-def test_tables_specifications(submission: Submission):
-    metadata: Metadata = Metadata(get_db_uri())
-    ignore_columns: list[str] = ConfigValue("options:ignore_columns").resolve()
+def test_tables_specifications(cfg: Config, submission: Submission):
+    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
+    ignore_columns: list[str] = cfg.get("options:ignore_columns")
     specifixation: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=ignore_columns)
     specifixation.is_satisfied_by(submission)
     assert specifixation.messages.errors == []
