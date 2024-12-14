@@ -8,30 +8,32 @@ from loguru import logger
 
 from .configuration.inject import ConfigValue
 from .metadata import Metadata, SeadSchema, Table
-from .utility import Registry
+from .utility import Registry, pascal_to_snake_case
 
 if TYPE_CHECKING:
     from importer.submission import Submission
 
 
-class SubmissionUpdateRegistry(Registry):
+class PolicyRegistry(Registry):
     items: dict[str, PolicyBase] = {}
 
     def get_sorted_items(self) -> list[PolicyBase]:
         return sorted(self.items.values(), key=lambda x: x.SORT_ORDER)
 
 
-UpdatePolicies: SubmissionUpdateRegistry = SubmissionUpdateRegistry()
+UpdatePolicies: PolicyRegistry = PolicyRegistry()
 
 
 class PolicyBase:
 
-    ID: str = "policy_base"
     SORT_ORDER: int = 0
 
     def __init__(self, metadata: Metadata, submission: Submission) -> None:
         self.metadata: Metadata = metadata
         self.submission: Submission = submission
+
+    def get_policy_id(self) -> str:
+        return pascal_to_snake_case(self.__class__.__name__)
 
 
 @UpdatePolicies.register()
@@ -53,18 +55,16 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
 class AddDefaultForeignKeyPolicy(PolicyBase):
     """Adds default FK value to DataFrame if it is missing"""
 
-    ID: str = "add_default_fk_id_if_missing"
-
     def apply(self) -> pd.DataFrame:
 
-        for table_name, cfg in (ConfigValue(f"policies.{self.ID}").resolve() or {}).items():
+        for table_name, cfg in (ConfigValue(f"policies.{self.get_policy_id()}").resolve() or {}).items():
 
             if table_name not in self.submission:
                 return
 
             if 'fk_name' not in cfg or 'fk_value' not in cfg:
                 raise ValueError(
-                    f"Table '{table_name}': 'fk_name' and 'fk_value' must be provided in config for policy '{self.ID}'"
+                    f"Table '{table_name}': 'fk_name' and 'fk_value' must be provided in config for policy '{self.get}'"
                 )
 
             fk_name: str = cfg['fk_name']
@@ -82,7 +82,7 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
 
 
 @UpdatePolicies.register()
-class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
+class IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId(PolicyBase):
     """Rule: if an FK table is missing then add the table using system_id as public_id.
 
     For table that is referenced by a foreign key,
@@ -95,11 +95,9 @@ class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
         The rule is applied to the table only if it exists in configuration (YAML) file
     """
 
-    ID: str = "if_lookup_table_is_missing_add_table_using_system_id_as_public_id"
-
     def apply(self) -> None:
 
-        for table_name in ConfigValue(f"policies.{self.ID}").resolve() or {}:
+        for table_name in ConfigValue(f"policies.{self.get_policy_id()}.tables").resolve() or {}:
 
             if table_name in self.submission:
                 continue
@@ -113,7 +111,9 @@ class IfLookupTableIsMissing_AddTableUsingSystemIdAsPublicId(PolicyBase):
                 {'system_id': referenced_keys, pk_name: list(referenced_keys)}
             )
 
-            logger.info(f"Added table '{table_name}' added to submission with identity system_id/{pk_name} mapping")
+            logger.info(
+                f"Added table '{table_name}' to submission with identity system_id/{pk_name} mapping ({len(referenced_keys)} keys added)"
+            )
 
 
 @UpdatePolicies.register()
@@ -123,8 +123,6 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
     For each table in the submission,
         update the data types of the columns based on the SEAD schema
     """
-
-    ID: str = "update_types_based_on_sead_schema"
 
     def apply(self) -> None:
 
@@ -156,29 +154,33 @@ class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
     In this case, the public primary key is assigned upon submission commit to the database
     """
 
-    ID: str = "set_public_id_to_negative_system_id_for_new_lookups"
+    DISABLED: bool = True
 
     def apply(self) -> None:
 
-        for table_name in self.submission.data_tables:
+        if self.DISABLED:
+            logger.warning(f"Policy '{self.get_policy_id()}' is disabled")
+            return
 
-            if not self.metadata[table_name].is_lookup:
-                continue
+        # for table_name in self.submission.data_tables:
 
-            data_table: pd.DataFrame = self.submission.data_tables[table_name]
+        #     if not self.metadata[table_name].is_lookup:
+        #         continue
 
-            pk_name: str = self.metadata[table_name].pk_name
+        #     data_table: pd.DataFrame = self.submission.data_tables[table_name]
 
-            if pk_name not in data_table.columns:
-                continue
+        #     pk_name: str = self.metadata[table_name].pk_name
 
-            if data_table[pk_name].isnull().any():
-                data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
-                data_table[pk_name] = data_table[pk_name].astype(int)
+        #     if pk_name not in data_table.columns:
+        #         continue
+
+        #     if data_table[pk_name].isnull().any():
+        #         data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
+        #         data_table[pk_name] = data_table[pk_name].astype(int)
 
 
 @UpdatePolicies.register()
-class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
+class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
     """Rule: assign temporary public primary key to new lookup table rows.
 
     For new lookup table rows,
@@ -186,8 +188,6 @@ class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
             if all public primary keys are missing
     In this case, the public primary key is assigned upon submission commit to the database
     """
-
-    ID: str = "if_system_id_is_missing_set_system_id_to_public_id"
 
     def apply(self) -> None:
         """For each table in index, update system_id to public_id if isnan. This should be avoided though."""
@@ -214,10 +214,9 @@ class IfSystemIdIsMissing_SetSystemIdToPublicId(PolicyBase):
 
 
 @UpdatePolicies.register()
-class IfForeignKeyValueIsMissing_AddIdentityMappingToForeignKeyTable(PolicyBase):
+class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
     """Any foreign key value that is missing in the submission is added to the foreign key table."""
 
-    ID: str = "if_foreignkey_value_is_missing_add_identity_mapping_to_foreignkey_table"
     SORT_ORDER: int = 1
 
     def apply(self) -> pd.DataFrame:
@@ -253,4 +252,43 @@ class IfForeignKeyValueIsMissing_AddIdentityMappingToForeignKeyTable(PolicyBase)
 
             self.submission.data_tables[table_name] = data_table
 
-            
+            logger.info(
+                f"Added missing PK keys to '{table_name}' with identity system_id/{pk_name} mapping: ({', '.join(map(str, missing_keys))})"
+            )
+
+
+# @UpdatePolicies.register()
+# class DropIgnoredColumns(PolicyBase):
+#     """Rule: drop ignored columns from data so that they are excluded from uploaded submission data.
+#        This rule currently only applies "date_updated" and "*_uuid" columns.
+#     """
+
+#     def apply(self) -> None:
+#         """For each table in index, drop column if it is ignoderd."""
+
+#         drop_columns: list[str] = ConfigValue(f"policies.{self.get}").resolve() or []
+
+#         for table_name in self.submission.data_tables:
+
+#             for column_name in self.submission.data_tables[table_name].columns:
+#                 if self.submission.i
+#                     self.submission.data_tables[table_name].drop(columns=column_name, inplace=True)
+
+#             data_table: pd.DataFrame = self.submission.data_tables[table_name]
+#             table_spec: Table = self.metadata[table_name]
+
+#             pk_name: str = table_spec.pk_name
+
+#             if pk_name == "ceramics_id":
+#                 pk_name = "ceramic_id"
+
+#             if data_table is None or pk_name not in data_table.columns:
+#                 continue
+
+#             if "system_id" not in data_table.columns:
+#                 raise ValueError(f'critical error Table {table_name} has no column named "system_id"')
+
+#             # Update system_id to public_id if isnan. This should be avoided though.
+#             data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
+#                 np.isnan(data_table.system_id), pk_name
+#             ]
