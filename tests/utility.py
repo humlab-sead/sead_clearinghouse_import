@@ -6,14 +6,10 @@ from typing import Any
 
 import pandas as pd
 
-from importer.configuration import ConfigValue
+from importer.configuration.inject import ConfigValue
 from importer.metadata import Metadata
 from importer.submission import Submission
 from importer.utility import create_db_uri
-
-
-def get_db_uri() -> str:
-    return create_db_uri(**ConfigValue("options:database").resolve())
 
 # @deprecated('table_name_index data sheet has been removed')
 # def load_excel_by_regression(filename: str) -> dict[str, pd.DataFrame]:
@@ -202,7 +198,7 @@ def load_test_submission(excel_filename: str, test_sites: list[int], filename: s
     basename: str = os.path.splitext(os.path.basename(filename))[0]
     pickled_filename: str = f"{basename}_{encode_sites(test_sites)}.pkl"
     if not os.path.isfile(pickled_filename) or force:
-        metadata: Metadata = Metadata(db_uri=get_db_uri())
+        metadata: Metadata = Metadata(create_db_uri(**ConfigValue("options:database").resolve()))
         submission: Submission = Submission.load(metadata=metadata, source=excel_filename)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)

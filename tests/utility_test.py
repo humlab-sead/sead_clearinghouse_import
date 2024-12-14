@@ -141,3 +141,16 @@ def test_recursive_filter_dict_non_dict_input():
     filter_keys = {'a', 'b'}
     result = utility.recursive_filter_dict(d, filter_keys, 'keep')
     assert result == d
+
+
+def test_pascal_to_snake_case():
+    assert utility.pascal_to_snake_case("PascalCase") == "pascal_case"
+    assert utility.pascal_to_snake_case("TestString") == "test_string"
+    assert utility.pascal_to_snake_case("AnotherTest") == "another_test"
+    assert utility.pascal_to_snake_case("SimpleTest") == "simple_test"
+    assert utility.pascal_to_snake_case("ThisIsATest") == "this_is_a_test"
+    assert utility.pascal_to_snake_case("Test") == "test"
+    assert utility.pascal_to_snake_case("PascalCaseTest") == "pascal_case_test"
+    assert utility.pascal_to_snake_case("PascalCase123") == "pascal_case123"
+    assert utility.pascal_to_snake_case("PascalCaseWithNumbers123") == "pascal_case_with_numbers123"
+    assert utility.pascal_to_snake_case("PascalCaseWith123Numbers") == "pascal_case_with123_numbers"
