@@ -52,16 +52,20 @@ def test_add_primary_key_column_if_missing_policy():
 def test_add_default_foreign_key_policy():
     metadata = MagicMock(spec=Metadata)
     submission = MagicMock(spec=Submission)
-    submission.data_tables = {"table1": pd.DataFrame({"fk_col": [None, None]})}
+    table: pd.DataFrame = pd.DataFrame({"fk_col": [None, None]})
+    submission.data_tables = {"table1": table}
     config_value = MagicMock()
-    config_value.resolve.return_value = {"table1": {"fk_name": "fk_col", "fk_value": 1}}
+    config_value.resolve.side_effect = [
+        False, # call to is_disabled()
+        {"table1": {"fk_name": "fk_col", "fk_value": 2}},
+    ]
     submission.__contains__.side_effect = lambda x: x in submission.data_tables
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
         policy = AddDefaultForeignKeyPolicy(metadata=metadata, submission=submission)
         policy.apply()
 
-    assert (submission.data_tables["table1"]["fk_col"] == 1).all()
+    assert (table["fk_col"] == 2).all()
 
 
 def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():

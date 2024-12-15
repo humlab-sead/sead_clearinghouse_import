@@ -19,7 +19,7 @@ class PolicyRegistry(Registry):
     items: dict[str, PolicyBase] = {}
 
     def get_sorted_items(self) -> list[PolicyBase]:
-        return sorted(self.items.values(), key=lambda x: x.get_priority())
+        return sorted(self.items.values(), key=lambda x: x(None,None).get_priority())
 
 
 UpdatePolicies: PolicyRegistry = PolicyRegistry()
@@ -89,13 +89,15 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
 
             data: pd.DataFrame = self.submission[table_name]
 
-            if fk_name in data.columns:
-                if data[fk_name].isnull().all():
+            if fk_name not in data.columns or data[fk_name].isnull().all():
+
+                if fk_name not in data.columns:
+                    logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
+                else:
                     logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
-                    data[fk_name] = fk_value
-            else:
-                logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
+
                 data[fk_name] = fk_value
+
 
 
 @UpdatePolicies.register()
