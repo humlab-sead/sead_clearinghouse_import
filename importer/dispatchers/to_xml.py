@@ -224,7 +224,7 @@ class XmlProcessor(IDispatcher):
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
 
             if len(referenced_keyset) == 0:
-                logger.debug(f"Skipping {table_name}: not referenced")
+                # logger.debug(f"Skipping {table_name}: not referenced")
                 continue
 
             xml: str = template.render(
