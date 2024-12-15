@@ -1,4 +1,5 @@
 import base64
+import fnmatch
 import functools
 import importlib
 import io
@@ -232,6 +233,19 @@ def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortb
         .rename_axis([f'index_{x}' for x in index])
         .sort_values(by=sortby if sortby else index)
     )
+    return data
+
+
+def load_sead_columns(db_uri: str, ignore_columns: list[str] = None) -> pd.DataFrame:
+    """Returns a dataframe of table columns from SEAD with attributes."""
+    sql: str = "select * from clearing_house.clearinghouse_import_columns"
+    data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
+    if ignore_columns:
+        columns_to_ignore: list[str] = [
+            c for c in data['column_name'].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
+        ]
+        data = data[~data['column_name'].isin(columns_to_ignore)]
+
     return data
 
 
