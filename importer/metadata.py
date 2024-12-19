@@ -4,7 +4,9 @@ from typing import Any
 
 import pandas as pd
 
-from .utility import camel_case_name, load_sead_data
+from importer.configuration.inject import ConfigValue
+
+from .utility import camel_case_name, load_sead_data, load_sead_columns
 
 # pylint: disable=no-member
 
@@ -100,9 +102,10 @@ class SeadSchema(dict[str, Table]):
 class Metadata:
     """Logic related to Excel metadata file"""
 
-    def __init__(self, db_uri: str) -> None:
+    def __init__(self, db_uri: str, ignore_columns: list[str] = None) -> None:
         self.db_uri: str = db_uri
         self.foreign_key_aliases: dict[str, str] = {"updated_dataset_id": "dataset_id"}
+        self.ignore_columns: list[str] = ignore_columns or ConfigValue("options.ignore_columns", default=[]).resolve()
 
     @cached_property
     def sead_tables(self) -> pd.DataFrame:
@@ -113,8 +116,7 @@ class Metadata:
     @cached_property
     def sead_columns(self) -> pd.DataFrame:
         """Returns a dataframe of table columns from SEAD with attributes."""
-        sql: str = "select * from clearing_house.clearinghouse_import_columns"
-        return load_sead_data(self.db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
+        return load_sead_columns(self.db_uri, self.ignore_columns)
 
     @cached_property
     def sead_schema(self) -> SeadSchema:
