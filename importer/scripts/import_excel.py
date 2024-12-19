@@ -154,24 +154,24 @@ def workflow(opts: Options) -> None:
 
 
 if __name__ == "__main__":
-    # import_file()
+    import_file()
 
-    from click.testing import CliRunner
+    # from click.testing import CliRunner
 
-    runner = CliRunner()
-    runner.invoke(
-        import_file,
-        [
-            "./config.yml",
-            "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
-            "--no-timestamp",
-            "--register",
-            "--explode",
-            "--data-types",
-            "adna",
-            "--transfer-format",
-            "csv",
-            "--output-folder",
-            "./data/output/",
-        ],
-    )
+    # runner = CliRunner()
+    # runner.invoke(
+    #     import_file,
+    #     [
+    #         "./config.yml",
+    #         "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
+    #         "--no-timestamp",
+    #         "--register",
+    #         "--explode",
+    #         "--data-types",
+    #         "adna",
+    #         "--transfer-format",
+    #         "csv",
+    #         "--output-folder",
+    #         "./data/output/",
+    #     ],
+    # )
