@@ -22,7 +22,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.command()
 @click.argument('config_filename')
 @click.argument("filename")
-@click.option('--options-filename', type=str, default=None, help='Name of options file.')
+@click.option('--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).')
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option("--output-folder", type=str, help="Output folder", required=True)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
@@ -43,7 +43,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option(
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
-@click.option("--transfer-format", type=str, default='xml', help="Explode XML into public tables.")
+@click.option("--transfer-format", type=str, default='xml', help="Specify format to use in upload (XML or CSV).")
 @click.pass_context
 def import_file(
     ctx,
