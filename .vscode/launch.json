@@ -24,7 +24,7 @@
             "stopOnEntry": false,
             // "python": "${command:python.interpreterPath}",
             "justMyCode": true,
-            // "envFile": "${workspaceRoot}/.venv",
+            // "envFile": "${workspaceRoot}/.env",
             "cwd": "${workspaceRoot}",
             "console": "internalConsole",
             "redirectOutput": true,
