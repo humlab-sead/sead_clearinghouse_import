@@ -15,7 +15,7 @@
 ```
 - [x] Commit submission by creating a change request in SEAD Change Control System
 ```bash
-[sead_change_control] λ bin/add-submission-change-request --id 5 --database DBNAME --project dendrochronology
+[sead_change_control] λ bin/commit-submission --id 5 --database DBNAME --project dendrochronology
 ```
 
 ### Optional (generate XML, then stop)
