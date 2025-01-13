@@ -3,9 +3,9 @@ import fnmatch
 import functools
 import importlib
 import io
-import logging
 import os
 import re
+import sys
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
@@ -16,6 +16,29 @@ import pandas as pd
 import yaml
 from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+
+def configure_logging(opts: dict[str, str]) -> None:
+
+    if not opts:
+        return
+
+    if opts.get("handlers"):
+
+        for handler in opts["handlers"]:
+
+            if not handler.get("sink"):
+                continue
+
+            if handler["sink"] == "sys.stdout":
+                handler["sink"] = sys.stdout
+
+            elif isinstance(handler['sink'], str) and handler['sink'].endswith(".log"):
+                handler["sink"] = join(
+                    opts.get('folder', 'logs'), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"
+                )
+
+        logger.configure(handlers=opts["handlers"])
 
 
 def pascal_to_snake_case(s: str) -> str:
@@ -161,7 +184,7 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
 
 
 def log_decorator(
-    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int = logging.INFO
+    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int|str = "INFO"
 ):
     def decorator(func):
         @functools.wraps(func)
@@ -373,10 +396,33 @@ def write_yaml(data: dict, file: str) -> None:
         return yaml.dump(data=data, stream=fp)
 
 
-def update_dict_from_yaml(yaml_file: str, data: dict) -> dict:
+def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> None:
+    """
+    Recursively removes keys from a dictionary if they exist in keys_to_remove.
+
+    Parameters:
+    data (dict): The input dictionary.
+    keys_to_remove (set): A set of keys to be removed.
+    """
+    if not isinstance(data, dict):
+        return data
+
+    if not keys_to_remove:
+        return data
+
+    keys: list[str] = list(data.keys())
+    for key in keys:
+        if key in keys_to_remove:
+            del data[key]
+        elif isinstance(data[key], dict):
+            remove_keys_recursively(data[key], keys_to_remove)
+
+
+def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str]) -> dict:
     """Update dict `data` with values found in `yaml_file`."""
     if yaml_file is None:
         return data
+    keep_keys = keep_keys or set()
     options: dict = read_yaml(yaml_file)
     data.update(options)
     return data

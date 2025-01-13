@@ -1,7 +1,6 @@
 options:
   database:
-    dbname: sead_staging_development
-  log_folder: ./logs
+    dbname: sead_staging_development_adna
   transfer_format: xml
   ignore_columns:
     - "date_updated"
@@ -33,3 +32,12 @@ policies:
     columns:
       - "date_updated"
       - "*_uuid"
+logging:
+  folder: ./logs
+  handlers:
+    - sink: "import_excel.log"
+      level: "DEBUG"
+      format: "{time} - {level} - {message}"
+    - sink: "sys.stdout"
+      level: "DEBUG"
+      format: "{time} - {level} - {message}"

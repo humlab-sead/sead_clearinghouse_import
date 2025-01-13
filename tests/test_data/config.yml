@@ -2,7 +2,6 @@ options:
   database:
     dbname: sead_staging_development
     port: 5433
-  log_folder: ./logs
   transfer_format: xml
   ignore_columns:
     - "date_updated"
@@ -69,3 +68,13 @@ test:
   adna:
     source:
       filename: data/input/SEAD_aDNA_data_20241114_RM.xlsx
+
+logging:
+  folder: tests/output
+  handlers:
+    - sink: "import_excel.log"
+      level: "DEBUG"
+      format: "{time} - {level} - {message}"
+    - sink: "sys.stdout"
+      level: "WARNING"
+      format: "{time} - {level} - {message}"

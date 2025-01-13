@@ -12,7 +12,7 @@ from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
 from importer.submission import Submission
-from importer.utility import strip_path_and_extension
+from importer.utility import configure_logging, dotset, strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -22,7 +22,9 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.command()
 @click.argument('config_filename')
 @click.argument("filename")
-@click.option('--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).')
+@click.option(
+    '--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).'
+)
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option("--output-folder", type=str, help="Output folder", required=True)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
@@ -88,7 +90,9 @@ def import_file(
 
 def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
+    specified_keys: set[str]=_get_specified_cli_opts(ctx)
     config_filename: str = opts.pop('config_filename')
+    log_folder: str = opts.pop('log_folder')
 
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
@@ -101,9 +105,9 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
     ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="SEAD_IMPORT")
 
-    ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=_get_specified_cli_opts(ctx))
+    ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
 
-    logger.add(f"{opts.get('log_folder')}/logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log")
+    configure_logging(ConfigValue('logging').resolve() | ({} if not log_folder else {"folder": log_folder}))
 
 
 def _get_specified_cli_opts(ctx) -> set[str]:
@@ -156,8 +160,9 @@ def workflow(opts: Options) -> None:
 if __name__ == "__main__":
     import_file()
 
-    # from click.testing import CliRunner
+    from click.testing import CliRunner
 
+    # print("warning: running using CliRunner (options are ignored)")
     # runner = CliRunner()
     # runner.invoke(
     #     import_file,
@@ -167,6 +172,7 @@ if __name__ == "__main__":
     #         "--no-timestamp",
     #         "--register",
     #         "--explode",
+    #         "--database", "APA",
     #         "--data-types",
     #         "adna",
     #         "--transfer-format",
