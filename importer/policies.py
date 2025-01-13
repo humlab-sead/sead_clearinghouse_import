@@ -259,7 +259,9 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
             rows_to_add: list[dict[str, int]] = [
                 template | {'system_id': system_id, pk_name: system_id} for system_id in missing_keys
             ]
-            data_table = pd.concat([data_table, pd.DataFrame(rows_to_add)], ignore_index=True)
+
+            if len(rows_to_add) > 0:
+                data_table = pd.concat([data_table, pd.DataFrame(rows_to_add)], ignore_index=True)
 
             self.submission.data_tables[table_name] = data_table
 
@@ -290,6 +292,7 @@ class DropIgnoredColumns(PolicyBase):
             columns: list[str] = self.filter_columns(drop_patterns, data.columns)
             if not columns:
                 continue
+
             data.drop(columns=columns, inplace=True)
             logger.info(f"Dropping column(s) {', '.join(columns)} from {table_name}")
 
@@ -320,5 +323,9 @@ class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
                 continue
 
             columns_to_drop: list[str] = [c for c in data_table.columns if c not in ['system_id', pk_name]]
+
+            if not columns_to_drop:
+                continue
+
             data_table.drop(columns=columns_to_drop, inplace=True)
-            logger.info(f"Dropping column(s) {', '.join(columns_to_drop)} from {table_name}")
+            logger.debug(f"Dropping column(s) {', '.join(columns_to_drop)} from {table_name}")
