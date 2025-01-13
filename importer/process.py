@@ -86,7 +86,7 @@ class ImportService:
         )
 
     @utility.log_decorator(
-        enter_message=" ---> generating target file(s)...", exit_message=" ---> target file(s) created"
+        enter_message=" ---> generating target file(s)...", exit_message=" ---> target file(s) created", level="DEBUG"
     )
     def dispatch(self, submission: Submission, format_document: bool = False) -> str:
         """
@@ -100,11 +100,11 @@ class ImportService:
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)
 
-        logger.info(f" ---> target file created: {self.opts.target}")
+        logger.debug(f" ---> target file created: {self.opts.target}")
 
         return self.opts.target
 
-    @utility.log_decorator(enter_message="Processing started...", exit_message="Processing done")
+    @utility.log_decorator(enter_message="Processing started...", exit_message="Processing done", level="DEBUG")
     def process(self, submission: int | str | Submission) -> None:
         """Process a submission. The submission can be either
         - an Excel file,
@@ -123,7 +123,7 @@ class ImportService:
                     logger.error(f" ---> {opts.basename} does not satisfy the specification")
                     return
                 if self.opts.check_only:
-                    logger.info(f" ---> {opts.basename} satisfies the specification")
+                    logger.debug(f" ---> {opts.basename} satisfies the specification")
                     return
 
             if opts.use_existing_submission:

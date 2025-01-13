@@ -19,19 +19,19 @@ class SubmissionRepository:
         with self as connection:
             self.uploader.upload(connection, xml_filename, submission_id)
 
-    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted")
+    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG")
     def extract_to_staging_tables(self, submission_id: int) -> None:
         with self as connection:
             self.uploader.extract(connection, submission_id)
 
-    @log_decorator(enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded")
+    @log_decorator(enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded", level="DEBUG")
     def explode_to_public_tables(
         self, submission_id: int, p_dry_run: bool = False, p_add_missing_columns: bool = False
     ) -> None:
         """Explode submission into public tables."""
         with self as connection:
             for table_name_underscored in self.get_table_names(submission_id):
-                logger.info(f"   --> Exploding table {table_name_underscored}")
+                logger.debug(f"   --> Exploding table {table_name_underscored}")
                 if p_dry_run:
                     continue
 
@@ -47,7 +47,7 @@ class SubmissionRepository:
                         (submission_id, table_name_underscored),
                     )
 
-    @log_decorator(enter_message=" ---> removing submission...", exit_message=" ---> submission removed")
+    @log_decorator(enter_message=" ---> removing submission...", exit_message=" ---> submission removed", level="DEBUG")
     def remove(self, submission_id: int, clear_header: bool = False, clear_exploded: bool = True) -> None:
         """Delete submission from staging tables."""
         logger.info("   --> Cleaning up existing data for submission...")
@@ -55,7 +55,7 @@ class SubmissionRepository:
             with connection.cursor() as cursor:
                 cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))
 
-    @log_decorator(enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending")
+    @log_decorator(enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending", level="DEBUG")
     def set_pending(self, submission_id: int) -> None:
         with self as connection:
             with connection.cursor() as cursor:
@@ -66,7 +66,7 @@ class SubmissionRepository:
                 """
                 cursor.execute(sql, (2, "Pending", submission_id))
 
-    @log_decorator(enter_message=" ---> registering submission...", exit_message=" ---> submission registered")
+    @log_decorator(enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG")
     def register(self, *, data_types: str = "") -> int:
         # if xml is None and filename is None:
         #     raise ValueError("Either xml or filename must be provided")
