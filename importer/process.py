@@ -41,7 +41,6 @@ class Options:
 
     output_folder: str = field(default="data/output")
     database: dict[str, str] = field(default_factory=dict)
-    log_folder: str = field(default="./logs")
     transfer_format: str = field(default="xml")
 
     def __post_init__(self) -> None:
