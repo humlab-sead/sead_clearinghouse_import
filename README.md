@@ -9,7 +9,7 @@ This program uses `tidlib` to cleanup the resulting XML which you can install us
 sudo apt-get install tidy
 ```
 
-You will need Python ^3.11 (install with) and Poetry on your local machine.
+You will need Python ^3.12 (install with pyenv) and Poetry on your local machine.
 
 Clone the SEAD Clearinghouse import repository into a new folder and setup the local environment:
 
@@ -55,7 +55,13 @@ Options:
 
 ### Configuration
 
-The import expects that user's password is stored in environment variable "SEAD_CH_PASSWORD".
+The import program reads configuration in the following order of priority:
+
+1. Command line arguments have the highest priority and supercedes other configurations.
+2. Command line arguments found in options file (--options-filename FILENAME)
+3. Environment variables having prefix "SEAD_IMPORT_ABC_DEF" corresponding to setting "options"[abc].def.
+4. Values in "options" section in YAML configuration file (argument)
+
 
 ### Examples
 
@@ -70,50 +76,3 @@ Generate XML and submit to clearinghouse:
 ```bash
 λ PYTHONPATH=. python importer/scripts/import-excel.py data/input/building_dendro_2023-12_import.xlsx --data-types dendrochronology
 ```
-
-2024-01-07 10:04:31.981 | Level 30 | importer.model.specification:log_messages:98 - WARNING type clash: tbl_dendro_dates.age_older integer<=>object
-  6038	Winter X
-  6039	Winter X
-  6040	Winter X
-  6130	After X
-  6131	After X
-
-2024-01-07 10:04:31.982 | Level 30 | importer.model.specification:log_messages:98 - WARNING! Column tbl_dendro_dates.season_id: ends with "_id" but NOT marked as PK/FK
-  Add FK constraint
-
-2024-01-07 10:04:31.981 | Level 30 | importer.model.specification:log_messages:98 - WARNING type clash: tbl_physical_samples.sample_name character varying<=>int64
-  Non-critical, should be OK
-
-2024-01-07 10:04:31.982 | Level 30 | importer.model.specification:log_messages:98 - WARNING tbl_dendro_dates has EXTRA DATA columns: error_uncertainty_id
-  Non-critical, should be OK
-
-2024-01-07 10:04:31.982 | Level 30 | importer.model.specification:log_messages:98 - WARNING tbl_sample_group_coordinates has EXTRA DATA columns: sample_group_name
-  Non-critical, should be OK
-
-2024-01-07 10:04:31.983 | Level 30 | importer.model.specification:log_messages:98 - WARNING tbl_sample_groups has EXTRA DATA columns: sample_group_id.1
-  Non-critical, should be OK
-
-2024-01-07 10:04:31.983 | Level 30 | importer.model.specification:log_messages:98 - WARNING tbl_site_references has EXTRA DATA columns: Projektnr
-  Non-critical, should be OK
-
-2024-01-07 10:04:31.983 | Level 40 | importer.model.specification:log_messages:98 - CRITICAL ERROR Column tbl_dendro_dates.age_older has non-numeric values: Winter X After X
-  Criticalerror, same cause as above
-  6038	Winter X
-  6039	Winter X
-  6040	Winter X
-  6130	After X
-  6131	After X
-
-
-ERROR   Non-nullable foreign key column tbl_dendro_dates.age_type_id                 has missing values
-WARNING Non-nullable foreign key column tbl_physical_samples.sample_type_id          has missing values
-ERROR   Non-nullable foreign key column tbl_sample_group_coordinates.sample_group_id has missing values == system_id?
-
-Hej, tre mindre problem i nya dendrofilen: 
-
-- tbl_dendro_dates.age_type_id är blank, ska förmodligen vara 1, är non-nullable i databasen.
-- tbl_dendro_dates.age_older har icke-numeriska värden (Winter X. After X). fältet är numeriskt i databasen.
-- tbl_physical_samples.sample_type_id saknar värden (non-nullable i databasen)
-- tbl_sample_group_coordinates.sample_group_id (non-nullable FK), ska förmodligen ha samma värden som "system_id"
-
-
