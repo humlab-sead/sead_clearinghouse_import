@@ -16,7 +16,7 @@ class XmlUploader(BaseUploader):
     def __init__(self, *, target_schema: str = "clearing_house") -> None:
         self.target_schema: str = target_schema
 
-    @log_decorator(enter_message=" ---> uploading XML...", exit_message=" ---> XML uploaded")
+    @log_decorator(enter_message=" ---> uploading XML...", exit_message=" ---> XML uploaded", level="DEBUG")
     def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:
         """Upload processed XML submission file to database."""
         if xml_filename is None:
@@ -38,7 +38,7 @@ class XmlUploader(BaseUploader):
             cursor.execute(sql, (xml, submission_id))
         connection.commit()
 
-    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted")
+    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG")
     def extract(self, connection: Connection, submission_id: int) -> None:
         """Extract submission into staging tables."""
         with connection.cursor() as cursor:

@@ -43,7 +43,6 @@ def test_import_a_dna_submission(cfg: Config):
             'table_names': None,
             'xml_filename': None,
             'check_only': False,
-            'log_folder': './logs',
         }
     )
     metadata: Metadata = Metadata(opts.db_uri())

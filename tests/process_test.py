@@ -22,7 +22,6 @@ def test_create_options(cfg: Config):
             'table_names': None,
             'xml_filename': None,
             'check_only': True,
-            'log_folder': './logs',
             'timestamp': True,
         }
     )
@@ -50,7 +49,6 @@ def test_import_reduced_submission(cfg: Config):
             'check_only': False,
             'register': False,
             'explode': False,
-            'log_folder': './logs',
             'timestamp': False,
             "tidy_xml": False,
         }
