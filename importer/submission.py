@@ -92,8 +92,8 @@ class Submission:
                 if data.excel_sheet in reader.sheet_names
             }
 
-            logger.info(f"   read sheets: {','.join(k for k in data_tables)}")
-            logger.info(f"ignored sheets: {','.join(set(reader.sheet_names) - set(data_tables.keys()))}")
+            logger.debug(f"   read sheets: {','.join(k for k in data_tables)}")
+            logger.debug(f"ignored sheets: {','.join(set(reader.sheet_names) - set(data_tables.keys()))}")
 
             if 'data_table_index' in reader.sheet_names:
                 logger.info("ignoring data_table_index found in Excel")
