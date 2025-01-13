@@ -37,6 +37,35 @@ def test_tidy_xml_returns_a_tidy_xml():
     assert tidy_path == "/tmp/test_tidy.xml"
 
 
+def test_recursive_delete():
+
+    d: dict[str, Any] = {'a': 1}
+    utility.remove_keys_recursively(d, {'a'})
+    assert d == {}
+
+    d = {'b': { 'a': 1 }}
+    utility.remove_keys_recursively(d, {'a'})
+    assert d == {'b': {}}
+
+    d = {'b': { 'a': 1 }, 'a': { 'c': 1 }}
+    utility.remove_keys_recursively(d, {'a'})
+    assert d == {'b': {}}
+
+    d = {'b': { 'a': 1, 'c': 1 }, 'a': { 'c': 1 }}
+    utility.remove_keys_recursively(d, {'a'})
+    assert d == {'b': {'c': 1}}
+
+    d = {
+        'a': 1,
+        'b': {'x': 10, 'y': 20},
+        'c': {'z': 30, 'w': {'u': 40, 'v': 50}},
+    }
+    keys: set[str] = {'a', 'b', 'z', 'u'}
+    utility.remove_keys_recursively(d, keys)
+    expected = {'c': {'w': {'v': 50}}}
+    assert d == expected
+
+
 def test_recursive_update():
     d1: dict[str, Any] = {'a': 1, 'b': 2}
     d2: dict[str, Any] = {'b': 3, 'c': 4}
