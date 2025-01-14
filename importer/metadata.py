@@ -98,6 +98,9 @@ class SeadSchema(dict[str, Table]):
     def lookup_tables(self) -> list[Table]:
         return [t for t in self.values() if t.is_lookup]
 
+    @cached_property
+    def aliased_tables(self) -> list[Table]:
+        return [t for t in self.values() if t.excel_sheet != t.table_name]
 
 class Metadata:
     """Logic related to Excel metadata file"""
