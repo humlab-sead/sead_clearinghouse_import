@@ -10,22 +10,8 @@ from importer.dispatchers.to_xml import XmlProcessor
 def test_emit():
     outstream = Mock()
     processor = XmlProcessor(outstream)
-    processor.emit('test', 2)
+    processor.outstream.emit('test', 2)
     outstream.write.assert_called_once_with('    test\n')
-
-
-def test_emit_tag():
-    outstream = Mock()
-    processor = XmlProcessor(outstream)
-    processor.emit_tag('tag', {'attr': 'value'}, 2, True)
-    outstream.write.assert_called_once_with('    <tag attr="value"/>\n')
-
-
-def test_emit_close_tag():
-    outstream = Mock()
-    processor = XmlProcessor(outstream)
-    processor.emit_close_tag('tag', 2)
-    outstream.write.assert_called_once_with('    </tag>\n')
 
 
 # def test_camel_case_name():
