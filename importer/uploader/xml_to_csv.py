@@ -10,7 +10,7 @@ from typing import Any, Iterable
 import pandas as pd
 from sqlalchemy.types import TEXT
 
-from ..utility import get_connection_uri, Registry
+from ..utility import Registry, get_connection_uri
 
 Table = namedtuple("Table", "table_type, record_count")
 

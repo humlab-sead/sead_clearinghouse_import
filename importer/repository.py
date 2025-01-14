@@ -19,12 +19,16 @@ class SubmissionRepository:
         with self as connection:
             self.uploader.upload(connection, xml_filename, submission_id)
 
-    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG")
+    @log_decorator(
+        enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG"
+    )
     def extract_to_staging_tables(self, submission_id: int) -> None:
         with self as connection:
             self.uploader.extract(connection, submission_id)
 
-    @log_decorator(enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded", level="DEBUG")
+    @log_decorator(
+        enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded", level="DEBUG"
+    )
     def explode_to_public_tables(
         self, submission_id: int, p_dry_run: bool = False, p_add_missing_columns: bool = False
     ) -> None:
@@ -55,7 +59,9 @@ class SubmissionRepository:
             with connection.cursor() as cursor:
                 cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))
 
-    @log_decorator(enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending", level="DEBUG")
+    @log_decorator(
+        enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending", level="DEBUG"
+    )
     def set_pending(self, submission_id: int) -> None:
         with self as connection:
             with connection.cursor() as cursor:
@@ -66,7 +72,9 @@ class SubmissionRepository:
                 """
                 cursor.execute(sql, (2, "Pending", submission_id))
 
-    @log_decorator(enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG")
+    @log_decorator(
+        enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG"
+    )
     def register(self, *, data_types: str = "") -> int:
         # if xml is None and filename is None:
         #     raise ValueError("Either xml or filename must be provided")

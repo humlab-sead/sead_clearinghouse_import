@@ -56,7 +56,7 @@ def test_add_default_foreign_key_policy():
     submission.data_tables = {"table1": table}
     config_value = MagicMock()
     config_value.resolve.side_effect = [
-        False, # call to is_disabled()
+        False,  # call to is_disabled()
         {"table1": {"fk_col": 2, "fk_col2": 3}},
     ]
     submission.__contains__.side_effect = lambda x: x in submission.data_tables

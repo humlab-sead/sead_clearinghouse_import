@@ -38,7 +38,9 @@ class XmlUploader(BaseUploader):
             cursor.execute(sql, (xml, submission_id))
         connection.commit()
 
-    @log_decorator(enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG")
+    @log_decorator(
+        enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG"
+    )
     def extract(self, connection: Connection, submission_id: int) -> None:
         """Extract submission into staging tables."""
         with connection.cursor() as cursor:

@@ -6,7 +6,7 @@ import pandas as pd
 
 from importer.configuration.inject import ConfigValue
 
-from .utility import camel_case_name, load_sead_data, load_sead_columns
+from .utility import camel_case_name, load_sead_columns, load_sead_data
 
 # pylint: disable=no-member
 

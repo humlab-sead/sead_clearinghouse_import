@@ -1,5 +1,8 @@
 import io
 from typing import Any
+from unittest.mock import patch
+
+import pandas as pd
 
 from importer import utility
 
@@ -43,15 +46,15 @@ def test_recursive_delete():
     utility.remove_keys_recursively(d, {'a'})
     assert d == {}
 
-    d = {'b': { 'a': 1 }}
+    d = {'b': {'a': 1}}
     utility.remove_keys_recursively(d, {'a'})
     assert d == {'b': {}}
 
-    d = {'b': { 'a': 1 }, 'a': { 'c': 1 }}
+    d = {'b': {'a': 1}, 'a': {'c': 1}}
     utility.remove_keys_recursively(d, {'a'})
     assert d == {'b': {}}
 
-    d = {'b': { 'a': 1, 'c': 1 }, 'a': { 'c': 1 }}
+    d = {'b': {'a': 1, 'c': 1}, 'a': {'c': 1}}
     utility.remove_keys_recursively(d, {'a'})
     assert d == {'b': {'c': 1}}
 
@@ -185,12 +188,7 @@ def test_pascal_to_snake_case():
     assert utility.pascal_to_snake_case("PascalCaseWith123Numbers") == "pascal_case_with123_numbers"
 
 
-import io
-from typing import Any
 
-from importer import utility
-import pandas as pd
-from unittest.mock import patch
 
 
 def test_flatten_empty_list_returns_empty_list():
