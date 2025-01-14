@@ -187,6 +187,10 @@ def log_decorator(
     enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int | str = "INFO"
 ):
     def decorator(func):
+        
+        if __debug__:
+            return func
+        
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
@@ -396,7 +400,7 @@ def write_yaml(data: dict, file: str) -> None:
         return yaml.dump(data=data, stream=fp)
 
 
-def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> None:
+def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> dict[str, Any]:
     """
     Recursively removes keys from a dictionary if they exist in keys_to_remove.
 
@@ -416,9 +420,10 @@ def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> N
             del data[key]
         elif isinstance(data[key], dict):
             remove_keys_recursively(data[key], keys_to_remove)
+    return data
 
 
-def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str]) -> dict:
+def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str] = None) -> dict:
     """Update dict `data` with values found in `yaml_file`."""
     if yaml_file is None:
         return data
