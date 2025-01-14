@@ -77,7 +77,7 @@ class Submission:
         ]
         return set(int(x) for x in functools.reduce(flatten_sets, referenced_pk_ids or [], []))
 
-    @log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel')
+    @log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel', level='DEBUG')
     @staticmethod
     def load(*, metadata: Metadata, source: str | pd.ExcelFile) -> "Submission":
         """Loads the submission file into a SubmissionData object"""

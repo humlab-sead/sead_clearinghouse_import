@@ -91,7 +91,7 @@ class SubmissionSpecification(SpecificationBase):
         super().__init__(metadata, messages or SpecificationMessages(), ignore_columns)
         self.raise_errors: bool = raise_errors
 
-    @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked")
+    @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked", level='DEBUG')
     def is_satisfied_by(self, submission: Submission, _: str = None) -> bool:
         """
         Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
