@@ -10,7 +10,7 @@ from importer.dispatchers.to_xml import XmlProcessor
 def test_emit():
     outstream = Mock()
     processor = XmlProcessor(outstream)
-    processor.outstream.emit('test', 2)
+    processor.emit('test', 2)
     outstream.write.assert_called_once_with('    test\n')
 
 
