@@ -57,6 +57,7 @@ class Submission:
         """Returns a list of all table names included in the submission"""
         return list(self.data_tables.keys())
 
+
     def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[int]:
         """Returns all unique system ids in `table_name` that are referenced by any foreign key in any other table.
         NOTE: This function assumes PK and FK names are the same."""
