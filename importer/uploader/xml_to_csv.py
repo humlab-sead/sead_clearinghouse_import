@@ -10,7 +10,7 @@ from typing import Any, Iterable
 import pandas as pd
 from sqlalchemy.types import TEXT
 
-from ..utility import Registry
+from ..utility import get_connection_uri, Registry
 
 Table = namedtuple("Table", "table_type, record_count")
 
@@ -30,7 +30,7 @@ class ParserRegistry(Registry):
     items: dict = {}
 
 
-Parsers = Registry()
+Parsers = ParserRegistry()
 
 
 def format_value(value: str, data_type: str) -> str:
@@ -112,20 +112,8 @@ def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_
     return filename
 
 
-def get_connection_uri(connection: Any) -> str:
-    conn_info = connection.get_dsn_parameters()
-    user: str = conn_info.get('user')
-    host: str = conn_info.get('host')
-    port: str = conn_info.get('port')
-    dbname: str = conn_info.get('dbname')
-    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
-    return uri
-
-
 def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: str) -> None:
     """Using the csv files created by to_csv, import the data into the PostgreSQL database using psycopg2"""
-
-    # if False:
 
     uri: str = get_connection_uri(connection)
     data: pd.DataFrame = pd.read_csv(filename, sep='\t', na_values='NULL', keep_default_na=True, dtype=str)

@@ -184,7 +184,7 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
 
 
 def log_decorator(
-    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int|str = "INFO"
+    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int | str = "INFO"
 ):
     def decorator(func):
         @functools.wraps(func)
@@ -433,3 +433,13 @@ def create_db_uri(*, host: str, port: int | str, user: str, dbname: str) -> str:
     Returns the database URI from the environment variables.
     """
     return f"postgresql://{user}@{host}:{port}/{dbname}"
+
+
+def get_connection_uri(connection: Any) -> str:
+    conn_info = connection.get_dsn_parameters()
+    user: str = conn_info.get('user')
+    host: str = conn_info.get('host')
+    port: str = conn_info.get('port')
+    dbname: str = conn_info.get('dbname')
+    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
+    return uri
