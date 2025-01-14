@@ -3,7 +3,6 @@ import sys
 from typing import Any, Optional
 
 import click
-from loguru import logger
 
 from .. import utility
 
