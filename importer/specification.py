@@ -1,6 +1,7 @@
 import abc
 from dataclasses import dataclass, field
 from fnmatch import fnmatch
+from functools import cached_property
 
 import numpy as np
 import pandas as pd
@@ -436,3 +437,17 @@ class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
 
         if data_table[pk_name].isnull().any():
             self.error(f"Table {table_name}, new values not allowed for lookup table.")
+
+
+@SpecificationRegistry.register()
+class KeyedByTableNameSpecification(SpecificationBase):
+    """Verify that `table_name` is a SEAD table (and not an Excel abbreviated sheet name)"""
+
+    @cached_property
+    def aliased_table_names(self) -> set[str]:
+        return {t.excel_sheet for t in self.metadata.sead_schema.aliased_tables}
+
+    def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
+
+        if table_name in self.aliased_table_names:
+            self.error(f"Table {table_name} is keyed by excel sheet name for aliased table")
