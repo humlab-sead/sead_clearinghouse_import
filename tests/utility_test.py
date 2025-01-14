@@ -188,9 +188,6 @@ def test_pascal_to_snake_case():
     assert utility.pascal_to_snake_case("PascalCaseWith123Numbers") == "pascal_case_with123_numbers"
 
 
-
-
-
 def test_flatten_empty_list_returns_empty_list():
     results = utility.flatten([])
     assert [] == results
