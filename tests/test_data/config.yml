@@ -8,13 +8,13 @@ options:
     - "*_uuid"
 policies:
   if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table:
-    priotity: 1
+    priority: 1
   set_public_id_to_negative_system_id_for_new_lookups:
     disabled: true
   add_default_foreign_key_policy:
     tbl_dataset_contacts:
-      fk_name: contact_type_id
-      fk_value: 2
+      contact_type_id: 2
+      contact_id: 1
   if_lookup_table_is_missing_add_table_using_system_id_as_public_id:
     tables:
       - tbl_abundance_elements

@@ -57,15 +57,17 @@ def test_add_default_foreign_key_policy():
     config_value = MagicMock()
     config_value.resolve.side_effect = [
         False, # call to is_disabled()
-        {"table1": {"fk_name": "fk_col", "fk_value": 2}},
+        {"table1": {"fk_col": 2, "fk_col2": 3}},
     ]
     submission.__contains__.side_effect = lambda x: x in submission.data_tables
+    submission.__getitem__.side_effect = lambda x: table
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
         policy = AddDefaultForeignKeyPolicy(metadata=metadata, submission=submission)
         policy.apply()
 
     assert (table["fk_col"] == 2).all()
+    assert (table["fk_col2"] == 3).all()
 
 
 def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():

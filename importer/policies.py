@@ -78,25 +78,19 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
 
             if table_name not in self.submission:
                 return
-
-            if 'fk_name' not in cfg or 'fk_value' not in cfg:
-                raise ValueError(
-                    f"Table '{table_name}': 'fk_name' and 'fk_value' must be provided in config for policy '{self.get_id()}'"
-                )
-
-            fk_name: str = cfg['fk_name']
-            fk_value: int = cfg['fk_value']
-
+            
             data: pd.DataFrame = self.submission[table_name]
 
-            if fk_name not in data.columns or data[fk_name].isnull().all():
+            for fk_name, fk_value in cfg.items():
 
-                if fk_name not in data.columns:
-                    logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
-                else:
-                    logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
+                if fk_name not in data.columns or data[fk_name].isnull().all():
 
-                data[fk_name] = fk_value
+                    if fk_name not in data.columns:
+                        logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
+                    else:
+                        logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
+
+                    data[fk_name] = fk_value
 
 
 
