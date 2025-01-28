@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import base64
 import fnmatch
 import functools
@@ -9,13 +11,17 @@ import sys
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
-from typing import Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal
 from xml.dom import minidom
 
 import pandas as pd
 import yaml
+from jinja2 import Environment, Template
 from loguru import logger
 from sqlalchemy import Engine, create_engine
+
+if TYPE_CHECKING:
+    from .submission import Submission
 
 
 def configure_logging(opts: dict[str, str]) -> None:
@@ -187,10 +193,10 @@ def log_decorator(
     enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int | str = "INFO"
 ):
     def decorator(func):
-        
+
         if __debug__:
             return func
-        
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
 
@@ -448,3 +454,52 @@ def get_connection_uri(connection: Any) -> str:
     dbname: str = conn_info.get('dbname')
     uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
     return uri
+
+def to_lookups_sql(submission: Submission, filename: str) -> None:
+    """Writes file"""
+
+    lookup_sql_template: str = """
+    with new_data {{excel_sql_columns}} as (
+        values
+            {% for row in excel_sql_values %}{{row}}{% if not loop.last %},
+            {% endif %}{% endfor %}
+        )
+        insert into {{table_name}} ({{pk_name}}, {{non_pk_attributes}})
+            select
+                sead_utility.allocate_system_id(
+                    v_submission_identifier,
+                    v_change_request_identifier,
+                    '{{table_name}}',
+                    '{{pk_name}}',
+                    new_data.system_id::text,
+                    row_to_json(new_data.*)::jsonb
+                ) as {{pk_name}}, {{non_pk_attributes}}
+            from new_data;
+
+"""
+
+    jinja_env = Environment()
+    template: Template = jinja_env.from_string(lookup_sql_template)
+
+    with open(filename, "w", encoding="utf-8") as fp:
+        for table_name in submission.data_table_names:
+            excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith('(')), None)
+            if excel_sql_columns:
+                pk_name: str = submission.metadata[table_name].pk_name
+                data = submission.data_tables[table_name][excel_sql_columns].str.strip().str.lstrip('(').str.rstrip(',').str.strip().str.rstrip(')')
+                attributes: list[str] = [x.strip() for x in excel_sql_columns.strip().lstrip('(').rstrip(')').split(',')]
+                non_pk_attributes = [x for x in attributes if x not in ('system_id', pk_name)]
+                data: pd.Series = submission.data_tables[table_name][excel_sql_columns]
+
+                sql_data: str = template.render(
+                    table_name=table_name,
+                    pk_name=pk_name,
+                    excel_sql_columns=excel_sql_columns,
+                    excel_sql_values=data[~data.isnull()],
+                    non_pk_attributes=', '.join(non_pk_attributes),
+                )
+                fp.write(sql_data)
+
+
+def ensure_path(f: str) -> None:
+    os.makedirs(dirname(f), exist_ok=True)
