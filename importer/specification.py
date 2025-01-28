@@ -29,6 +29,16 @@ class SpecificationMessages:
         self.warnings = sorted(set(self.warnings))
         self.infos = sorted(set(self.infos))
 
+    def __str__(self) -> str:
+        msgs: str = ""
+        if len(self.errors) > 0:
+            msgs += f"Errors: \n{'\n'.join(self.errors)}\n"
+        if len(self.warnings) > 0:
+            msgs += f"Warnings: \n{'\n'.join(self.warnings)}\n"
+        if len(self.infos) > 0:
+            msgs += f"Infos: \n{'\n'.join(self.infos)}\n"
+        return msgs
+
 
 class SpecificationError(Exception):
     def __init__(self, messages: SpecificationMessages) -> None:
@@ -389,7 +399,10 @@ class NoMissingColumnSpecification(SpecificationBase):
 @SpecificationRegistry.register()
 class NonNullableColumnHasValueSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
-        """All fields in metadata.Table.Fields MUST exist in DataTable.columns"""
+        """
+        Checks that non-nullable columns have values.
+        Records that has a public_id value greater than 0 are ignored since they already exists in the database.
+        """
 
         if table_name not in submission or table_name not in self.metadata:
             return
@@ -407,8 +420,13 @@ class NonNullableColumnHasValueSpecification(SpecificationBase):
             and x != "system_id"
         }
 
+        new_records: pd.DataFrame = data[~(data[table.pk_name] > 0) | data[table.pk_name].isnull()]
+
+        if len(new_records) == 0:
+            return
+
         for column_name in non_nullable_columns:
-            if data[column_name].isnull().any():
+            if new_records[column_name].isnull().any():
                 self.error(f"Table {table_name} has NULL values in non-nullable column {column_name}")
 
 
