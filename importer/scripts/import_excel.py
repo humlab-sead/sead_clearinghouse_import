@@ -1,6 +1,5 @@
 import os
 import sys
-from datetime import datetime
 from typing import Any
 
 import click
@@ -12,7 +11,7 @@ from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
 from importer.submission import Submission
-from importer.utility import configure_logging, dotset, strip_path_and_extension
+from importer.utility import configure_logging, strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -46,6 +45,13 @@ dotenv.load_dotenv(dotenv.find_dotenv())
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
 @click.option("--transfer-format", type=str, default='xml', help="Specify format to use in upload (XML or CSV).")
+@click.option(
+    "--dump-to-csv/--no-dump-to-csv",
+    type=bool,
+    is_flag=True,
+    default=False,
+    help="Store (policy-updated) submission data as CSV files in output folder.",
+)
 @click.pass_context
 def import_file(
     ctx,
@@ -68,6 +74,7 @@ def import_file(
     timestamp: bool,
     tidy_xml: bool,
     transfer_format: str,
+    dump_to_csv: bool,
     options_filename: str = None,
 ) -> None:
     """
@@ -90,7 +97,7 @@ def import_file(
 
 def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
-    specified_keys: set[str]=_get_specified_cli_opts(ctx)
+    specified_keys: set[str] = _get_specified_cli_opts(ctx)
     config_filename: str = opts.pop('config_filename')
     log_folder: str = opts.pop('log_folder')
 
@@ -160,9 +167,10 @@ def workflow(opts: Options) -> None:
 if __name__ == "__main__":
     import_file()
 
-    from click.testing import CliRunner
+    # print("WARNING: running using CliRunner (options are ignored)")
 
-    # print("warning: running using CliRunner (options are ignored)")
+    # from click.testing import CliRunner
+
     # runner = CliRunner()
     # runner.invoke(
     #     import_file,
@@ -172,7 +180,8 @@ if __name__ == "__main__":
     #         "--no-timestamp",
     #         "--register",
     #         "--explode",
-    #         "--database", "APA",
+    #         "--database",
+    #         "sead_staging_development_adna",
     #         "--data-types",
     #         "adna",
     #         "--transfer-format",
