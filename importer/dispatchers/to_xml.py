@@ -4,7 +4,7 @@ from typing import Any
 from xml.sax.saxutils import escape
 
 import pandas as pd
-from jinja2 import Environment, Template, select_autoescape
+from jinja2 import Environment, select_autoescape
 from loguru import logger
 
 from ..metadata import Column, Metadata, Table
@@ -72,28 +72,26 @@ class XmlProcessor(IDispatcher):
             if table_name not in metadata:
                 raise ValueError(f"Table {table_name}: not found in metadata")
 
-            table_spec: Table = metadata[table_name]
-            data_table: pd.DataFrame = submission.data_tables[table_name]
+            table: Table = metadata[table_name]
+            data: pd.DataFrame = submission.data_tables[table_name]
 
             referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
-            table_namespace: str = f"com.sead.database.{table_spec.java_class}"
+            table_namespace: str = f"com.sead.database.{table.java_class}"
 
-            if data_table is None:
+            if data is None:
                 continue
 
-            if data_table.shape[0] == 0:
+            if data.shape[0] == 0:
                 continue
 
-            self.emit(f'<{table_spec.java_class} length="{data_table.shape[0]}">', 1)
+            self.emit(f'<{table.java_class} length="{data.shape[0]}">', 1)
 
-            # datarows = [x for x in data_table.iterrows()]
-            # for index, record in enumerate(data_table.to_dict(orient='records')):
-            for record in data_table.to_dict(orient='records'):
+            for record in data.to_dict(orient='records'):
                 try:
                     data_row: dict = record  # record.to_dict()
 
                     public_id: int | None = _to_int_or_none(
-                        data_row[table_spec.pk_name] if table_spec.pk_name in data_row else None
+                        data_row[table.pk_name] if table.pk_name in data_row else None
                     )
                     system_id: int | None = _to_int_or_none(data_row["system_id"])
 
@@ -114,7 +112,7 @@ class XmlProcessor(IDispatcher):
 
                     self.emit(f'<{table_namespace} id="{system_id}">', 2)
 
-                    for column_name, column_spec in table_spec.columns.items():
+                    for column_name, column_spec in table.columns.items():
                         if column_name in self.ignore_columns:
                             continue
 
@@ -137,13 +135,10 @@ class XmlProcessor(IDispatcher):
                         f'<clonedId class="java.util.Integer">{"NULL" if public_id is None else public_id}</clonedId>',
                         3,
                     )
-                    if "date_updated" in table_spec.column_names():
+                    if "date_updated" in table.column_names():
                         self.emit('<dateUpdated class="java.util.Date"/>', 3)
 
                     self.emit(f"</{table_namespace}>", 2)
-
-                    # if 0 < max_rows < index:
-                    #     break
 
                 except Exception as x:
                     logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
@@ -154,8 +149,8 @@ class XmlProcessor(IDispatcher):
                     f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
                 )
                 for key in referenced_keyset:
-                    self.emit(f'<com.sead.database.{table_spec.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2)
-            self.emit(f"</{table_spec.java_class}>", 1)
+                    self.emit(f'<com.sead.database.{table.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2)
+            self.emit(f"</{table.java_class}>", 1)
 
     def process_fk(self, data_row: dict, column: Column, fk_table_spec: Table, fk_data_table: pd.DataFrame) -> None:
         """The value is a FK system_id"""
@@ -217,21 +212,6 @@ class XmlProcessor(IDispatcher):
 
         return value
 
-    def process_lookups(self, metadata: Metadata, submission: Submission, table_names: list[str]) -> None:
-        template: Template = self.jinja_env.from_string(LOOKUP_TEMPLATE)
-
-        for table_name in sorted(table_names):
-            referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
-
-            if len(referenced_keyset) == 0:
-                # logger.debug(f"Skipping {table_name}: not referenced")
-                continue
-
-            xml: str = template.render(
-                lookup_ids=referenced_keyset, class_name=metadata[table_name].java_class, length=len(referenced_keyset)
-            )
-            self.emit(xml)
-
     def dispatch(
         self,
         metadata: Metadata,
@@ -240,12 +220,8 @@ class XmlProcessor(IDispatcher):
         extra_names: list[str] = None,
     ) -> None:
         tables_to_process: list[str] = list(submission.data_tables.keys()) if table_names is None else table_names
-        extra_names: set[str] = (
-            set(metadata.sead_schema.keys()) - set(submission.data_table_names) if extra_names is None else extra_names
-        )
 
         self.emit('<?xml version="1.0" ?>')
         self.emit("<sead-data-upload>")
-        self.process_lookups(metadata, submission, extra_names)
         self.process_tables(metadata, submission, tables_to_process)
         self.emit("</sead-data-upload>")

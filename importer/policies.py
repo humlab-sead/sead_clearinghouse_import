@@ -156,33 +156,33 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
                     data_table[column_name] = data_table[column_name].astype('Int64')
 
 
-@UpdatePolicies.register()
-class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
-    """Rule: assign temporary public primary key to new lookup table rows.
+# @UpdatePolicies.register()
+# class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
+#     """Rule: assign temporary public primary key to new lookup table rows.
 
-    For new lookup table rows,
-        set the public primary key to the negative of the system_id
-            if all public primary keys are missing
-    In this case, the public primary key is assigned upon submission commit to the database
-    """
+#     For new lookup table rows,
+#         set the public primary key to the negative of the system_id
+#             if all public primary keys are missing
+#     In this case, the public primary key is assigned upon submission commit to the database
+#     """
 
-    def update(self) -> None:
+#     def update(self) -> None:
 
-        for table_name in self.submission.data_tables:
+#         for table_name in self.submission.data_tables:
 
-            if not self.metadata[table_name].is_lookup:
-                continue
+#             if not self.metadata[table_name].is_lookup:
+#                 continue
 
-            data_table: pd.DataFrame = self.submission.data_tables[table_name]
+#             data_table: pd.DataFrame = self.submission.data_tables[table_name]
 
-            pk_name: str = self.metadata[table_name].pk_name
+#             pk_name: str = self.metadata[table_name].pk_name
 
-            if pk_name not in data_table.columns:
-                continue
+#             if pk_name not in data_table.columns:
+#                 continue
 
-            if data_table[pk_name].isnull().any():
-                data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
-                data_table[pk_name] = data_table[pk_name].astype(int)
+#             if data_table[pk_name].isnull().any():
+#                 data_table.loc[data_table[pk_name].isnull(), pk_name] = -data_table['system_id']
+#                 data_table[pk_name] = data_table[pk_name].astype(int)
 
 
 @UpdatePolicies.register()
