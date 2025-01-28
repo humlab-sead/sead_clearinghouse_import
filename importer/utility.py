@@ -455,6 +455,7 @@ def get_connection_uri(connection: Any) -> str:
     uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
     return uri
 
+
 def to_lookups_sql(submission: Submission, filename: str) -> None:
     """Writes file"""
 
@@ -486,8 +487,17 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
             excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith('(')), None)
             if excel_sql_columns:
                 pk_name: str = submission.metadata[table_name].pk_name
-                data = submission.data_tables[table_name][excel_sql_columns].str.strip().str.lstrip('(').str.rstrip(',').str.strip().str.rstrip(')')
-                attributes: list[str] = [x.strip() for x in excel_sql_columns.strip().lstrip('(').rstrip(')').split(',')]
+                data = (
+                    submission.data_tables[table_name][excel_sql_columns]
+                    .str.strip()
+                    .str.lstrip('(')
+                    .str.rstrip(',')
+                    .str.strip()
+                    .str.rstrip(')')
+                )
+                attributes: list[str] = [
+                    x.strip() for x in excel_sql_columns.strip().lstrip('(').rstrip(')').split(',')
+                ]
                 non_pk_attributes = [x for x in attributes if x not in ('system_id', pk_name)]
                 data: pd.Series = submission.data_tables[table_name][excel_sql_columns]
 

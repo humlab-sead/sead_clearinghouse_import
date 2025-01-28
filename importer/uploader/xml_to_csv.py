@@ -7,8 +7,8 @@ import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
 
-from loguru import logger
 import pandas as pd
+from loguru import logger
 from sqlalchemy.types import TEXT
 
 from ..utility import Registry, get_connection_uri
@@ -94,13 +94,16 @@ def xml_to_columns(source: str) -> Iterable[Column]:
             for column in columns:
                 yield Column(table.tag, column.tag, column.get('class'))
 
-            logger.info(f"   --> {table.tag}: has new data, found columns {', '.join(x.tag for x in columns)} for {table.tag}")
+            logger.info(
+                f"   --> {table.tag}: has new data, found columns {', '.join(x.tag for x in columns)} for {table.tag}"
+            )
             found = True
 
             break
-        
+
         if not found:
             logger.info(f"   --> {table.tag}: no new data found (no data records found)")
+
 
 @Parsers.register(key=Record)
 def xml_to_records(source: str) -> Iterable[Record]:
