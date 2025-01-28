@@ -42,6 +42,7 @@ class Options:
     output_folder: str = field(default="data/output")
     database: dict[str, str] = field(default_factory=dict)
     transfer_format: str = field(default="xml")
+    dump_to_csv: bool = field(default=False)
 
     def __post_init__(self) -> None:
 
@@ -118,17 +119,24 @@ class ImportService:
                 return
 
             if isinstance(submission, Submission):
+
                 if not self.specification.is_satisfied_by(submission):
                     logger.error(f" ---> {opts.basename} does not satisfy the specification")
-                    return
+                    raise SpecificationError(str(self.specification.messages))
+
                 if self.opts.check_only:
                     logger.debug(f" ---> {opts.basename} satisfies the specification")
                     return
 
+                if opts.dump_to_csv:
+                    submission.to_csv(self.opts.output_folder)
+
             if opts.use_existing_submission:
+
                 self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             if not opts.use_existing_submission:
+
                 opts.xml_filename = (
                     submission
                     if isinstance(submission, str)
@@ -141,7 +149,8 @@ class ImportService:
                     self.repository.upload_xml(opts.xml_filename, opts.submission_id)
                     self.repository.extract_to_staging_tables(opts.submission_id)
 
-            if opts.explode is True:
+            if opts.explode:
+
                 self.repository.explode_to_public_tables(
                     opts.submission_id, p_dry_run=False, p_add_missing_columns=False
                 )
