@@ -107,3 +107,4 @@ tmp
 logs
 update
 csv_files
+tests/output
