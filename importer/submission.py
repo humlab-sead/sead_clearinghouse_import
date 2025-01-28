@@ -1,12 +1,15 @@
+from __future__ import annotations
+
 import contextlib
 import functools
+import os
 
 import pandas as pd
 from loguru import logger
 
 from .metadata import Metadata, SeadSchema
 from .policies import UpdatePolicies
-from .utility import flatten_sets, log_decorator
+from .utility import flatten_sets, log_decorator, to_lookups_sql
 
 
 def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
@@ -57,7 +60,6 @@ class Submission:
         """Returns a list of all table names included in the submission"""
         return list(self.data_tables.keys())
 
-
     def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[int]:
         """Returns all unique system ids in `table_name` that are referenced by any foreign key in any other table.
         NOTE: This function assumes PK and FK names are the same."""
@@ -105,3 +107,16 @@ class Submission:
             policy(metadata, submission).apply()
 
         return submission
+
+    def to_csv(self, output_folder: str) -> None:
+        """Writes lookup data to an SQL file.
+        Lookup tables are identified as having column that begins with "(".
+        This column is computed by Excel macros in the input file.
+        """
+        os.makedirs(f"{output_folder}/csv", exist_ok=True)
+        for table_name, data in self.data_tables.items():
+            data.to_csv(f"{output_folder}/csv/{table_name}.csv", index=False)
+            logger.debug(f" ---> {table_name}.csv written to {output_folder}")
+
+    def to_lookups_sql(self: Submission, filename: str = 'lookups_inserts.sql') -> None:
+        to_lookups_sql(self, filename)

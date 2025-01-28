@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
 
+from loguru import logger
 import pandas as pd
 from sqlalchemy.types import TEXT
 
@@ -61,7 +62,7 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
     root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
         found_record_count: int = 0
-        for record in table.findall("./*"):
+        for record in table.iterfind("./*"):
             has_values: bool = False
             for column in record.findall("./*"):
                 has_values = True
@@ -83,16 +84,29 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
 def xml_to_columns(source: str) -> Iterable[Column]:
     root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
-        record: ET.Element | Any = table.find("./*")
-        for column in record.findall("./*"):
-            yield Column(table.tag, column.tag, column.get('class'))
+        found: bool = False
+        for record in table.findall("./*"):
 
+            if 'clonedId' in record.attrib:
+                continue
+
+            columns: list[ET.Element] = record.findall("./*")
+            for column in columns:
+                yield Column(table.tag, column.tag, column.get('class'))
+
+            logger.info(f"   --> {table.tag}: has new data, found columns {', '.join(x.tag for x in columns)} for {table.tag}")
+            found = True
+
+            break
+        
+        if not found:
+            logger.info(f"   --> {table.tag}: no new data found (no data records found)")
 
 @Parsers.register(key=Record)
 def xml_to_records(source: str) -> Iterable[Record]:
     root: ET.Element | Any = load_xml(source)
     for table in root.iterfind("./*"):
-        for record in table.findall("./*"):
+        for record in table.iterfind("./*"):
             local_id: str = record.get('id')
             public_id: str = record.get('clonedId')
             if public_id is None:
