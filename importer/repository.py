@@ -17,6 +17,7 @@ class SubmissionRepository:
 
     def upload_xml(self, xml_filename: str, submission_id: int) -> None:
         with self as connection:
+            logger.info(f'Uploading data file using {type(self.uploader).__name__} uploader')
             self.uploader.upload(connection, xml_filename, submission_id)
 
     @log_decorator(
