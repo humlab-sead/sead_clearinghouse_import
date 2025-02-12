@@ -457,7 +457,14 @@ def get_connection_uri(connection: Any) -> str:
 
 
 def to_lookups_sql(submission: Submission, filename: str) -> None:
-    """Writes file"""
+    """
+    This is a utility function to generate SQL inserts of lookup data.
+    A SEAD system id is generated for each insert.
+    
+    Lookup tables are identified as having columns that begin with "(".
+    This column is computed by Excel macros in the input file.
+
+    """
 
     lookup_sql_template: str = """
     with new_data {{excel_sql_columns}} as (
