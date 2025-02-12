@@ -27,6 +27,7 @@ class Options:
     filename: str
     skip: bool
     submission_id: int
+    submission_name: str
     data_types: str
     xml_filename: str = None
     table_names: str = None
@@ -144,7 +145,7 @@ class ImportService:
                 )
 
                 if opts.register:
-                    opts.submission_id = self.repository.register(data_types=opts.data_types)
+                    opts.submission_id = self.repository.register(name=opts.submission_name, data_types=opts.data_types)
 
                     self.repository.upload_xml(opts.xml_filename, opts.submission_id)
                     self.repository.extract_to_staging_tables(opts.submission_id)

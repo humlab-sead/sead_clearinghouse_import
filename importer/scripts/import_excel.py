@@ -25,6 +25,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
     '--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).'
 )
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
+@click.option("--name", "-n", "submission_name", type=str, help="Unique name of submission (use CR name)", required=True)
 @click.option("--output-folder", type=str, help="Output folder", required=True)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
 @click.option("--database", "-d", "dbname", type=str, help="Database name")
@@ -57,6 +58,7 @@ def import_file(
     ctx,
     config_filename: str,
     filename: str,
+    submission_name: str,
     data_types: str,
     host: str,
     dbname: str,
