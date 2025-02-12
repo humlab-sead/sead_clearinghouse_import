@@ -85,21 +85,7 @@ class Submission:
     def load(*, metadata: Metadata, source: str | pd.ExcelFile) -> "Submission":
         """Loads the submission file into a SubmissionData object"""
 
-        schema: SeadSchema = metadata.sead_schema
-
-        with pd.ExcelFile(source) if isinstance(source, str) else source as reader:
-
-            data_tables: dict[str, pd.DataFrame] = {
-                tablename: load_excel_sheet(reader, data.excel_sheet)
-                for tablename, data in schema.items()
-                if data.excel_sheet in reader.sheet_names
-            }
-
-            logger.debug(f"   read sheets: {','.join(k for k in data_tables)}")
-            logger.debug(f"ignored sheets: {','.join(set(reader.sheet_names) - set(data_tables.keys()))}")
-
-            if 'data_table_index' in reader.sheet_names:
-                logger.info("ignoring data_table_index found in Excel")
+        data_tables: dict[str, pd.DataFrame] = Submission.load_data_tables(source, metadata.sead_schema)
 
         submission: Submission = Submission(data_tables, metadata)
 
@@ -107,6 +93,25 @@ class Submission:
             policy(metadata, submission).apply()
 
         return submission
+
+    @staticmethod
+    def load_data_tables(source: str | pd.ExcelFile, schema: SeadSchema) -> dict[str, pd.DataFrame]:
+        with pd.ExcelFile(source) if isinstance(source, str) else source as reader:
+            data_tables: dict[str, pd.DataFrame] = {
+                tablename: load_excel_sheet(reader, data.excel_sheet)
+                for tablename, data in schema.items()
+                if data.excel_sheet in reader.sheet_names
+            }
+
+            logger.debug(f"   read sheets: {','.join(k for k in data_tables)}")
+
+            ignore_sheets: set[str] = set(reader.sheet_names) - set(data_tables.keys())
+            if ignore_sheets:
+                logger.debug(f"<red>ignored sheets</red>: {','.join(ignore_sheets)}")
+
+            if 'data_table_index' in reader.sheet_names:
+                logger.info("ignoring data_table_index found in Excel")
+        return data_tables
 
     def to_csv(self, output_folder: str) -> None:
         """Writes lookup data to an SQL file.
