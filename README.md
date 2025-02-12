@@ -22,35 +22,46 @@ poetry install
 
 ```bash
  λ PYTHONPATH=. python importer/scripts/import_excel.py --help
-Usage: import_excel.py [OPTIONS] FILENAME
+Usage: import_excel.py [OPTIONS] CONFIG_FILENAME FILENAME
 
-  FILENAME is either an Excel file, or a previously generated XML file.
+  Imports a new SEAD data submission to the SEAD ClearingHouse database. The
+  source data is either an Excel file or an XML file that has previously been
+  generated with this program.
 
-  Imports an Excel file to the database. The content of the Excel file is
-  processed and stored as an XML  file conforming to the clearinghouse data
-  import XML schema. The Excel file
-  must satisfy the following requirements: - The file must be in the Excel
-  2007+ format (xlsx) -
-  
+  The content of the Excel file is processed and stored in an XML file that
+  conforms to the clearinghouse data import schema.
+
+  The Excel file must satisfy the following requirements:
+    - The file must be in the Excel 2007+ format (xlsx)
+    - The file must contain a sheet named as in SEAD' for each table in the submission.
+
 Options:
-  -t, --data-types TEXT         Types of data (short description)  [required]
-  --output-folder TEXT          Output folder
-  -h, --host TEXT               Target database server
-  -d, --database TEXT           Database name
-  -u, --user TEXT               Database user
-  --port INTEGER                Server port number.
-  --skip                        Skip the import (do nothing)
-  --id INTEGER                  Replace existing submission.
-  --table-names TEXT            Only load specified tables.
-  --xml-filename TEXT           Name of existing XML file to use.
-  --log-folder TEXT             Name of existing XML file to use.
-  --check-only                  Only check if file seems OK.
-  --register / --no-register    Register file in the database.
-  --explode / --no-explode      Explode XML into public tables.
-  --tidy-xml / --no-tidy-xml    Run XML formatting tool on document.
-  --timestamp / --no-timestamp  Add timestamp to target XML filename.
-  --help                        Show this message and exit.
-
+  --options-filename TEXT         Name of options file to use (alternative to
+                                  CLI options).
+  -t, --data-types TEXT           Types of data (short description)
+  -n, --name TEXT                 Unique name of submission (use CR name)
+                                  [required]
+  --output-folder TEXT            Output folder  [required]
+  -h, --host TEXT                 Target database server
+  -d, --database TEXT             Database name
+  -u, --user TEXT                 Database user
+  -p, --port INTEGER              Server port number.
+  --skip                          Skip the import (do nothing)
+  --id INTEGER                    Replace existing submission.
+  --table-names TEXT              Only load specified tables.
+  --xml-filename TEXT             Name of existing XML file to use.
+  --log-folder TEXT               Name of existing XML file to use.
+  --check-only                    Only check if file seems OK.
+  --register / --no-register      Register file in the database.
+  --explode / --no-explode        Explode XML into public tables.
+  --tidy-xml / --no-tidy-xml      Run XML formatting tool on document.
+  --timestamp / --no-timestamp    Add timestamp to target XML filename.
+  --transfer-format TEXT          Specify format to use in upload (XML or
+                                  CSV).
+  --dump-to-csv / --no-dump-to-csv
+                                  Store (policy-updated) submission data as
+                                  CSV files in output folder.
+  --help                          Show this message and exit.
 ```
 
 ### Configuration
