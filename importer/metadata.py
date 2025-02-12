@@ -102,6 +102,10 @@ class SeadSchema(dict[str, Table]):
     def aliased_tables(self) -> list[Table]:
         return [t for t in self.values() if t.excel_sheet != t.table_name]
 
+    @cached_property
+    def table_name2excel_sheet(self) -> dict[str, Table]:
+        return {t: x.excel_sheet for t, x in self.items()}
+
 
 class Metadata:
     """Logic related to Excel metadata file"""
@@ -121,6 +125,31 @@ class Metadata:
     def sead_columns(self) -> pd.DataFrame:
         """Returns a dataframe of table columns from SEAD with attributes."""
         return load_sead_columns(self.db_uri, self.ignore_columns)
+
+    @cached_property
+    def sead_dtypes(self) -> dict[str, str]:
+        """Returns a dict of table to datatype mappings."""
+        sql: str = (
+            "select distinct column_name, data_type from sead_utility.table_columns where table_schema = 'public'"
+        )
+        data: dict[str, str] = load_sead_data(self.db_uri, sql, index=['column_name']).to_dict()['data_type']
+        dtype_mapping: dict[str, str] = {
+            'uuid': 'string',
+            'smallint': 'Int16',
+            'integer': 'Int32',
+            'bigint': 'Int64',
+            'boolean': 'boolean',
+            'character varying': 'string',
+            'text': 'string',
+            # 'numeric': 'float64',  # Use 'object' if preserving precision with Decimal
+            'timestamp without time zone': 'datetime64[ns]',
+            'timestamp with time zone': 'datetime64[ns, UTC]',
+            'date': 'datetime64[ns]',
+            'numrange': 'object',
+            'int4range': 'object',
+        }
+        data = {k: dtype_mapping.get(v) for k, v in data.items() if v in dtype_mapping}
+        return data
 
     @cached_property
     def sead_schema(self) -> SeadSchema:
