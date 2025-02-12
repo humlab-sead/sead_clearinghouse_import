@@ -1,6 +1,6 @@
 options:
   database:
-    dbname: sead_staging_development_adna
+    dbname: sead_staging_202502
   transfer_format: xml
   ignore_columns:
     - "date_updated"
