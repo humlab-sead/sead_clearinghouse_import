@@ -63,7 +63,7 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
             table: Table = self.metadata[table_name]
             if table.pk_name not in data.columns:
                 logger.info(
-                    f"Added missing primary key column '{table.pk_name}' to '{table_name}' (assuming all new records)"
+                    f"Added missing primary key column '{table_name}.{table.pk_name}' (assuming all new records)"
                 )
                 data[table.pk_name] = None
 
@@ -86,7 +86,7 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
                 if fk_name not in data.columns or data[fk_name].isnull().all():
 
                     if fk_name not in data.columns:
-                        logger.info(f"Added missing column '{fk_name}' to {table_name} using value '{fk_value}'")
+                        logger.info(f"Added missing column '{fk_name}' to '{table_name}' using value '{fk_value}'")
                     else:
                         logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
 
@@ -116,6 +116,9 @@ class IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId(PolicyBase):
 
             referenced_keys: list[str] = sorted(self.submission.get_referenced_keyset(self.metadata, table_name))
 
+            if not referenced_keys:
+                continue
+            
             meta_table: Table = self.metadata[table_name]
             pk_name: str = meta_table.pk_name
 
@@ -223,6 +226,15 @@ class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
 class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
     """Any foreign key value that is missing in the submission is added to the foreign key table."""
 
+    def fix_dtypes(self, data_table: pd.DataFrame) -> pd.DataFrame:
+        """Fix data types of the column in the data table."""
+        for column_name in data_table.columns:
+            if data_table[column_name].isnull().all():
+                dtype: str | None = self.metadata.sead_dtypes.get(column_name, None)
+                if dtype:
+                    data_table[column_name] = data_table[column_name].astype(dtype=dtype)
+        return data_table
+    
     def update(self) -> pd.DataFrame:
 
         sead_schema: SeadSchema = self.metadata.sead_schema
@@ -254,7 +266,14 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
             ]
 
             if len(rows_to_add) > 0:
-                data_table = pd.concat([data_table, pd.DataFrame(rows_to_add)], ignore_index=True)
+                new_rows: pd.DataFrame = pd.DataFrame(rows_to_add)
+                data_table = self.fix_dtypes(data_table)
+                new_rows = self.fix_dtypes(new_rows)
+                data_table = (
+                    pd.DataFrame(rows_to_add)
+                    if len(data_table) == 0
+                    else pd.concat([data_table, new_rows], ignore_index=True)
+                )
 
             self.submission.data_tables[table_name] = data_table
 
