@@ -69,6 +69,14 @@ test:
     source:
       filename: data/input/SEAD_aDNA_data_20241114_RM.xlsx
 
+  dendrochronology:
+    living_tree:
+      source:
+        filename: data/input/lund_living_trees_20241213.xlsx
+    database:
+      dbname: sead_staging_202502
+      port: 5433
+
 logging:
   folder: tests/output
   handlers:
