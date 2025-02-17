@@ -66,7 +66,12 @@ class Options:
     def use_existing_submission(self) -> bool:
         return self.submission_id is not None and self.submission_id > 0
 
+    @property
+    def source_name(self) -> str:
+        """Name of the source file"""
+        return basename(self.filename) if self.filename else self.submission_name
 
+    
 class ImportService:
     def __init__(
         self,
@@ -145,7 +150,11 @@ class ImportService:
                 )
 
                 if opts.register:
-                    opts.submission_id = self.repository.register(name=opts.submission_name, data_types=opts.data_types)
+                    opts.submission_id = self.repository.register(
+                        name=opts.submission_name,
+                        source_name=opts.source_name,
+                        data_types=opts.data_types,
+                    )
 
                     self.repository.upload_xml(opts.xml_filename, opts.submission_id)
                     self.repository.extract_to_staging_tables(opts.submission_id)

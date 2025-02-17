@@ -76,7 +76,7 @@ class SubmissionRepository:
     @log_decorator(
         enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG"
     )
-    def register(self, *, name: str, data_types: str = "") -> int:
+    def register(self, *, name: str, source_name: str, data_types: str = "") -> int:
         # if xml is None and filename is None:
         #     raise ValueError("Either xml or filename must be provided")
 
@@ -86,10 +86,10 @@ class SubmissionRepository:
         with self as connection:
             with connection.cursor() as cursor:
                 sql = """
-                    insert into clearing_house.tbl_clearinghouse_submissions(submission_name, submission_state_id, data_types, upload_user_id, status_text)
-                    values (%s, %s, %s, %s, %s) returning submission_id;
+                    insert into clearing_house.tbl_clearinghouse_submissions(submission_name, source_name, submission_state_id, data_types, upload_user_id, status_text)
+                    values (%s, %s, %s, %s, %s, %s) returning submission_id;
                 """
-                cursor.execute(sql, (name, 1, data_types, 4, "New"))
+                cursor.execute(sql, (name, source_name, 1, data_types, 4, "New"))
                 submission_id: int = cursor.fetchone()[0]
             return submission_id
 
