@@ -8,7 +8,7 @@ import pytest
 from importer.configuration.config import Config
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
-from importer.specification import SubmissionSpecification
+from importer.specification import ForeignKeyColumnsHasValuesSpecification, SpecificationMessages, SubmissionSpecification
 from importer.submission import Submission
 from importer.utility import create_db_uri
 
@@ -36,6 +36,16 @@ def test_living_tree_tables_specifications(living_tree: Submission, cfg: Config)
     )
     specification.is_satisfied_by(living_tree)
     assert specification.messages.errors == []
+
+def test_living_tree_tables_specifications_bugg(living_tree: Submission, cfg: Config):
+    specification: ForeignKeyColumnsHasValuesSpecification = ForeignKeyColumnsHasValuesSpecification(
+        metadata=living_tree.metadata, 
+        messages= SpecificationMessages(),
+        ignore_columns=cfg.get("options:ignore_columns")
+    )
+    specification.is_satisfied_by(living_tree, 'tbl_dataset_submissions')
+    assert specification.messages.errors == []
+    assert specification.messages.warnings == []
 
 
 def test_to_lookups_sql(living_tree: Submission):
