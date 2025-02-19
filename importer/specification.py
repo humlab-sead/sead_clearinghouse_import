@@ -82,7 +82,7 @@ class SpecificationBase(abc.ABC):
         self.infos.append(f'{message}')
 
     def get_columns(self, table_name: str) -> list[Table]:
-        return [column for column in self.metadata[table_name].columns.values() if self.is_ignored(column.column_name)]
+        return [column for column in self.metadata[table_name].columns.values() if not self.is_ignored(column.column_name)]
 
     @abc.abstractmethod
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None: ...
