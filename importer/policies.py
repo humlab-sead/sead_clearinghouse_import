@@ -47,7 +47,11 @@ class PolicyBase:
     def apply(self) -> None:
         if self.is_disabled():
             logger.info(f"Policy '{self.get_id()}' is disabled")
-        self.update()
+        try:
+            self.update()
+        except:  # pylint: disable=bare-except
+            logger.exception(f"Error applying policy '{self.get_id()}'")
+            raise
 
     def update(self) -> None:
         raise NotImplementedError("Policy must implement _apply method")
@@ -341,3 +345,4 @@ class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
 
             data_table.drop(columns=columns_to_drop, inplace=True)
             logger.debug(f"Dropping column(s) {', '.join(columns_to_drop)} from {table_name}")
+
