@@ -167,7 +167,7 @@ class ImportService:
                 self.repository.set_pending(opts.submission_id)
 
         except SpecificationError:
-            logger.exception(f"Specification(s) not satisfied {opts.basename}")
+            logger.error(f"Specification(s) not satisfied {opts.basename}")
 
         except Exception:
             logger.exception(f"aborted critical error {opts.basename}")
