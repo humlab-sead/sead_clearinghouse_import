@@ -10,6 +10,21 @@ from .utility import camel_case_name, load_sead_columns, load_sead_data
 
 # pylint: disable=no-member
 
+DTYPE_MAPPING: dict[str, str] = {
+    'uuid': 'string',
+    'smallint': 'Int16',
+    'integer': 'Int32',
+    'bigint': 'Int64',
+    'boolean': 'boolean',
+    'character varying': 'string',
+    'text': 'string',
+    # 'numeric': 'float64',  # Use 'object' if preserving precision with Decimal
+    'timestamp without time zone': 'datetime64[ns]',
+    'timestamp with time zone': 'datetime64[ns, UTC]',
+    'date': 'datetime64[ns]',
+    'numrange': 'object',
+    'int4range': 'object',
+}
 
 @dataclass
 class Column:
@@ -132,24 +147,10 @@ class Metadata:
         sql: str = (
             "select distinct column_name, data_type from sead_utility.table_columns where table_schema = 'public'"
         )
-        data: dict[str, str] = load_sead_data(self.db_uri, sql, index=['column_name']).to_dict()['data_type']
-        dtype_mapping: dict[str, str] = {
-            'uuid': 'string',
-            'smallint': 'Int16',
-            'integer': 'Int32',
-            'bigint': 'Int64',
-            'boolean': 'boolean',
-            'character varying': 'string',
-            'text': 'string',
-            # 'numeric': 'float64',  # Use 'object' if preserving precision with Decimal
-            'timestamp without time zone': 'datetime64[ns]',
-            'timestamp with time zone': 'datetime64[ns, UTC]',
-            'date': 'datetime64[ns]',
-            'numrange': 'object',
-            'int4range': 'object',
-        }
-        data = {k: dtype_mapping.get(v) for k, v in data.items() if v in dtype_mapping}
-        return data
+        sead_types: dict[str, str] = load_sead_data(self.db_uri, sql, index=['column_name']).to_dict()['data_type']
+
+        dtypes: dict[str, str] = {k: DTYPE_MAPPING[v] for k, v in sead_types.items() if v in DTYPE_MAPPING}
+        return dtypes
 
     @cached_property
     def sead_schema(self) -> SeadSchema:
