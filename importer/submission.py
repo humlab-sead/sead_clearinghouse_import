@@ -73,7 +73,7 @@ class Submission:
             for fk_table in metadata.get_tablenames_referencing(table_name)
             if fk_table in self.data_tables and pk_name in self.data_tables[fk_table].columns
         ]
-
+        # logger.debug(f"   {table_name} is referenced by: {','.join(fk_tables)}")
         referenced_pk_ids: list[set] = [
             set(series.loc[~series.isnull()].tolist())
             for series in (self.data_tables[fk_table][pk_name] for fk_table in fk_tables)
@@ -82,15 +82,16 @@ class Submission:
 
     @log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel', level='DEBUG')
     @staticmethod
-    def load(*, metadata: Metadata, source: str | pd.ExcelFile) -> "Submission":
+    def load(*, metadata: Metadata, source: str | pd.ExcelFile, apply_policies: bool = True) -> "Submission":
         """Loads the submission file into a SubmissionData object"""
 
         data_tables: dict[str, pd.DataFrame] = Submission.load_data_tables(source, metadata.sead_schema)
 
         submission: Submission = Submission(data_tables, metadata)
 
-        for policy in UpdatePolicies.get_sorted_items():
-            policy(metadata, submission).apply()
+        if apply_policies:
+            for policy in UpdatePolicies.get_sorted_items():
+                policy(metadata, submission).apply()
 
         return submission
 
