@@ -34,6 +34,7 @@ class PolicyBase:
     def __init__(self, metadata: Metadata, submission: Submission) -> None:
         self.metadata: Metadata = metadata
         self.submission: Submission = submission
+        self.logs: dict[str, str] = {}
 
     def get_id(self) -> str:
         return pascal_to_snake_case(self.__class__.__name__)
@@ -56,6 +57,9 @@ class PolicyBase:
     def update(self) -> None:
         raise NotImplementedError("Policy must implement _apply method")
 
+    def log(self, table: str, message: str = None) -> None:
+        self.logs[table] = message or self.get_id()
+
 
 @UpdatePolicies.register()
 class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
@@ -66,8 +70,9 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
         for table_name, data in self.submission.data_tables.items():
             table: Table = self.metadata[table_name]
             if table.pk_name not in data.columns:
-                logger.info(
-                    f"Added missing primary key column '{table_name}.{table.pk_name}' (assuming all new records)"
+                self.log(
+                    table_name,
+                    f"Added missing primary key column '{table_name}.{table.pk_name}' (assuming all new records)",
                 )
                 data[table.pk_name] = None
 
@@ -90,9 +95,11 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
                 if fk_name not in data.columns or data[fk_name].isnull().all():
 
                     if fk_name not in data.columns:
-                        logger.info(f"Added missing column '{fk_name}' to '{table_name}' using value '{fk_value}'")
+                        self.log(
+                            table_name, f"Added missing column '{fk_name}' to '{table_name}' using value '{fk_value}'"
+                        )
                     else:
-                        logger.info(f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
+                        self.log(table_name, f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
 
                     data[fk_name] = fk_value
 
@@ -130,8 +137,9 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
                 {'system_id': referenced_keys, pk_name: list(referenced_keys)}
             )
 
-            logger.info(
-                f"Added table '{table_name}' to submission with identity system_id/{pk_name} mapping ({len(referenced_keys)} keys added)"
+            self.log(
+                table_name,
+                f"AddIdentityMappingSystemIdToPublicIdPolicy: table '{table_name}' with system_id/{pk_name} mapping ({len(referenced_keys)} keys)",
             )
 
 
@@ -224,6 +232,7 @@ class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
             data_table.loc[np.isnan(data_table.system_id), "system_id"] = data_table.loc[
                 np.isnan(data_table.system_id), pk_name
             ]
+            self.log(table_name, f"Updated system_id to public_id for new records in '{table_name}'")
 
 
 @UpdatePolicies.register()
@@ -281,8 +290,9 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
 
             self.submission.data_tables[table_name] = data_table
 
-            logger.info(
-                f"Added missing PK keys to '{table_name}' with identity system_id/{pk_name} mapping: ({', '.join(map(str, missing_keys))})"
+            self.log(
+                table_name,
+                f"Added missing PK keys to '{table_name}' with identity system_id/{pk_name} mapping: ({', '.join(map(str, missing_keys))})",
             )
 
 
@@ -310,7 +320,7 @@ class DropIgnoredColumns(PolicyBase):
                 continue
 
             data.drop(columns=columns, inplace=True)
-            logger.info(f"Dropping column(s) {', '.join(columns)} from {table_name}")
+            self.log(table_name, f"Dropped column(s) {', '.join(columns)} from {table_name}")
 
 
 @UpdatePolicies.register()
@@ -344,5 +354,4 @@ class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
                 continue
 
             data_table.drop(columns=columns_to_drop, inplace=True)
-            logger.debug(f"Dropping column(s) {', '.join(columns_to_drop)} from {table_name}")
-
+            self.log(table_name, f"Dropped column(s) {', '.join(columns_to_drop)} from {table_name}")
