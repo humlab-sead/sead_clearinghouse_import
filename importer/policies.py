@@ -98,7 +98,7 @@ class AddDefaultForeignKeyPolicy(PolicyBase):
 
 
 @UpdatePolicies.register()
-class IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId(PolicyBase):
+class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
     """Rule: if an FK table is missing then add the table using system_id as public_id.
 
     For table that is referenced by a foreign key,

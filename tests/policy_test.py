@@ -8,7 +8,7 @@ from importer.policies import (
     AddDefaultForeignKeyPolicy,
     AddPrimaryKeyColumnIfMissingPolicy,
     IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable,
-    IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId,
+    AddIdentityMappingSystemIdToPublicIdPolicy,
     IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId,
     IfSystemIdIsMissingSetSystemIdToPublicId,
     PolicyBase,
@@ -83,7 +83,7 @@ def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():
     config_value.resolve.return_value = {"table1"}
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
-        policy = IfLookupTableIsMissingAddTableUsingSystemIdAsPublicId(metadata=metadata, submission=submission)
+        policy = AddIdentityMappingSystemIdToPublicIdPolicy(metadata=metadata, submission=submission)
         policy.apply()
 
     assert "table1" in submission.data_tables
