@@ -1,31 +1,40 @@
 options:
   database:
-    dbname: sead_staging_development
+    dbname: sead_staging_202502
     port: 5433
   transfer_format: xml
   ignore_columns:
     - "date_updated"
     - "*_uuid"
+    - "(*"
 policies:
   if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table:
     priority: 1
   set_public_id_to_negative_system_id_for_new_lookups:
     disabled: true
-  add_default_foreign_key_policy:
+  update_missing_foreign_key_policy:
     tbl_dataset_contacts:
       contact_type_id: 2
       contact_id: 1
-  if_lookup_table_is_missing_add_table_using_system_id_as_public_id:
+  if_table_is_missing_add_table_using_system_id_as_public_id:
+    # add missing table foreign keys where the foreign key is a public id
     tables:
-      - tbl_abundance_elements
-      - tbl_contact_types
-      - tbl_dataset_submission_types
-      - tbl_location_types
-      - tbl_project_types
-      - tbl_project_stages
-      - tbl_relative_ages
-      - tbl_sample_group_sampling_contexts
-      - tbl_sample_types
+
+  if_table_is_missing_add_table_using_system_id_as_public_id:
+    disabled: false
+    tables:
+      # include:
+      #   - tbl_abundance_elements
+      #   - tbl_contact_types
+      #   - tbl_dataset_submission_types
+      #   - tbl_location_types
+      #   - tbl_project_types
+      #   - tbl_project_stages
+      #   - tbl_relative_ages
+      #   - tbl_sample_group_sampling_contexts
+      #   - tbl_sample_types
+      exclude: # these tables have prealloced identities
+        - tbl_locations
   if_lookup_with_no_new_data_then_keep_only_system_id_public_id:
     priority: 9
   drop_ignored_columns:
@@ -33,6 +42,7 @@ policies:
     columns:
       - "date_updated"
       - "*_uuid"
+      - "(*"
 test:
   sites:
     - 1635
@@ -72,7 +82,7 @@ test:
   dendrochronology:
     living_tree:
       source:
-        filename: data/input/lund_living_trees_20241213.xlsx
+        filename: data/input/lund_living_trees_20241213_RM.xlsx
     database:
       dbname: sead_staging_202502
       port: 5433
