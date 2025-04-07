@@ -5,12 +5,13 @@ options:
   ignore_columns:
     - "date_updated"
     - "*_uuid"
+    - "(*"
 policies:
   if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table:
     priority: 1
   set_public_id_to_negative_system_id_for_new_lookups:
     disabled: true
-  add_default_foreign_key_policy:
+  update_missing_foreign_key_policy:
     tbl_dataset_contacts:
       contact_type_id: 2
       contact_id: 1
@@ -25,6 +26,7 @@ policies:
       - tbl_relative_ages
       - tbl_sample_group_sampling_contexts
       - tbl_sample_types
+    preallocated_tables:
   if_lookup_with_no_new_data_then_keep_only_system_id_public_id:
     priority: 9
   drop_ignored_columns:
