@@ -9,7 +9,7 @@ from loguru import logger
 
 from .configuration.inject import ConfigValue
 from .metadata import Metadata, SeadSchema, Table
-from .utility import Registry, pascal_to_snake_case
+from .utility import Registry, pascal_to_snake_case, snake_to_pascal_case
 
 if TYPE_CHECKING:
     from importer.submission import Submission
@@ -50,8 +50,10 @@ class PolicyBase:
             logger.info(f"Policy '{self.get_id()}' is disabled")
         try:
             self.update()
+            for table, message in self.logs.items():
+                logger.info(f"{message} (policy [{snake_to_pascal_case(self.get_id())}])")
         except:  # pylint: disable=bare-except
-            logger.exception(f"Error applying policy '{self.get_id()}'")
+            logger.exception(f"Error applying policy ({snake_to_pascal_case(self.get_id())})")
             raise
 
     def update(self) -> None:
@@ -78,31 +80,34 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
 
 
 @UpdatePolicies.register()
-class AddDefaultForeignKeyPolicy(PolicyBase):
+class UpdateMissingForeignKeyPolicy(PolicyBase):
     """Adds default FK value to DataFrame if it is missing"""
 
     def update(self) -> pd.DataFrame:
 
         for table_name, cfg in (ConfigValue(f"policies.{self.get_id()}").resolve() or {}).items():
-
             if table_name not in self.submission:
                 return
 
             data: pd.DataFrame = self.submission[table_name]
 
             for fk_name, fk_value in cfg.items():
-
-                if fk_name not in data.columns or data[fk_name].isnull().all():
-
-                    if fk_name not in data.columns:
-                        self.log(
-                            table_name, f"Added missing column '{fk_name}' to '{table_name}' using value '{fk_value}'"
-                        )
-                    else:
-                        self.log(table_name, f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
-
+                if fk_name not in data.columns:
                     data[fk_name] = fk_value
+                    self.log(
+                        table_name, f"Added missing column '{fk_name}' to '{table_name}' using value '{fk_value}'"
+                    )
+                elif data[fk_name].isnull().all():                    
+                    data[fk_name] = fk_value
+                    self.log(table_name, f"Added default value '{fk_value}' to '{fk_name}' in '{table_name}'")
 
+                elif data[fk_name].isnull().any():
+                    n_count: int = data[fk_name].isnull().sum()
+                    data.loc[data[fk_name].isnull(), fk_name] = fk_value
+                    self.log(
+                        table_name,
+                        f"Updated {n_count} missing values '{table_name}.{fk_name}' to '{fk_value}'",
+                    )
 
 @UpdatePolicies.register()
 class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
@@ -113,25 +118,37 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
             add the table to the submission and assume that the table's system_id is the same as it's public primary key
 
     Assumptions:
-        The table must be a lookup table
         The foreign keys used in the submission MUST be equal to the public primary key of the table
-        The rule is applied to the table only if it exists in configuration (YAML) file
+        The rule (as default) is applied any table
     """
+
+    def table_names(self) -> set[str]:
+        includes: set[str] = set(
+            ConfigValue(f"policies.{self.get_id()}.tables.include").resolve() or []
+        ) or set(self.metadata.sead_schema.keys())
+        excludes: set[str] =  set(ConfigValue(f"policies.{self.get_id()}.tables.exclude").resolve() or [])
+        return includes - excludes
 
     def update(self) -> None:
 
-        for table_name in ConfigValue(f"policies.{self.get_id()}.tables").resolve() or {}:
+        for table_name in self.table_names():
 
             if table_name in self.submission:
                 continue
 
-            referenced_keys: list[str] = sorted(self.submission.get_referenced_keyset(self.metadata, table_name))
+            referenced_keys: list[int] = sorted(self.submission.get_referenced_keyset(self.metadata, table_name))
 
             if not referenced_keys:
                 continue
-            
+
             meta_table: Table = self.metadata[table_name]
             pk_name: str = meta_table.pk_name
+
+            public_primary_keys: set[int] = self.metadata.get_primary_keys(table_name)
+            if (set(referenced_keys) - public_primary_keys):
+                logger.warning(
+                    f"Table '{table_name}' has referenced keys that are not primary keys: {', '.join(map(str, referenced_keys))}"
+                )
 
             self.submission.data_tables[table_name] = pd.DataFrame(
                 {'system_id': referenced_keys, pk_name: list(referenced_keys)}
@@ -139,7 +156,7 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
 
             self.log(
                 table_name,
-                f"AddIdentityMappingSystemIdToPublicIdPolicy: table '{table_name}' with system_id/{pk_name} mapping ({len(referenced_keys)} keys)",
+                f"Added table '{table_name}' with system_id/{pk_name} mapping ({len(referenced_keys)} keys)",
             )
 
 
@@ -247,7 +264,7 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
                 if dtype:
                     data_table[column_name] = data_table[column_name].astype(dtype=dtype)
         return data_table
-    
+
     def update(self) -> pd.DataFrame:
 
         sead_schema: SeadSchema = self.metadata.sead_schema

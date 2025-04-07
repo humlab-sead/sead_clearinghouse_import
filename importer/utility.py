@@ -26,6 +26,8 @@ if TYPE_CHECKING:
 
 def configure_logging(opts: dict[str, str]) -> None:
 
+    logger.remove()
+    logger.add(sys.stdout, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
     if not opts:
         return
 

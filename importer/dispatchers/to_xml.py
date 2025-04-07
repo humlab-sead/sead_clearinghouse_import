@@ -67,7 +67,7 @@ class XmlProcessor(IDispatcher):
         All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
         """
         for table_name in sorted(table_names):
-            logger.info(f"Processing {table_name}...")
+            logger.debug(f"Processing {table_name}...")
 
             if table_name not in metadata:
                 raise ValueError(f"Table {table_name}: not found in metadata")

@@ -200,3 +200,15 @@ class Metadata:
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
         """Returns a list of tablenames referencing the given table"""
         return self.foreign_keys.loc[(self.foreign_keys.fk_table_name == table_name)]["table_name"].tolist()
+
+    def get_primary_keys(self, table_name: str) -> set[int]:
+        """Returns all unique primary keys for `table_name` in SEAD.
+        NOTE: This function assumes PK and FK names are the same."""
+        pk_name: str = self[table_name].pk_name
+        if pk_name is None:
+            return set()
+
+        """Find all tables that reference the given table, and have the PK column in the referencing table's data"""
+        sql: str = f"select distinct {pk_name} from {table_name}"
+        keys: set = set(load_sead_data(self.db_uri, sql, index=[pk_name]).index)
+        return keys

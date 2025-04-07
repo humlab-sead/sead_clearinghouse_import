@@ -5,7 +5,7 @@ import pandas as pd
 
 from importer.metadata import Metadata, SeadSchema, Table
 from importer.policies import (
-    AddDefaultForeignKeyPolicy,
+    UpdateMissingForeignKeyPolicy,
     AddPrimaryKeyColumnIfMissingPolicy,
     IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable,
     AddIdentityMappingSystemIdToPublicIdPolicy,
@@ -63,7 +63,7 @@ def test_add_default_foreign_key_policy():
     submission.__getitem__.side_effect = lambda x: table
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
-        policy = AddDefaultForeignKeyPolicy(metadata=metadata, submission=submission)
+        policy = UpdateMissingForeignKeyPolicy(metadata=metadata, submission=submission)
         policy.apply()
 
     assert (table["fk_col"] == 2).all()
