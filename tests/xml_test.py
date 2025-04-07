@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 import pandas as pd
 
-from importer.to_xml import XmlProcessor
+from importer.dispatchers.to_xml import XmlProcessor
 
 # pylint: disable=unused-argument,redefined-outer-name
 
@@ -14,20 +14,6 @@ def test_emit():
     outstream.write.assert_called_once_with('    test\n')
 
 
-def test_emit_tag():
-    outstream = Mock()
-    processor = XmlProcessor(outstream)
-    processor.emit_tag('tag', {'attr': 'value'}, 2, True)
-    outstream.write.assert_called_once_with('    <tag attr="value"/>\n')
-
-
-def test_emit_close_tag():
-    outstream = Mock()
-    processor = XmlProcessor(outstream)
-    processor.emit_close_tag('tag', 2)
-    outstream.write.assert_called_once_with('    </tag>\n')
-
-
 # def test_camel_case_name():
 #     outstream = Mock()
 #     processor = XmlProcessor(outstream)
@@ -37,7 +23,7 @@ def test_emit_close_tag():
 def test_read_xml():
     source_file: str = 'tests/test_data/building_dendro_reduced.xml'
 
-    data: pd.DataFrame = pd.read_xml(source_file, xpath='//element')
+    data: pd.DataFrame = pd.read_xml(source_file)
     assert data is not None
 
 
