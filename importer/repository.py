@@ -11,7 +11,7 @@ from .utility import log_decorator
 class SubmissionRepository:
     def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader = None) -> None:
         self.db_options: dict[str, str] = db_options
-        self.uploader: BaseUploader | None = uploader if uploader is BaseUploader else Uploaders.get(uploader)()
+        self.uploader: BaseUploader | None = uploader if uploader is BaseUploader else Uploaders.get(uploader)() if uploader else None
         self.connection: Connection | None = None
         self.timeout_seconds: int = 300
 
@@ -59,6 +59,16 @@ class SubmissionRepository:
         with self as connection:
             with connection.cursor() as cursor:
                 cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))
+
+    def get_id_by_name(self, name: str) -> int:
+        sql: str = (
+            f"select submission_id from clearing_house.tbl_clearinghouse_submissions where submission_name = %s limit 1;"
+        )
+        with self as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(sql, (name,))
+                submission_id: int = cursor.fetchone()[0]
+        return submission_id
 
     @log_decorator(
         enter_message=" ---> setting state to pending...", exit_message=" ---> state set to pending", level="DEBUG"
