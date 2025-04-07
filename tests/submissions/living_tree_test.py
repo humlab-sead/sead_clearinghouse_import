@@ -156,7 +156,7 @@ def test_add_primary_key_column_if_missing_policy(unprocessed_submission: Submis
 
 
 def test_add_default_foreign_key_policy(unprocessed_submission: Submission):
-    policy: policies.AddDefaultForeignKeyPolicy = policies.AddDefaultForeignKeyPolicy(
+    policy: policies.UpdateMissingForeignKeyPolicy = policies.UpdateMissingForeignKeyPolicy(
         metadata=unprocessed_submission.metadata, submission=unprocessed_submission
     )
     policy.apply()
