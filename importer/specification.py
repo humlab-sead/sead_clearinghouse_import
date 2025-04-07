@@ -151,38 +151,23 @@ class SubmissionTableExistsSpecification(SpecificationBase):
 
 @SpecificationRegistry.register()
 class ColumnTypesSpecification(SpecificationBase):
-    TYPE_COMPATIBILITY_MATRIX = {
-        ("integer", "float64"): True,
-        ("timestamp with time zone", "float64"): False,
-        ("text", "float64"): False,
-        ("character varying", "float64"): False,
-        ("numeric", "float64"): True,
-        ("timestamp without time zone", "float64"): False,
-        ("boolean", "float64"): False,
-        ("date", "float64"): False,
-        ("smallint", "float64"): True,
-        ("integer", "object"): False,
-        ("timestamp with time zone", "object"): True,
-        ("text", "object"): True,
-        ("character varying", "object"): True,
-        ("numeric", "object"): False,
-        ("timestamp without time zone", "object"): True,
-        ("boolean", "object"): False,
-        ("date", "object"): True,
-        ("smallint", "object"): False,
-        ("bigint", "int64"): True,
-        ("integer", "int64"): True,
-        ("timestamp with time zone", "int64"): False,
-        ("text", "int64"): False,
-        ("character varying", "int64"): False,
-        ("numeric", "int64"): True,
-        ("timestamp without time zone", "int64"): False,
-        ("boolean", "int64"): False,
-        ("date", "int64"): False,
-        ("smallint", "int64"): True,
-        ("timestamp with time zone", "datetime64[ns]"): True,
-        ("date", "datetime64[ns]"): True,
-        #  ('character varying', 'datetime64[ns]'): True
+    TYPE_COMPATIBILITY_MATRIX: set[tuple[str, str]] = {
+        ("bigint", "int64"),
+        ("character varying", "object"),
+        ("date", "datetime64[ns]"),
+        ("date", "object"),
+        ("integer", "float64"),
+        ("integer", "int64"),
+        ("integer", "int32"),
+        ("numeric", "float64"),
+        ("numeric", "int64"),
+        ("smallint", "float64"),
+        ("smallint", "int64"),
+        ("text", "object"),
+        ("timestamp with time zone", "datetime64[ns]"),
+        ("timestamp with time zone", "object"),
+        ("timestamp without time zone", "object"),
+        #  ('character varying', 'datetime64[ns]')
     }
 
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None:
@@ -197,7 +182,7 @@ class ColumnTypesSpecification(SpecificationBase):
             data_column_type: str = data_table.dtypes[column.column_name].name
             if all(data_table[column.column_name].isna()):
                 continue
-            if not self.TYPE_COMPATIBILITY_MATRIX.get((column.data_type, data_column_type), False):
+            if (column.data_type.lower(), data_column_type.lower()) not in self.TYPE_COMPATIBILITY_MATRIX:
                 self.warn(f"type clash: {table_name}.{column.column_name} {column.data_type}<=>{data_column_type}")
 
 
@@ -290,7 +275,7 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
                 if not column.is_nullable:
                     self.error(f"Foreign key column '{table_name}.{column.column_name}' not in data")
                 else:
-                    self.warn(f"Foreign key column '{table_name}.{column.column_name}' not in data (but is nullable)")
+                    self.info(f"Foreign key column '{table_name}.{column.column_name}' not in data (but is nullable)")
                 continue
 
             has_nan: bool = data_table[column.column_name].isnull().values.any()
@@ -382,8 +367,8 @@ class NoMissingColumnSpecification(SpecificationBase):
         ) - set(data_column_names)
 
         if len(missing_nullable_column_names) > 0:
-            self.warn(
-                f"Table {table_name} has MISSING NULLABLE data columns: {', '.join(sorted(missing_nullable_column_names))}"
+            self.info(
+                f"Table {table_name} has missing nullable columns: {', '.join(sorted(missing_nullable_column_names))}"
             )
 
         extra_column_names = list(
