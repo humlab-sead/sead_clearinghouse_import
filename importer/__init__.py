@@ -1,5 +1,4 @@
 from .utility import *
 
 
-class DataImportError(Exception):
-    ...
+class DataImportError(Exception): ...

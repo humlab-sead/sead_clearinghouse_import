@@ -7,7 +7,11 @@ import xml.etree.ElementTree as ET
 from collections import namedtuple
 from typing import Any, Iterable
 
-from .utility import Registry
+import pandas as pd
+from loguru import logger
+from sqlalchemy.types import TEXT
+
+from ..utility import Registry, get_connection_uri
 
 Table = namedtuple("Table", "table_type, record_count")
 
@@ -27,7 +31,7 @@ class ParserRegistry(Registry):
     items: dict = {}
 
 
-Parsers = Registry()
+Parsers = ParserRegistry()
 
 
 def format_value(value: str, data_type: str) -> str:
@@ -58,7 +62,7 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
     root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
         found_record_count: int = 0
-        for record in table.findall("./*"):
+        for record in table.iterfind("./*"):
             has_values: bool = False
             for column in record.findall("./*"):
                 has_values = True
@@ -80,16 +84,32 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
 def xml_to_columns(source: str) -> Iterable[Column]:
     root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
-        record: ET.Element | Any = table.find("./*")
-        for column in record.findall("./*"):
-            yield Column(table.tag, column.tag, column.get('class'))
+        found: bool = False
+        for record in table.findall("./*"):
+
+            if 'clonedId' in record.attrib:
+                continue
+
+            columns: list[ET.Element] = record.findall("./*")
+            for column in columns:
+                yield Column(table.tag, column.tag, column.get('class'))
+
+            logger.debug(
+                f"   --> {table.tag}: has new data, found columns {', '.join(x.tag for x in columns)} for {table.tag}"
+            )
+            found = True
+
+            break
+
+        if not found:
+            logger.debug(f"   --> {table.tag}: no new data found (no data records found)")
 
 
 @Parsers.register(key=Record)
 def xml_to_records(source: str) -> Iterable[Record]:
     root: ET.Element | Any = load_xml(source)
     for table in root.iterfind("./*"):
-        for record in table.findall("./*"):
+        for record in table.iterfind("./*"):
             local_id: str = record.get('id')
             public_id: str = record.get('clonedId')
             if public_id is None:
@@ -111,21 +131,34 @@ def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_
 
 def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: str) -> None:
     """Using the csv files created by to_csv, import the data into the PostgreSQL database using psycopg2"""
-    with open(filename, 'r') as fp:
-        columns: list[str] = next(fp).strip().split('\t')
-        columns_spec: list[str] = [f"{x} text null" for x in columns]
 
-        with connection.cursor() as cursor:
-            cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
-            cursor.execute(f"truncate {target_schema}.{target_table}")
+    uri: str = get_connection_uri(connection)
+    data: pd.DataFrame = pd.read_csv(filename, sep='\t', na_values='NULL', keep_default_na=True, dtype=str)
+    data.to_sql(
+        target_table,
+        uri,
+        schema=target_schema,
+        if_exists='replace',
+        index=False,
+        dtype={column_name: TEXT for column_name in data.columns},
+    )
 
-        connection.commit()
+    # else:
+    #     with open(filename, 'r') as fp:
+    #         columns: list[str] = next(fp).strip().split('\t')
+    #         columns_spec: list[str] = [f"{x} text null" for x in columns]
 
-        with connection.cursor() as cursor:
-            cursor.execute(f"set search_path = {target_schema}")
-            cursor.copy_from(fp, target_table, sep='\t', null='NULL', columns=columns)
+    #         with connection.cursor() as cursor:
+    #             cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
+    #             cursor.execute(f"truncate {target_schema}.{target_table}")
 
-        connection.commit()
+    #         connection.commit()
+
+    #         with connection.cursor() as cursor:
+    #             cursor.execute(f"set search_path = {target_schema}")
+    #             cursor.copy_from(fp, target_table, sep='\t', null='NULL', columns=columns)
+
+    #         connection.commit()
 
 
 def xml_to_csv_to_db(connection: Any, xml_filename: str, csv_folder: str, target_schema: str) -> None:
