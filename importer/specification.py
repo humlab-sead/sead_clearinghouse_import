@@ -265,6 +265,10 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
         if submission.is_lookup(table_name):
             if not submission.has_new_rows(table_name):
                 return
+        
+        # Only check new rows (otherwise it's just a system id to public id mapping)
+        pk_name: str = submission.metadata[table_name].pk_name
+        is_new_rows: pd.Series = data_table[pk_name].isnull()
 
         for column in self.get_columns(table_name):
 
@@ -278,8 +282,8 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
                     self.info(f"Foreign key column '{table_name}.{column.column_name}' not in data (but is nullable)")
                 continue
 
-            has_nan: bool = data_table[column.column_name].isnull().values.any()
-            all_nan: bool = data_table[column.column_name].isnull().values.all()
+            has_nan: bool = data_table[is_new_rows][column.column_name].isnull().values.any()
+            all_nan: bool = data_table[is_new_rows][column.column_name].isnull().values.all()
 
             if all_nan and not column.is_nullable:
                 self.error(f"Foreign key column '{table_name}.{column.column_name}' has no values")
