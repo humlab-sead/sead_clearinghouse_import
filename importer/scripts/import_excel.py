@@ -6,6 +6,8 @@ import click
 import dotenv
 from loguru import logger
 
+from os.path import abspath, dirname, join
+
 from importer.configuration.inject import ConfigStore, ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
@@ -25,7 +27,9 @@ dotenv.load_dotenv(dotenv.find_dotenv())
     '--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).'
 )
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
-@click.option("--name", "-n", "submission_name", type=str, help="Unique name of submission (use CR name)", required=True)
+@click.option(
+    "--name", "-n", "submission_name", type=str, help="Unique name of submission (use CR name)", required=True
+)
 @click.option("--output-folder", type=str, help="Output folder", required=True)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
 @click.option("--database", "-d", "dbname", type=str, help="Database name")
@@ -103,6 +107,9 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
     config_filename: str = opts.pop('config_filename')
     log_folder: str = opts.pop('log_folder')
 
+    if not log_folder and opts.get('filename'):
+        log_folder = join(dirname(abspath(opts.get('filename'))), "logs")
+
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
         sys.exit(1)
@@ -177,18 +184,18 @@ if __name__ == "__main__":
     # runner.invoke(
     #     import_file,
     #     [
-    #         "./config.yml",
-    #         "./data/input/SEAD_aDNA_data_20241114_RM.xlsx",
+    #         "data/adna/SEAD_aDNA_data_20241114/config.yml",
+    #         "data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx",
     #         "--no-timestamp",
     #         "--register",
     #         "--explode",
     #         "--database",
-    #         "sead_staging_development_adna",
+    #         "sead_staging_dendro",
     #         "--data-types",
     #         "adna",
     #         "--transfer-format",
     #         "csv",
     #         "--output-folder",
-    #         "./data/output/",
+    #         "data/adna/SEAD_aDNA_data_20241114",
     #     ],
     # )
