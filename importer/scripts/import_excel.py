@@ -184,18 +184,31 @@ if __name__ == "__main__":
     # runner.invoke(
     #     import_file,
     #     [
-    #         "data/adna/SEAD_aDNA_data_20241114/config.yml",
-    #         "data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx",
+    #         "/home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/config.yml",
+    #         "/home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx",
     #         "--no-timestamp",
     #         "--register",
     #         "--explode",
     #         "--database",
-    #         "sead_staging_dendro",
+    #         "sead_staging_202501_adna",
+    #         "--host",
+    #         "humlabseadserv.srv.its.umu.se",
+    #         "--user",
+    #         "humlab_admin",
+    #         "--port",
+    #         "5433",
     #         "--data-types",
     #         "adna",
+    #         "--name",
+    #         "20250108_DML_SUBMISSION_ADNA_COMMIT",
     #         "--transfer-format",
     #         "csv",
     #         "--output-folder",
-    #         "data/adna/SEAD_aDNA_data_20241114",
+    #         "/home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/output",
+    #         "--dump-to-csv",
     #     ],
     # )
+
+    # copy-database --source sead_staging_202501 --target sead_staging_202501_adna --port 5433 --force --host humlabseadserv.srv.its.umu.se
+    # poetry run python importer/scripts/import_excel.py /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/config.yml /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx --no-timestamp --register --explode --database sead_staging_202501_adna --host humlabseadserv.srv.its.umu.se --user humlab_admin --port 5433 --data-types adna --name 20250108_DML_SUBMISSION_ADNA_COMMIT --transfer-format csv --output-folder /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/output --dump-to-csv
+    # bin/commit-submission --mode update --change 20250108_DML_SUBMISSION_ADNA_COMMIT --id 20250108_DML_SUBMISSION_ADNA_COMMIT --port 5433 --database sead_staging_202501_adna --project adna --no-create-issue
