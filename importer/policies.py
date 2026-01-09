@@ -25,7 +25,7 @@ class PolicyRegistry(Registry):
 UpdatePolicies: PolicyRegistry = PolicyRegistry()
 
 
-pythonclass DisabledError(Exception):
+class DisabledError(Exception):
     pass
 
 
