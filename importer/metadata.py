@@ -149,7 +149,8 @@ class Metadata:
     def sead_dtypes(self) -> dict[str, str]:
         """Returns a dict of table to datatype mappings."""
         sql: str = (
-            "select distinct column_name, data_type from sead_utility.table_columns where table_schema = 'public'"
+            "select distinct column_name, data_type "
+            "from sead_utility.table_columns where table_schema = 'public'"
         )
         sead_types: dict[str, str] = load_sead_data(self.db_uri, sql, index=["column_name"]).to_dict()["data_type"]
 
