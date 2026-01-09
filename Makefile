@@ -5,6 +5,10 @@ PACKAGE_FOLDER=importer
 
 RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
 
+.PHONY: install
+install:
+	@uv sync --all-extras
+
 fast-release: clean tidy build guard_clean_working_repository bump.patch tag publish
 
 release: ready guard_clean_working_repository bump.patch tag  publish
@@ -12,10 +16,10 @@ release: ready guard_clean_working_repository bump.patch tag  publish
 ready: tools clean tidy full-test lint build
 
 build: requirements.txt
-	@poetry build
+	@uv build
 
 publish:
-	@poetry publish
+	@uv publish
 
 lint: tidy pylint flake8
 
@@ -23,35 +27,35 @@ tidy: black isort
 
 test: output-dir
 	@echo SKIPPING LONG RUNNING TESTS!
-	@poetry run pytest -m "not long_running" --durations=0 tests
+	@uv run pytest -m "not long_running" --durations=0 tests
 	@rm -rf ./tests/output/*
 
 pytest: output-dir
-	@poetry run pytest -m "not long_running" --durations=0 tests
+	@uv run pytest -m "not long_running" --durations=0 tests
 
 test-coverage: output-dir
 	@echo SKIPPING LONG RUNNING TESTS!
-	@poetry run pytest -m "not long_running" --cov=$(PACKAGE_FOLDER) --cov-report=html tests
+	@uv run pytest -m "not long_running" --cov=$(PACKAGE_FOLDER) --cov-report=html tests
 	@rm -rf ./tests/output/*
 
 full-test: output-dir
-	@poetry run pytest tests
+	@uv run pytest tests
 	@rm -rf ./tests/output/*
 
 long-test: output-dir
-	@poetry run pytest -m "long_running" --durations=0 tests
+	@uv run pytest -m "long_running" --durations=0 tests
 	@rm -rf ./tests/output/*
 
 full-test-coverage: output-dir
 	@mkdir -p ./tests/output
-	@poetry run pytest --cov=$(PACKAGE_FOLDER) --cov-report=html tests
+	@uv run pytest --cov=$(PACKAGE_FOLDER) --cov-report=html tests
 	@rm -rf ./tests/output/*
 
 output-dir:
 	@mkdir -p ./tests/output ./logs
 
 retest:
-	@poetry run pytest --durations=0 --last-failed tests
+	@uv run pytest --durations=0 --last-failed tests
 
 .ONESHELL: guard_clean_working_repository
 guard_clean_working_repository:
@@ -68,27 +72,27 @@ bump.patch: bump.version.patch sync.package.version
 	@git push
 
 bump.version.patch:
-	@poetry version patch
+	@uv version patch
 
 .PHONY: tag
 tag:
-	@poetry build
+	@uv build
 	@git push
 	@git tag $(shell grep "^version \= " pyproject.toml | sed "s/version = //" | sed "s/\"//g") -a
 	@git push origin --tags
 
 .PHONY: pylint
 pylint:
-	@time poetry run pylint $(SOURCE_FOLDERS)
-	# @poetry run mypy --version
-	# @poetry run mypy .
+	@time uv run pylint $(SOURCE_FOLDERS)
+	# @uv run mypy --version
+	# @uv run mypy .
 
 isort:
-	@poetry run isort --profile black --float-to-top --line-length 120 --py 311 $(SOURCE_FOLDERS)
+	@uv run isort --profile black --float-to-top --line-length 120 --py auto $(SOURCE_FOLDERS)
 
 black: clean
-	@poetry run black --version
-	@poetry run black  $(SOURCE_FOLDERS)
+	@uv run black --version
+	@uv run black  $(SOURCE_FOLDERS)
 
 clean:
 	@rm -rf .pytest_cache build dist .eggs *.egg-info
@@ -99,10 +103,10 @@ clean:
 	@rm -rf tests/output
 
 clean_cache:
-	@poetry cache clear pypi --all
+	@uv cache clean
 
-requirements.txt: poetry.lock
-	@poetry export --without-hashes -f requirements.txt --output requirements.txt
+requirements.txt: uv.lock
+	@uv pip compile pyproject.toml -o requirements.txt
 
 .PHONY: help check install version
 .PHONY: lint flake8 pylint pylint_by_file yapf black isort tidy pylint_diff_only
@@ -112,7 +116,7 @@ requirements.txt: poetry.lock
 
 venus:
 	# @tar czvf ./tmp/VENUS.$(RUN_TIMESTAMP).tar.gz ./tests/test_data/VENUS
-	@poetry run python -c 'from tests.pipeline.fixtures import create_test_data_bundles; create_test_data_bundles()'
+	@uv run python -c 'from tests.pipeline.fixtures import create_test_data_bundles; create_test_data_bundles()'
 
 help:
 	@echo "Higher level recepies: "
