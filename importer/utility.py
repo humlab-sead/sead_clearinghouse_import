@@ -11,7 +11,7 @@ import sys
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar
 from xml.dom import minidom
 
 import pandas as pd
@@ -188,6 +188,21 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
             key = key.lower()
         if key.startswith(prefix.lower()):
             dotset(data, key[len(prefix) + 1 :].replace('_', ':'), value)
+    return data
+
+
+R = TypeVar("R", dict[str, Any], list[Any], str)
+
+
+def replace_env_vars(data: R) -> R:
+    """Replaces recursively values in `data` that match `${ENV_VAR}` with os.getenv("ENV_VAR", "")"""
+    if isinstance(data, dict):
+        return {k: replace_env_vars(v) for k, v in data.items()}  # type: ignore[return-value]
+    if isinstance(data, list):
+        return [replace_env_vars(i) for i in data]  # type: ignore[return-value]
+    if isinstance(data, str) and data.startswith("${") and data.endswith("}"):
+        env_var: str = data[2:-1]
+        return os.getenv(env_var, "")  # type: ignore[return-value]
     return data
 
 
@@ -462,7 +477,7 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
     """
     This is a utility function to generate SQL inserts of lookup data.
     A SEAD system id is generated for each insert.
-    
+
     Lookup tables are identified as having columns that begin with "(".
     This column is computed by Excel macros in the input file.
 
