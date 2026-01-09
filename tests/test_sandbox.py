@@ -20,7 +20,8 @@ from importer.utility import create_db_uri
 # # {{table['table_name']}}
 # {{table['comment'] or ''}}
 # {% for column in columns -%}
-# ## {{table['table_name']}}.{{column['column_name']}} {{'PK' if column['is_pk'] == 'YES' else ''}} {{'FK' if column['is_fk'] == 'YES' else ''}}
+# ## {{table['table_name']}}.{{column['column_name']}} {{'PK' if column['is_pk'] == 'YES' else ''}}
+#  {{'FK' if column['is_fk'] == 'YES' else ''}}
 # {{column['comment'] or ''}}
 # {%- endfor %}"""
 

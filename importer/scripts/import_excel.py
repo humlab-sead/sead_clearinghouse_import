@@ -172,6 +172,8 @@ def workflow(opts: Options) -> None:
     ImportService(metadata=metadata, opts=opts).process(submission=submission)
 
 
+# pylint: disable=line-too-long
+
 if __name__ == "__main__":
     import_file()
 

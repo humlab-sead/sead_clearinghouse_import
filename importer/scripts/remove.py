@@ -5,8 +5,6 @@ import dotenv
 from loguru import logger
 
 from importer.repository import SubmissionRepository
-from importer.scripts.utility import update_arguments_from_options_file
-from importer.utility import configure_logging, strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -34,7 +32,7 @@ def remove_submission(
     Removes a SEAD data submission from the SEAD ClearingHouse database.
     The `key` argument can be either a submission ID or submission name (i.e. CR name).
     """
-    opts = dict(host=host, dbname=dbname, user=user, port=port)
+    opts = {"host": host, "dbname": dbname, "user": user, "port": port}
     repository: SubmissionRepository = SubmissionRepository(opts, uploader=None)
 
     submission_id: int = int(key) if key.isdigit() else repository.get_id_by_name(key)

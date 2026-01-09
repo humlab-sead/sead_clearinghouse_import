@@ -185,7 +185,10 @@ class ColumnTypesSpecification(SpecificationBase):
             if all(data_table[column.column_name].isna()):
                 continue
             if (column.data_type.lower(), data_column_type.lower()) not in self.TYPE_COMPATIBILITY_MATRIX:
-                self.warn(f"type clash: {table_name}.{column.column_name} {column.data_type}<=>{data_column_type}")
+                self.warn(
+                    f"type clash: {table_name}.{
+                    column.column_name} {column.data_type}<=>{data_column_type}"
+                )
 
 
 @SpecificationRegistry.register()
@@ -206,7 +209,10 @@ class SubmissionTableTypesSpecification(SpecificationBase):
             ok_mask: pd.Series = series.apply(np.isreal)
             if not ok_mask.all():
                 error_values = " ".join(list(set(series[~ok_mask])))[:200]
-                self.error(f"Column '{table_name}.{column.column_name}' has non-numeric values: '{error_values}'")
+                self.error(
+                    f"Column '{table_name}.{
+                    column.column_name}' has non-numeric values: '{error_values}'"
+                )
 
 
 @SpecificationRegistry.register()
@@ -215,7 +221,8 @@ class HasPrimaryKeySpecification(SpecificationBase):
         data_table: pd.DataFrame = submission.data_tables[table_name]
         if self.metadata[table_name].pk_name not in data_table.columns:
             self.error(
-                f"Primary key column '{table_name}.{self.metadata[table_name].pk_name}' (table metadata) not in data columns."
+                f"Primary key column '{table_name}.{
+                    self.metadata[table_name].pk_name}' (table metadata) not in data columns."
             )
 
         if not any(c.is_pk for c in self.metadata[table_name].columns.values()):
@@ -243,7 +250,7 @@ class HasSystemIdSpecification(SpecificationBase):
             if len(duplicates) > 0:
                 error_values: str = " ".join([str(x) for x in duplicates])[:200]
                 self.error(f"Table {table_name} has DUPLICATE system ids: {error_values}")
-        except Exception as _:
+        except Exception as _:  # pylint: disable=broad-except
             self.warn(f"Duplicate check of {table_name}.system_id failed")
 
 

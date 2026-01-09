@@ -49,10 +49,10 @@ class XmlProcessor(IDispatcher):
         self.jinja_env = Environment(autoescape=select_autoescape(["xml"]))
 
     def emit(self, data: str, indent: int = 0) -> None:
-        self.outstream.write("{}{}\n".format("  " * indent, data))
+        self.outstream.write(f'{"  " * indent}{data}\n')
 
     def emit_tag(self, tag: str, attributes: dict[str, Any] = None, indent=0, close=True) -> None:
-        attrib_str: str = " ".join(['{}="{}"'.format(x, y) for (x, y) in (attributes or {}).items()])
+        attrib_str: str = " ".join([f'{x}="{y}"' for (x, y) in (attributes or {}).items()])
         self.emit(f"<{tag} {attrib_str}{'/' if close else ''}>", indent)
 
     def emit_close_tag(self, tag: str, indent: int) -> None:
@@ -64,7 +64,8 @@ class XmlProcessor(IDispatcher):
         """
         Import assumes that all FK references points to a local "system_id" in referenced table
         All submission tables MUST have a non null "system_id"
-        All submission tables MUST have a PK column with a name equal to that specified in "Tables" meta-data PK-name field
+        All submission tables MUST have a PK column with a name equal to that specified
+          in "Tables" meta-data PK-name field
         """
         for table_name in sorted(table_names):
             logger.debug(f"Processing {table_name}...")
@@ -174,7 +175,8 @@ class XmlProcessor(IDispatcher):
         else:
             if column.column_name not in fk_data_table.columns:
                 logger.warning(
-                    f"Table {column.table_name}, FK column {column.column_name}: FK column not found in {fk_table_spec.table_name}, id={fk_system_id}"
+                    f"Table {column.table_name}, FK column {column.column_name}: FK column not found in {
+                        fk_table_spec.table_name}, id={fk_system_id}"
                 )
                 return
             fk_data_row: pd.DataFrame = fk_data_table.loc[(fk_data_table.system_id == fk_system_id)]

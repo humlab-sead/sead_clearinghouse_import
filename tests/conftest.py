@@ -27,8 +27,10 @@ load_dotenv(DOTENV_FILENAME)
 
 @pytest.fixture(scope="session")
 def cfg() -> Config:
-    ConfigStore.configure_context(source=CONFIG_FILENAME, env_filename=DOTENV_FILENAME, env_prefix=ENV_PREFIX)
-    return ConfigStore.config()
+    ConfigStore.get_instance().configure_context(
+        source=CONFIG_FILENAME, env_filename=DOTENV_FILENAME, env_prefix=ENV_PREFIX
+    )
+    return ConfigStore.get_instance().config()
 
 
 @pytest.fixture(scope="session")

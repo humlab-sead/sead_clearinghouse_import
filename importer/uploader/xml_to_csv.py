@@ -31,7 +31,7 @@ class ParserRegistry(Registry):
     items: dict = {}
 
 
-Parsers = ParserRegistry()
+Parsers = ParserRegistry()  # pylint: disable=invalid-name
 
 
 def format_value(value: str, data_type: str) -> str:
@@ -122,7 +122,7 @@ def xml_to_records(source: str) -> Iterable[Record]:
 def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_type: DbType) -> str:
     basename: str = os.path.splitext(os.path.basename(xml_filename))[0]
     filename: str = os.path.join(csv_folder, f"{basename}_{iter_type.__name__.lower()}s.csv")
-    with open(filename, "w") as f:
+    with open(filename, "w", encoding="utf-8") as f:
         f.write("\t".join(iter_type._fields) + "\n")
         for record in iter_fn(xml_filename):
             f.write("\t".join("" if x is None else x for x in record) + "\n")
