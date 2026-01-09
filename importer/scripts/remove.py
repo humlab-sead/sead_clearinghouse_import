@@ -6,7 +6,7 @@ import click
 import dotenv
 from loguru import logger
 
-from importer.configuration.inject import ConfigStore, ConfigValue
+from importer.configuration import ConfigStore, ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.repository import SubmissionRepository

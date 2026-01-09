@@ -8,7 +8,7 @@ from loguru import logger
 
 from os.path import abspath, dirname, join
 
-from importer.configuration.inject import ConfigStore, ConfigValue
+from importer.configuration import ConfigStore, ConfigValue
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
