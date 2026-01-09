@@ -46,7 +46,7 @@ class Options:
 **Priority order**: CLI args → options file → environment vars (`SEAD_IMPORT_*`) → YAML config
 
 Configuration files: 
-- Project-wide: [config.yml](../config.yml)
+- Project-wide: [config.yml](../configs/config.yml)
 - Data-specific: [data/config.yml](../data/config.yml)
 
 ## Developer Workflows
