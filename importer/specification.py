@@ -342,11 +342,13 @@ class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
                 continue
             # fk_table: pd.DataFrame = submission.data_tables[fk_table_name]
             # if fk_table is None:
-            #     self.warn(f"ERROR Table {fk_table_name} referenced as FK in data by {table_name} but not found in submission.")
+            #     self.warn(f"ERROR Table {fk_table_name} referenced as FK in data by {
+            #           table_name} but not found in submission.")
             #     continue
             # if not fk_system_id.isin(fk_table.system_id).all():
             #     self.warn(
-            #         f"ERROR FK value {table_name}.{column_spec.column_name} has values not found as PK in {fk_table_name}"
+            #         f"ERROR FK value {table_name}.{
+            #               column_spec.column_name} has values not found as PK in {fk_table_name}"
             #     )
 
 

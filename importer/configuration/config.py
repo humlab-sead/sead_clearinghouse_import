@@ -404,10 +404,15 @@ class LoadResolver(BaseResolver):
             return directive_argument
 
         try:
-            loaded_data: list[dict[Any, Any]] = pd.read_csv(filename, sep=sep, dtype=str).to_dict(orient="records")
+            loaded_data: list[dict[Any, Any]] = pd.read_csv(
+                filename,
+                sep=sep,
+                dtype=str,
+            ).to_dict(orient="records")
         except Exception as e:  # pylint: disable=broad-exception-caught
             logger.warning(
-                f"ignoring load directive for path '{directive_argument}' since file '{filename}' could not be parsed: {e}"
+                f"ignoring load directive for path '{directive_argument}' since file '{
+                    filename}' could not be parsed: {e}"
             )
             return directive_argument
 

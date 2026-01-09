@@ -191,7 +191,8 @@ class XmlProcessor(IDispatcher):
             self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>', 3)
         else:
             self.emit(
-                f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
+                f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{
+                    int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
                 3,
             )
 

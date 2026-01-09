@@ -1,5 +1,3 @@
-from typing import Any
-
 import click
 import pandas as pd
 from loguru import logger

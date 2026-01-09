@@ -23,7 +23,7 @@ class UploaderRegistry(Registry):
     items: dict = {}
 
 
-Uploaders: UploaderRegistry = UploaderRegistry()
+Uploaders: UploaderRegistry = UploaderRegistry()  # pylint: disable=invalid-name
 
 
 __all__ = []

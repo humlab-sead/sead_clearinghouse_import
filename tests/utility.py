@@ -103,8 +103,6 @@ def generate_test_excel(
     assert submission is not None
     number_of_physical_samples: int = 2
 
-    # FIXME: New should new sites without pre-allocated ID be added to the database?
-
     sites: pd.DataFrame = filter_table(submission, "tbl_sites", "system_id", test_sites)
     site_locations: pd.DataFrame = filter_table(submission, "tbl_site_locations", "site_id", sites.system_id)
     site_references: pd.DataFrame = filter_table(submission, "tbl_site_references", "site_id", sites.system_id)

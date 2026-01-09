@@ -1,4 +1,3 @@
-# FIXME: #27 Performance problem with large files
 """
 Converts the XML file to CSV files for each table type., then uploads the CSV files to the database.
 """
@@ -149,7 +148,8 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
     #         columns_spec: list[str] = [f"{x} text null" for x in columns]
 
     #         with connection.cursor() as cursor:
-    #             cursor.execute(f"create table if not exists {target_schema}.{target_table} ( {','.join(columns_spec)} );")
+    #             cursor.execute(f"create table if not exists {target_schema}.{
+    #                   target_table} ( {','.join(columns_spec)} );")
     #             cursor.execute(f"truncate {target_schema}.{target_table}")
 
     #         connection.commit()

@@ -126,7 +126,8 @@ def test_xml_to_records_by_str():
         )
         in record_values
     )
-    # RecordValue(class_name='TblAbundances', system_id='3931', public_id='NULL', column_name='clonedId', column_type='java.util.Integer', fk_system_id='NULL', fk_public_id='NULL', column_value='12')
+    # RecordValue(class_name='TblAbundances', system_id='3931', public_id='NULL', column_name='clonedId',
+    # column_type='java.util.Integer', fk_system_id='NULL', fk_public_id='NULL', column_value='12')
 
 
 def test_xml_to_records_by_file():
