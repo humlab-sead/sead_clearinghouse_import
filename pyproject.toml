@@ -96,7 +96,8 @@ disable = [
     "too-many-function-args",
     "too-many-locals",
     "protected-access",
-    "f-string-without-interpolation"
+    "f-string-without-interpolation",
+    "pointless-string-statement",
 ]
 
 [tool.black]

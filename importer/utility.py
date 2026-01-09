@@ -84,7 +84,7 @@ def recursive_update(d1: dict, d2: dict) -> dict:
 
 
 def recursive_filter_dict(
-    D: dict[str, Any], filter_keys: set[str], filter_mode: Literal["keep", "exclude"] = "exclude"
+    data: dict[str, Any], filter_keys: set[str], filter_mode: Literal["keep", "exclude"] = "exclude"
 ) -> dict[str, Any]:
     """
     Recursively filters a dictionary to include only keys in the given set.
@@ -97,8 +97,8 @@ def recursive_filter_dict(
     Returns:
         dict: A new dictionary containing only the keys in K, with nested dictionaries also filtered.
     """
-    if not isinstance(D, dict):
-        return D
+    if not isinstance(data, dict):
+        return data
 
     return {
         key: (
@@ -106,7 +106,7 @@ def recursive_filter_dict(
             if isinstance(value, dict)
             else value
         )
-        for key, value in D.items()
+        for key, value in data.items()
         if (key in filter_keys if filter_mode == "keep" else key not in filter_keys)
     }
 
@@ -242,7 +242,7 @@ def log_decorator(
 
 def load_json_from_file(identifier: str) -> str:
     sql_path: str = join(dirname(abspath(__file__)), "json", identifier + ".json")
-    with open(sql_path, "r") as file:
+    with open(sql_path, "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -322,7 +322,7 @@ def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> st
     try:
         doc = minidom.parse(path)
         tidy_doc = doc.toprettyxml(encoding="UTF-8", newl="")
-        tidy_path: str = path[:-4] + "{}.xml".format(suffix)
+        tidy_path: str = f"{path[:-4]}{suffix}.xml"
         with io.open(tidy_path, "wb") as outstream:
             outstream.write(tidy_doc)
     except OSError as _:

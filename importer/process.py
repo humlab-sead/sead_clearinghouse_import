@@ -169,5 +169,5 @@ class ImportService:
         except SpecificationError:
             logger.error(f"Specification(s) not satisfied {opts.basename}")
 
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception(f"aborted critical error {opts.basename}")

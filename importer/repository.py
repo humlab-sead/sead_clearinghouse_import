@@ -64,7 +64,8 @@ class SubmissionRepository:
 
     def get_id_by_name(self, name: str) -> int:
         sql: str = (
-            f"select submission_id from clearing_house.tbl_clearinghouse_submissions where submission_name = %s limit 1;"
+            f"select submission_id from clearing_house.tbl_clearinghouse_submissions "
+            "where submission_name = %s limit 1;"
         )
         with self as connection:
             with connection.cursor() as cursor:

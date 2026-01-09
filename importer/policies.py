@@ -22,7 +22,7 @@ class PolicyRegistry(Registry):
         return sorted(self.items.values(), key=lambda x: x(None, None).get_priority())
 
 
-UpdatePolicies: PolicyRegistry = PolicyRegistry()
+UpdatePolicies: PolicyRegistry = PolicyRegistry()  # pylint: disable=invalid-name
 
 
 class DisabledError(Exception):
@@ -50,7 +50,7 @@ class PolicyBase:
             logger.info(f"Policy '{self.get_id()}' is disabled")
         try:
             self.update()
-            for table, message in self.logs.items():
+            for _, message in self.logs.items():
                 logger.info(f"{message} (policy [{snake_to_pascal_case(self.get_id())}])")
         except:  # pylint: disable=bare-except
             logger.exception(f"Error applying policy ({snake_to_pascal_case(self.get_id())})")
@@ -146,7 +146,8 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
             public_primary_keys: set[int] = self.metadata.get_primary_keys(table_name)
             if set(referenced_keys) - public_primary_keys:
                 logger.warning(
-                    f"Table '{table_name}' has referenced keys that are not primary keys: {', '.join(map(str, referenced_keys))}"
+                    f"Table '{table_name}' has referenced keys that are not primary keys: {', '
+                        .join(map(str, referenced_keys))}"
                 )
 
             self.submission.data_tables[table_name] = pd.DataFrame(
@@ -308,7 +309,8 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
 
             self.log(
                 table_name,
-                f"Added missing PK keys to '{table_name}' with identity system_id/{pk_name} mapping: ({', '.join(map(str, missing_keys))})",
+                f"Added missing PK keys to '{table_name}' with identity system_id/{pk_name} mapping: ({', '
+                                    .join(map(str, missing_keys))})",
             )
 
 
