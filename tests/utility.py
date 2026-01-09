@@ -6,7 +6,7 @@ from typing import Any
 
 import pandas as pd
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration import ConfigValue
 from importer.metadata import Metadata
 from importer.submission import Submission
 from importer.utility import create_db_uri
