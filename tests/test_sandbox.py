@@ -36,18 +36,18 @@ from importer.utility import create_db_uri
 #             f.write(md_str)
 
 
-@pytest.mark.skipif(isfile('tests/test_data/sead_columns.json'), reason='Used for generating test data only')
+@pytest.mark.skipif(isfile("tests/test_data/sead_columns.json"), reason="Used for generating test data only")
 def test_load_metadata_from_postgres(cfg: Config):
     """Use this test to store SEAD metadata in json files for regression testing"""
     metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
     test_tables: list[str] = cfg.get("test:tables")
-    with open('tests/test_data/sead_tables.json', 'w') as outfile:
-        data: dict = metadata.sead_tables[metadata.sead_tables.table_name.isin(test_tables)].to_dict('records')
+    with open("tests/test_data/sead_tables.json", "w") as outfile:
+        data: dict = metadata.sead_tables[metadata.sead_tables.table_name.isin(test_tables)].to_dict("records")
         json.dump(data, outfile, indent=4)
 
-    with open('tests/test_data/sead_columns.json', 'w') as outfile:
+    with open("tests/test_data/sead_columns.json", "w") as outfile:
         data: dict = metadata.sead_columns.fillna(0)[metadata.sead_columns.table_name.isin(test_tables)].to_dict(
-            'records'
+            "records"
         )
         json.dump(data, outfile, indent=4)
 

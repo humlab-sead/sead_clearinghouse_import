@@ -19,7 +19,7 @@ class SubmissionRepository:
 
     def upload_xml(self, xml_filename: str, submission_id: int) -> None:
         with self as connection:
-            logger.info(f'Uploading data file using {type(self.uploader).__name__} uploader')
+            logger.info(f"Uploading data file using {type(self.uploader).__name__} uploader")
             self.uploader.upload(connection, xml_filename, submission_id)
 
     @log_decorator(
@@ -123,7 +123,7 @@ class SubmissionRepository:
             timeout_ms: int = self.timeout_seconds * 1000
             self.connection: Connection = psycopg.connect(
                 **self.db_options,
-                options=f'-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}',
+                options=f"-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}",
             )
         return self.connection
 

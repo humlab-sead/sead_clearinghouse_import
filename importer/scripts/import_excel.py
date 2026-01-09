@@ -1,12 +1,11 @@
 import os
 import sys
+from os.path import abspath, dirname, join
 from typing import Any
 
 import click
 import dotenv
 from loguru import logger
-
-from os.path import abspath, dirname, join
 
 from importer.configuration import ConfigStore, ConfigValue
 from importer.metadata import Metadata
@@ -21,10 +20,10 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @click.command()
-@click.argument('config_filename')
+@click.argument("config_filename")
 @click.argument("filename")
 @click.option(
-    '--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).'
+    "--options-filename", type=str, default=None, help="Name of options file to use (alternative to CLI options)."
 )
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option(
@@ -49,7 +48,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option(
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
-@click.option("--transfer-format", type=str, default='xml', help="Specify format to use in upload (XML or CSV).")
+@click.option("--transfer-format", type=str, default="xml", help="Specify format to use in upload (XML or CSV).")
 @click.option(
     "--dump-to-csv/--no-dump-to-csv",
     type=bool,
@@ -98,32 +97,32 @@ def import_file(
 
     setup_configuration(ctx, dict(locals()))
 
-    return workflow(opts=Options(**ConfigValue('options').resolve()))
+    return workflow(opts=Options(**ConfigValue("options").resolve()))
 
 
 def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
     specified_keys: set[str] = _get_specified_cli_opts(ctx)
-    config_filename: str = opts.pop('config_filename')
-    log_folder: str = opts.pop('log_folder')
+    config_filename: str = opts.pop("config_filename")
+    log_folder: str = opts.pop("log_folder")
 
-    if not log_folder and opts.get('filename'):
-        log_folder = join(dirname(abspath(opts.get('filename'))), "logs")
+    if not log_folder and opts.get("filename"):
+        log_folder = join(dirname(abspath(opts.get("filename"))), "logs")
 
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
         sys.exit(1)
 
     opts = update_arguments_from_options_file(
-        arguments=opts, filename_key='options_filename', suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
+        arguments=opts, filename_key="options_filename", suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
     )
-    opts['database'] = {k: opts.pop(k) for k in ['host', 'dbname', 'user', 'port']}
+    opts["database"] = {k: opts.pop(k) for k in ["host", "dbname", "user", "port"]}
 
-    ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="SEAD_IMPORT")
+    ConfigStore.configure_context(source=config_filename, env_filename=".env", env_prefix="SEAD_IMPORT")
 
     ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
 
-    configure_logging(ConfigValue('logging').resolve() | ({} if not log_folder else {"folder": log_folder}))
+    configure_logging(ConfigValue("logging").resolve() | ({} if not log_folder else {"folder": log_folder}))
 
 
 def _get_specified_cli_opts(ctx) -> set[str]:

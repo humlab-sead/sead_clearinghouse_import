@@ -35,26 +35,26 @@ Parsers = ParserRegistry()
 
 
 def format_value(value: str, data_type: str) -> str:
-    if value is None or value == 'NULL':
-        return ''
-    if data_type == 'java.lang.String':
+    if value is None or value == "NULL":
+        return ""
+    if data_type == "java.lang.String":
         return '"' + value.replace('"', '""') + '"'  # escape double quotes
-    if data_type in ('java.lang.Integer', 'java.lang.Long', 'java.lang.Short'):
+    if data_type in ("java.lang.Integer", "java.lang.Long", "java.lang.Short"):
         return str(int(float(value)))
-    if data_type.startswith('com.sead.database.'):  # FK values
+    if data_type.startswith("com.sead.database."):  # FK values
         return str(int(float(value)))
     return value
 
 
 def load_xml(source: str) -> ET.ElementTree | ET.Element | Any:
-    return ET.fromstring(source) if '<' in source else ET.parse(source).getroot()
+    return ET.fromstring(source) if "<" in source else ET.parse(source).getroot()
 
 
 @Parsers.register(key=Table)
 def xml_to_tables(source: str) -> Iterable[Table]:
     root: ET.Element = load_xml(source)
     for table in root.iterfind("./*"):
-        yield Table(table.tag, table.get('length') or "NULL")
+        yield Table(table.tag, table.get("length") or "NULL")
 
 
 @Parsers.register(key=RecordValue)
@@ -68,13 +68,13 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
                 has_values = True
                 yield RecordValue(
                     table.tag,
-                    record.get('id') or "NULL",  # system_id
-                    record.get('clonedId') or "NULL",  # public_id
+                    record.get("id") or "NULL",  # system_id
+                    record.get("clonedId") or "NULL",  # public_id
                     column.tag,  # column_name
-                    column.get('class') or "NULL",  # column_type
-                    column.get('id') or "NULL",  # fk_system_id
-                    column.get('clonedId') or "NULL",  # fk_public_id
-                    format_value(column.text, column.get('class')) or "NULL",
+                    column.get("class") or "NULL",  # column_type
+                    column.get("id") or "NULL",  # fk_system_id
+                    column.get("clonedId") or "NULL",  # fk_public_id
+                    format_value(column.text, column.get("class")) or "NULL",
                 )
             if has_values:
                 found_record_count += 1
@@ -87,12 +87,12 @@ def xml_to_columns(source: str) -> Iterable[Column]:
         found: bool = False
         for record in table.findall("./*"):
 
-            if 'clonedId' in record.attrib:
+            if "clonedId" in record.attrib:
                 continue
 
             columns: list[ET.Element] = record.findall("./*")
             for column in columns:
-                yield Column(table.tag, column.tag, column.get('class'))
+                yield Column(table.tag, column.tag, column.get("class"))
 
             logger.debug(
                 f"   --> {table.tag}: has new data, found columns {', '.join(x.tag for x in columns)} for {table.tag}"
@@ -110,10 +110,10 @@ def xml_to_records(source: str) -> Iterable[Record]:
     root: ET.Element | Any = load_xml(source)
     for table in root.iterfind("./*"):
         for record in table.iterfind("./*"):
-            local_id: str = record.get('id')
-            public_id: str = record.get('clonedId')
+            local_id: str = record.get("id")
+            public_id: str = record.get("clonedId")
             if public_id is None:
-                column: str = record.find('./clonedId')
+                column: str = record.find("./clonedId")
                 if column is not None:
                     public_id = column.text or "NULL"
             yield Record(table.tag, local_id or "NULL", public_id or "NULL")
@@ -122,10 +122,10 @@ def xml_to_records(source: str) -> Iterable[Record]:
 def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_type: DbType) -> str:
     basename: str = os.path.splitext(os.path.basename(xml_filename))[0]
     filename: str = os.path.join(csv_folder, f"{basename}_{iter_type.__name__.lower()}s.csv")
-    with open(filename, 'w') as f:
-        f.write('\t'.join(iter_type._fields) + '\n')
+    with open(filename, "w") as f:
+        f.write("\t".join(iter_type._fields) + "\n")
         for record in iter_fn(xml_filename):
-            f.write('\t'.join('' if x is None else x for x in record) + '\n')
+            f.write("\t".join("" if x is None else x for x in record) + "\n")
     return filename
 
 
@@ -133,12 +133,12 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
     """Using the csv files created by to_csv, import the data into the PostgreSQL database using psycopg2"""
 
     uri: str = get_connection_uri(connection)
-    data: pd.DataFrame = pd.read_csv(filename, sep='\t', na_values='NULL', keep_default_na=True, dtype=str)
+    data: pd.DataFrame = pd.read_csv(filename, sep="\t", na_values="NULL", keep_default_na=True, dtype=str)
     data.to_sql(
         target_table,
         uri,
         schema=target_schema,
-        if_exists='replace',
+        if_exists="replace",
         index=False,
         dtype={column_name: TEXT for column_name in data.columns},
     )
@@ -164,5 +164,5 @@ def csv_to_db(connection: Any, filename: str, target_schema: str, target_table: 
 def xml_to_csv_to_db(connection: Any, xml_filename: str, csv_folder: str, target_schema: str) -> None:
     os.makedirs(csv_folder, exist_ok=True)
     for fn_type, fn in Parsers.items.items():
-        table_name: str = f'temp_submission_upload_{fn_type.__name__.lower()}'
+        table_name: str = f"temp_submission_upload_{fn_type.__name__.lower()}"
         csv_to_db(connection, xml_to_csv(xml_filename, csv_folder, fn, fn_type), target_schema, table_name)

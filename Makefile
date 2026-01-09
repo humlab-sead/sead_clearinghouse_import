@@ -8,7 +8,7 @@ RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
 .PHONY: install
 install:
 	@uv sync --all-extras
-
+	
 fast-release: clean tidy build guard_clean_working_repository bump.patch tag publish
 
 release: ready guard_clean_working_repository bump.patch tag  publish

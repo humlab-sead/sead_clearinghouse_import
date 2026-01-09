@@ -24,7 +24,7 @@ def adna(cfg: Config) -> Iterator[Submission]:
 
 def test_to_lookups_sql(adna: Submission):
 
-    filename: str = 'tests/output/lookups.sql'
+    filename: str = "tests/output/lookups.sql"
 
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     if os.path.isfile(filename):
@@ -68,10 +68,10 @@ def test_dispatch_a_dna_submission_to_xml_file(adna: Submission, cfg: Config):
     opts: Options = Options(
         skip=False,
         filename=cfg.get("test:adna:source:filename"),
-        data_types='adna',
+        data_types="adna",
         submission_id=None,
         database=cfg.get("options:database"),
-        output_folder='tests/output',
+        output_folder="tests/output",
     )
 
     if os.path.isfile(opts.target):
@@ -91,24 +91,24 @@ def test_dispatch_a_dna_submission_to_xml_file(adna: Submission, cfg: Config):
 
     assert data is not None
 
-    assert len(data['sead-data-upload'].keys()) == len(adna.data_tables)
+    assert len(data["sead-data-upload"].keys()) == len(adna.data_tables)
 
 
 def test_import_a_dna_submission(adna: Submission, cfg: Config):
 
     opts: Options = Options(
         **{
-            'filename': cfg.get("test:adna:source:filename"),
-            'data_types': 'adna',
-            'database': cfg.get("options:database"),
-            'output_folder': 'tests/output',
-            'skip': False,
-            'submission_id': None,
-            'table_names': None,
-            'xml_filename': None,
-            'check_only': False,
-            'register': True,
-            'transfer_format': 'csv',
+            "filename": cfg.get("test:adna:source:filename"),
+            "data_types": "adna",
+            "database": cfg.get("options:database"),
+            "output_folder": "tests/output",
+            "skip": False,
+            "submission_id": None,
+            "table_names": None,
+            "xml_filename": None,
+            "check_only": False,
+            "register": True,
+            "transfer_format": "csv",
         }
     )
 
@@ -128,7 +128,7 @@ def test_import_a_dna_submission(adna: Submission, cfg: Config):
 
     exported_java_classes: set[str] = {child.tag for child in root}
 
-    assert 'TblContacts' in exported_java_classes
+    assert "TblContacts" in exported_java_classes
 
     expected_java_classes: set[str] = {adna.metadata[t].java_class for t in adna.data_table_names}
 

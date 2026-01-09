@@ -6,7 +6,7 @@ import click
 
 from .. import utility
 
-CLI_LOG_PATH = './logs'
+CLI_LOG_PATH = "./logs"
 
 
 def update_arguments_from_options_file(
@@ -15,7 +15,7 @@ def update_arguments_from_options_file(
     filename_key: str,
     log_args: bool = True,
     ctx: click.Context = None,
-    skip_keys: str = 'ctx,config_filename',
+    skip_keys: str = "ctx,config_filename",
     suffix: str = None,
 ) -> dict:
     """Updates `arguments` based on values found in file specified by `filename_key`.
@@ -28,7 +28,7 @@ def update_arguments_from_options_file(
         arguments = utility.update_dict_from_yaml(options_filename, arguments)
         arguments.update(passed_cli_arguments(ctx, arguments))
 
-    for k in skip_keys.split(','):
+    for k in skip_keys.split(","):
         if k in arguments:
             del arguments[k]
 
@@ -55,7 +55,7 @@ def update_arguments_from_options_file(
 
 
 def log_arguments(
-    args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename', suffix: str = None
+    args: dict, subdir: bool = False, skip_keys: str = "ctx,options_filename", suffix: str = None
 ) -> None:
     """Log run time arguments to file"""
 
@@ -75,7 +75,7 @@ def log_arguments(
     if suffix:
         log_name = utility.path_add_suffix(log_name, suffix=f"_{suffix.strip('_')}")
 
-    log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(',')}
+    log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(",")}
     utility.write_yaml(log_args, log_name)
 
 

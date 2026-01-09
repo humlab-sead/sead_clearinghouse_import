@@ -105,56 +105,56 @@ def generate_test_excel(
 
     # FIXME: New should new sites without pre-allocated ID be added to the database?
 
-    sites: pd.DataFrame = filter_table(submission, 'tbl_sites', 'system_id', test_sites)
-    site_locations: pd.DataFrame = filter_table(submission, 'tbl_site_locations', 'site_id', sites.system_id)
-    site_references: pd.DataFrame = filter_table(submission, 'tbl_site_references', 'site_id', sites.system_id)
-    sample_groups: pd.DataFrame = filter_table(submission, 'tbl_sample_groups', 'site_id', sites.system_id)
+    sites: pd.DataFrame = filter_table(submission, "tbl_sites", "system_id", test_sites)
+    site_locations: pd.DataFrame = filter_table(submission, "tbl_site_locations", "site_id", sites.system_id)
+    site_references: pd.DataFrame = filter_table(submission, "tbl_site_references", "site_id", sites.system_id)
+    sample_groups: pd.DataFrame = filter_table(submission, "tbl_sample_groups", "site_id", sites.system_id)
     sample_group_descriptions: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_group_descriptions', 'sample_group_id', sample_groups.system_id
+        submission, "tbl_sample_group_descriptions", "sample_group_id", sample_groups.system_id
     )
     sample_group_coordinates: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_group_coordinates', 'sample_group_id', sample_groups.system_id
+        submission, "tbl_sample_group_coordinates", "sample_group_id", sample_groups.system_id
     )
     sample_group_notes: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_group_notes', 'sample_group_id', sample_groups.system_id
+        submission, "tbl_sample_group_notes", "sample_group_id", sample_groups.system_id
     )
     physical_samples: pd.DataFrame = filter_table(
-        submission, 'tbl_physical_samples', 'sample_group_id', sample_groups.system_id
+        submission, "tbl_physical_samples", "sample_group_id", sample_groups.system_id
     ).head(number_of_physical_samples)
     sample_descriptions: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_descriptions', 'physical_sample_id', physical_samples.system_id
+        submission, "tbl_sample_descriptions", "physical_sample_id", physical_samples.system_id
     )
     sample_locations: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_locations', 'physical_sample_id', physical_samples.system_id
+        submission, "tbl_sample_locations", "physical_sample_id", physical_samples.system_id
     )
     sample_notes: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_notes', 'physical_sample_id', physical_samples.system_id
+        submission, "tbl_sample_notes", "physical_sample_id", physical_samples.system_id
     )
     sample_alt_refs: pd.DataFrame = filter_table(
-        submission, 'tbl_sample_alt_refs', 'physical_sample_id', physical_samples.system_id
+        submission, "tbl_sample_alt_refs", "physical_sample_id", physical_samples.system_id
     )
     analysis_entities: pd.DataFrame = filter_table(
-        submission, 'tbl_analysis_entities', 'physical_sample_id', physical_samples.system_id
+        submission, "tbl_analysis_entities", "physical_sample_id", physical_samples.system_id
     )
-    dendro: pd.DataFrame = filter_table(submission, 'tbl_dendro', 'analysis_entity_id', analysis_entities.system_id)
+    dendro: pd.DataFrame = filter_table(submission, "tbl_dendro", "analysis_entity_id", analysis_entities.system_id)
     dendro_dates: pd.DataFrame = filter_table(
-        submission, 'tbl_dendro_dates', 'analysis_entity_id', analysis_entities.system_id
+        submission, "tbl_dendro_dates", "analysis_entity_id", analysis_entities.system_id
     )
     dendro_date_notes: pd.DataFrame = filter_table(
-        submission, 'tbl_dendro_date_notes', 'dendro_date_note_id', dendro_dates.system_id
+        submission, "tbl_dendro_date_notes", "dendro_date_note_id", dendro_dates.system_id
     )
     datasets: pd.DataFrame = filter_table(
-        submission, 'tbl_datasets', 'dataset_id', analysis_entities.dataset_id.unique(), flip=True
+        submission, "tbl_datasets", "dataset_id", analysis_entities.dataset_id.unique(), flip=True
     )
-    dataset_contacts: pd.DataFrame = filter_table(submission, 'tbl_dataset_contacts', 'dataset_id', datasets.system_id)
+    dataset_contacts: pd.DataFrame = filter_table(submission, "tbl_dataset_contacts", "dataset_id", datasets.system_id)
     dataset_submissions: pd.DataFrame = filter_table(
-        submission, 'tbl_dataset_submissions', 'dataset_id', datasets.system_id
+        submission, "tbl_dataset_submissions", "dataset_id", datasets.system_id
     )
     projects: pd.DataFrame = filter_table(
-        submission, 'tbl_projects', 'project_id', datasets.project_id.unique(), flip=True
+        submission, "tbl_projects", "project_id", datasets.project_id.unique(), flip=True
     )
     abundances: pd.DataFrame = filter_table(
-        submission, 'tbl_abundances', 'analysis_entity_id', analysis_entities.system_id
+        submission, "tbl_abundances", "analysis_entity_id", analysis_entities.system_id
     )
 
     # add_dummy_row(sample_notes, [1, physical_samples.iloc[0]['system_id'], 1, 'Dummy note', np.nan, np.nan])
@@ -184,13 +184,13 @@ def generate_test_excel(
         "tbl_abundances": abundances,
     }
 
-    with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:  # pylint: disable=abstract-class-instantiated
+    with pd.ExcelWriter(filename, engine="xlsxwriter") as writer:  # pylint: disable=abstract-class-instantiated
         for table_name, table in reduced_submission.items():
             table.to_excel(writer, sheet_name=table_name, index=False)
 
 
 def encode_sites(sites: list[int]) -> str:
-    return base64.urlsafe_b64encode(struct.pack(f'{len(sites)}I', *sites)).decode().rstrip('=')
+    return base64.urlsafe_b64encode(struct.pack(f"{len(sites)}I", *sites)).decode().rstrip("=")
 
 
 def load_test_submission(excel_filename: str, test_sites: list[int], filename: str, force: bool) -> Submission:

@@ -20,7 +20,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @click.command()
-@click.argument('key', type=str)
+@click.argument("key", type=str)
 @click.option("--clear-header", type=str, help="Output folder", required=False)
 @click.option("--clear-exploded", type=str, help="Remove (exploded) data in CH entity tables", required=False)
 @click.option("--host", "-h", "host", type=str, help="Target database server")

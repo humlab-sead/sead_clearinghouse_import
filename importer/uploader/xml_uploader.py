@@ -25,7 +25,7 @@ class XmlUploader(BaseUploader):
         if not isinstance(xml_filename, str):
             raise ValueError("XML must be a string or a filename")
 
-        if '<' in xml_filename:
+        if "<" in xml_filename:
             xml: str = xml_filename
         else:
             if not os.path.exists(xml_filename):

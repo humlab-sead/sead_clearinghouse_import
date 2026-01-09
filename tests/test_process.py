@@ -13,43 +13,43 @@ from importer.submission import Submission
 def test_create_options(cfg: Config):
     opts: Options = Options(
         **{
-            'filename': 'data/input/dummy.xlsx',
-            'data_types': 'dendrochronology',
-            'database': cfg.get("options:database"),
-            'output_folder': 'data/output',
-            'skip': False,
-            'submission_id': None,
-            'table_names': None,
-            'xml_filename': None,
-            'check_only': True,
-            'timestamp': True,
+            "filename": "data/input/dummy.xlsx",
+            "data_types": "dendrochronology",
+            "database": cfg.get("options:database"),
+            "output_folder": "data/output",
+            "skip": False,
+            "submission_id": None,
+            "table_names": None,
+            "xml_filename": None,
+            "check_only": True,
+            "timestamp": True,
         }
     )
-    assert opts.basename == 'dummy'
+    assert opts.basename == "dummy"
     assert opts.timestamp
     assert opts.target is not None
     assert opts.ignore_columns is not None
-    assert opts.db_uri().startswith('postgresql://')
+    assert opts.db_uri().startswith("postgresql://")
 
 
 def test_import_reduced_submission(cfg: Config):
-    target_filename: str = 'data/output/building_dendro_reduced.xml'
-    expected_filename: str = 'tests/test_data/building_dendro_reduced.xml'
+    target_filename: str = "data/output/building_dendro_reduced.xml"
+    expected_filename: str = "tests/test_data/building_dendro_reduced.xml"
 
     opts: Options = Options(
         **{
-            'filename': 'tests/test_data/building_dendro_reduced.xlsx',
-            'data_types': 'dendrochronology',
-            'database': cfg.get("options:database"),
-            'output_folder': 'data/output',
-            'skip': False,
-            'submission_id': None,
-            'table_names': None,
-            'xml_filename': None,
-            'check_only': False,
-            'register': False,
-            'explode': False,
-            'timestamp': False,
+            "filename": "tests/test_data/building_dendro_reduced.xlsx",
+            "data_types": "dendrochronology",
+            "database": cfg.get("options:database"),
+            "output_folder": "data/output",
+            "skip": False,
+            "submission_id": None,
+            "table_names": None,
+            "xml_filename": None,
+            "check_only": False,
+            "register": False,
+            "explode": False,
+            "timestamp": False,
             "tidy_xml": False,
         }
     )

@@ -32,7 +32,7 @@ dev = [
     "vulture>=2.14",
 ]
 all = [
-    "sead-clearinghouse-import[api,dev]",
+    "sead-clearinghouse-import[dev]",
 ]
 [project.scripts]
 process-submission = "importer.scripts.process_submission:import_file"

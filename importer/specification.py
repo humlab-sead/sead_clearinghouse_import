@@ -73,13 +73,13 @@ class SpecificationBase(abc.ABC):
         self.messages.infos = []
 
     def warn(self, message: str) -> None:
-        self.warnings.append(f'{message}')
+        self.warnings.append(f"{message}")
 
     def error(self, message: str) -> None:
-        self.errors.append(f'{message}')
+        self.errors.append(f"{message}")
 
     def info(self, message: str) -> None:
-        self.infos.append(f'{message}')
+        self.infos.append(f"{message}")
 
     def get_columns(self, table_name: str) -> list[Table]:
         return [
@@ -104,7 +104,7 @@ class SubmissionSpecification(SpecificationBase):
         super().__init__(metadata, messages or SpecificationMessages(), ignore_columns)
         self.raise_errors: bool = raise_errors
 
-    @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked", level='DEBUG')
+    @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked", level="DEBUG")
     def is_satisfied_by(self, submission: Submission, _: str = None) -> bool:
         """
         Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
@@ -355,7 +355,7 @@ class NoMissingColumnSpecification(SpecificationBase):
             sorted(data_table.columns.values.tolist()) if data_table is not None and table_name in self.metadata else []
         )
 
-        if set(data_column_names) == {'system_id', meta_table.pk_name}:
+        if set(data_column_names) == {"system_id", meta_table.pk_name}:
             """This is a lookup table with only system_id and public_id"""
             return
 

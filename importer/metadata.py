@@ -11,19 +11,19 @@ from .utility import camel_case_name, load_sead_columns, load_sead_data
 # pylint: disable=no-member
 
 DTYPE_MAPPING: dict[str, str] = {
-    'uuid': 'string',
-    'smallint': 'Int16',
-    'integer': 'Int32',
-    'bigint': 'Int64',
-    'boolean': 'boolean',
-    'character varying': 'string',
-    'text': 'string',
+    "uuid": "string",
+    "smallint": "Int16",
+    "integer": "Int32",
+    "bigint": "Int64",
+    "boolean": "boolean",
+    "character varying": "string",
+    "text": "string",
     # 'numeric': 'float64',  # Use 'object' if preserving precision with Decimal
-    'timestamp without time zone': 'datetime64[ns]',
-    'timestamp with time zone': 'datetime64[ns, UTC]',
-    'date': 'datetime64[ns]',
-    'numrange': 'object',
-    'int4range': 'object',
+    "timestamp without time zone": "datetime64[ns]",
+    "timestamp with time zone": "datetime64[ns, UTC]",
+    "date": "datetime64[ns]",
+    "numrange": "object",
+    "int4range": "object",
 }
 
 
@@ -151,7 +151,7 @@ class Metadata:
         sql: str = (
             "select distinct column_name, data_type from sead_utility.table_columns where table_schema = 'public'"
         )
-        sead_types: dict[str, str] = load_sead_data(self.db_uri, sql, index=['column_name']).to_dict()['data_type']
+        sead_types: dict[str, str] = load_sead_data(self.db_uri, sql, index=["column_name"]).to_dict()["data_type"]
 
         dtypes: dict[str, str] = {k: DTYPE_MAPPING[v] for k, v in sead_types.items() if v in DTYPE_MAPPING}
         return dtypes
@@ -164,13 +164,13 @@ class Metadata:
             return {
                 str(k): Column(**v)
                 for k, v in self.sead_columns[self.sead_columns.table_name == table_name]
-                .set_index('column_name', drop=False)
-                .to_dict(orient='index')
+                .set_index("column_name", drop=False)
+                .to_dict(orient="index")
                 .items()
             }
 
         schema: SeadSchema = SeadSchema(
-            {k: Table(columns=get_column_spec(k), **v) for k, v in self.sead_tables.to_dict(orient='index').items()}
+            {k: Table(columns=get_column_spec(k), **v) for k, v in self.sead_tables.to_dict(orient="index").items()}
         )
         return schema
 
@@ -208,7 +208,7 @@ class Metadata:
     @cached_property
     def foreign_keys(self) -> pd.DataFrame:
         """Returns foreign key columns from SEAD columns (performance only)."""
-        return self.sead_columns[self.sead_columns.is_fk][['table_name', 'column_name', 'fk_table_name', 'class_name']]
+        return self.sead_columns[self.sead_columns.is_fk][["table_name", "column_name", "fk_table_name", "class_name"]]
 
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
         """Returns a list of tablenames referencing the given table"""

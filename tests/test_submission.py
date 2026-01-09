@@ -36,7 +36,7 @@ def test_contains(submission: Submission):
 
 
 def test_exists(submission: Submission):
-    assert 'tbl_sites' in submission
+    assert "tbl_sites" in submission
     assert not "tbl_dummy" in submission
 
 
@@ -60,11 +60,11 @@ def test_referenced_keyset(submission: Submission, metadata: Metadata):
                 unique_ids.update(set(submission[fk_table_name][pk_name].unique()))
         return unique_ids
 
-    unique_site_ids: set[str] = compute_unique_system_ids_referenced_by_fk('tbl_sites', 'site_id')
+    unique_site_ids: set[str] = compute_unique_system_ids_referenced_by_fk("tbl_sites", "site_id")
 
-    assert {1635} == unique_site_ids == submission.get_referenced_keyset(metadata, 'tbl_sites')
+    assert {1635} == unique_site_ids == submission.get_referenced_keyset(metadata, "tbl_sites")
 
-    assert {10} == submission.get_referenced_keyset(metadata, 'tbl_methods')
+    assert {10} == submission.get_referenced_keyset(metadata, "tbl_methods")
 
 
 def test_tables_specifications(cfg: Config, submission: Submission):

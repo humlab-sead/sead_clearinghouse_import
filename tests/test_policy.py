@@ -5,13 +5,13 @@ import pandas as pd
 
 from importer.metadata import Metadata, SeadSchema, Table
 from importer.policies import (
-    UpdateMissingForeignKeyPolicy,
+    AddIdentityMappingSystemIdToPublicIdPolicy,
     AddPrimaryKeyColumnIfMissingPolicy,
     IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable,
-    AddIdentityMappingSystemIdToPublicIdPolicy,
     IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId,
     IfSystemIdIsMissingSetSystemIdToPublicId,
     PolicyBase,
+    UpdateMissingForeignKeyPolicy,
     UpdateTypesBasedOnSeadSchema,
 )
 from importer.submission import Submission

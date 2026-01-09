@@ -41,9 +41,9 @@ def configure_logging(opts: dict[str, str]) -> None:
             if handler["sink"] == "sys.stdout":
                 handler["sink"] = sys.stdout
 
-            elif isinstance(handler['sink'], str) and handler['sink'].endswith(".log"):
+            elif isinstance(handler["sink"], str) and handler["sink"].endswith(".log"):
                 handler["sink"] = join(
-                    opts.get('folder', 'logs'), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"
+                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"
                 )
 
         logger.configure(handlers=opts["handlers"])
@@ -53,11 +53,11 @@ def pascal_to_snake_case(s: str) -> str:
     """
     Converts a string from PascalCase to snake_case.
     """
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
 def snake_to_pascal_case(s: str) -> str:
-    return ''.join(part.capitalize() for part in s.split('_'))
+    return "".join(part.capitalize() for part in s.split("_"))
 
 
 def import_sub_modules(module_folder: str) -> Any:
@@ -84,7 +84,7 @@ def recursive_update(d1: dict, d2: dict) -> dict:
 
 
 def recursive_filter_dict(
-    D: dict[str, Any], filter_keys: set[str], filter_mode: Literal['keep', 'exclude'] = 'exclude'
+    D: dict[str, Any], filter_keys: set[str], filter_mode: Literal["keep", "exclude"] = "exclude"
 ) -> dict[str, Any]:
     """
     Recursively filters a dictionary to include only keys in the given set.
@@ -107,7 +107,7 @@ def recursive_filter_dict(
             else value
         )
         for key, value in D.items()
-        if (key in filter_keys if filter_mode == 'keep' else key not in filter_keys)
+        if (key in filter_keys if filter_mode == "keep" else key not in filter_keys)
     }
 
 
@@ -138,10 +138,10 @@ def dotexists(data: dict, *paths: list[str]) -> bool:
 def dotexpand(path: str) -> list[str]:
     """Expands paths with ',' and ':'."""
     paths: list[str] = []
-    for p in path.replace(' ', '').split(','):
+    for p in path.replace(" ", "").split(","):
         if not p:
             continue
-        if ':' in p:
+        if ":" in p:
             paths.extend([p.replace(":", "."), p.replace(":", "_")])
         else:
             paths.append(p)
@@ -154,7 +154,7 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
 
     for key in dotexpand(path):
         d: dict = data
-        for attr in key.split('.'):
+        for attr in key.split("."):
             d: dict = d.get(attr) if isinstance(d, dict) else None
             if d is None:
                 break
@@ -167,7 +167,7 @@ def dotset(data: dict, path: str, value: Any) -> dict:
     """Sets element in dict using dot notation x.y.z or x:y:z"""
 
     d: dict = data
-    attrs: list[str] = path.replace(":", ".").split('.')
+    attrs: list[str] = path.replace(":", ".").split(".")
     for attr in attrs[:-1]:
         if not attr:
             continue
@@ -187,7 +187,7 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
         if lower_key:
             key = key.lower()
         if key.startswith(prefix.lower()):
-            dotset(data, key[len(prefix) + 1 :].replace('_', ':'), value)
+            dotset(data, key[len(prefix) + 1 :].replace("_", ":"), value)
     return data
 
 
@@ -207,7 +207,7 @@ def replace_env_vars(data: R) -> R:
 
 
 def log_decorator(
-    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int | str = "INFO"
+    enter_message: str | None = "Entering", exit_message: str | None = "Exiting", level: int | str = "INFO"
 ):
     def decorator(func):
 
@@ -221,10 +221,10 @@ def log_decorator(
                 return func(*args, **kwargs)
 
             if enter_message:
-                logger.log(level, f'{enter_message} ({func.__name__})')
+                logger.log(level, f"{enter_message} ({func.__name__})")
             result = func(*args, **kwargs)
             if exit_message:
-                logger.log(level, f'{exit_message} ({func.__name__})')
+                logger.log(level, f"{exit_message} ({func.__name__})")
             return result
 
         return wrapper
@@ -280,7 +280,7 @@ def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortb
     data: pd.DataFrame = (
         (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
         .set_index(index, drop=False)
-        .rename_axis([f'index_{x}' for x in index])
+        .rename_axis([f"index_{x}" for x in index])
         .sort_values(by=sortby if sortby else index)
     )
     return data
@@ -292,9 +292,9 @@ def load_sead_columns(db_uri: str, ignore_columns: list[str] = None) -> pd.DataF
     data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
     if ignore_columns:
         columns_to_ignore: list[str] = [
-            c for c in data['column_name'].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
+            c for c in data["column_name"].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
         ]
-        data = data[~data['column_name'].isin(columns_to_ignore)]
+        data = data[~data["column_name"].isin(columns_to_ignore)]
 
     return data
 
@@ -393,15 +393,15 @@ def replace_extension(filename: str, extension: str) -> str:
 
 def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
     name, extension = splitext(path)
-    return f'{name}{suffix}{extension if new_extension is None else new_extension}'
+    return f"{name}{suffix}{extension if new_extension is None else new_extension}"
 
 
 def path_add_timestamp(path: str, fmt: str = "%Y%m%d%H%M") -> str:
-    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+    return path_add_suffix(path, f"_{datetime.now().strftime(fmt)}")
 
 
 def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
-    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+    return path_add_suffix(path, f"_{datetime.now().strftime(fmt)}")
 
 
 def ts_data_path(directory: str, filename: str) -> str:
@@ -410,8 +410,8 @@ def ts_data_path(directory: str, filename: str) -> str:
 
 def read_yaml(file: Any) -> dict:
     """Read yaml file. Return dict."""
-    if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
-        with open(file, "r", encoding='utf-8') as fp:
+    if isinstance(file, str) and any(file.endswith(x) for x in (".yml", ".yaml")):
+        with open(file, "r", encoding="utf-8") as fp:
             return yaml.load(fp, Loader=yaml.FullLoader)
     data: list[dict] = yaml.load(file, Loader=yaml.FullLoader)
     return {} if len(data) == 0 else data[0]
@@ -419,7 +419,7 @@ def read_yaml(file: Any) -> dict:
 
 def write_yaml(data: dict, file: str) -> None:
     """Write yaml to file.."""
-    with open(file, "w", encoding='utf-8') as fp:
+    with open(file, "w", encoding="utf-8") as fp:
         return yaml.dump(data=data, stream=fp)
 
 
@@ -465,10 +465,10 @@ def create_db_uri(*, host: str, port: int | str, user: str, dbname: str) -> str:
 
 def get_connection_uri(connection: Any) -> str:
     conn_info = connection.get_dsn_parameters()
-    user: str = conn_info.get('user')
-    host: str = conn_info.get('host')
-    port: str = conn_info.get('port')
-    dbname: str = conn_info.get('dbname')
+    user: str = conn_info.get("user")
+    host: str = conn_info.get("host")
+    port: str = conn_info.get("port")
+    dbname: str = conn_info.get("dbname")
     uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
     return uri
 
@@ -508,21 +508,21 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as fp:
         for table_name in submission.data_table_names:
-            excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith('(')), None)
+            excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith("(")), None)
             if excel_sql_columns:
                 pk_name: str = submission.metadata[table_name].pk_name
                 data = (
                     submission.data_tables[table_name][excel_sql_columns]
                     .str.strip()
-                    .str.lstrip('(')
-                    .str.rstrip(',')
+                    .str.lstrip("(")
+                    .str.rstrip(",")
                     .str.strip()
-                    .str.rstrip(')')
+                    .str.rstrip(")")
                 )
                 attributes: list[str] = [
-                    x.strip() for x in excel_sql_columns.strip().lstrip('(').rstrip(')').split(',')
+                    x.strip() for x in excel_sql_columns.strip().lstrip("(").rstrip(")").split(",")
                 ]
-                non_pk_attributes = [x for x in attributes if x not in ('system_id', pk_name)]
+                non_pk_attributes = [x for x in attributes if x not in ("system_id", pk_name)]
                 data: pd.Series = submission.data_tables[table_name][excel_sql_columns]
 
                 sql_data: str = template.render(
@@ -530,7 +530,7 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
                     pk_name=pk_name,
                     excel_sql_columns=excel_sql_columns,
                     excel_sql_values=data[~data.isnull()],
-                    non_pk_attributes=', '.join(non_pk_attributes),
+                    non_pk_attributes=", ".join(non_pk_attributes),
                 )
                 fp.write(sql_data)
 

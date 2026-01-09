@@ -86,7 +86,7 @@ class XmlProcessor(IDispatcher):
 
             self.emit(f'<{table.java_class} length="{data.shape[0]}">', 1)
 
-            for record in data.to_dict(orient='records'):
+            for record in data.to_dict(orient="records"):
                 try:
                     data_row: dict = record  # record.to_dict()
 

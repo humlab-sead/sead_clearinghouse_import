@@ -5,6 +5,7 @@ from typing import Any, Iterator
 import pandas as pd
 import pytest
 
+from importer import policies
 from importer.configuration.config import Config
 from importer.metadata import Metadata
 from importer.process import ImportService, Options
@@ -15,7 +16,6 @@ from importer.specification import (
 )
 from importer.submission import Submission
 from importer.utility import create_db_uri
-from importer import policies
 
 
 @pytest.fixture(scope="module")
@@ -58,14 +58,14 @@ def test_living_tree_tables_specifications_bugg(submission: Submission, cfg: Con
         messages=SpecificationMessages(),
         ignore_columns=cfg.get("options:ignore_columns"),
     )
-    specification.is_satisfied_by(submission, 'tbl_dataset_submissions')
+    specification.is_satisfied_by(submission, "tbl_dataset_submissions")
     assert specification.messages.errors == []
     assert specification.messages.warnings == []
 
 
 def test_to_lookups_sql(submission: Submission):
 
-    filename: str = 'tests/output/lookups.sql'
+    filename: str = "tests/output/lookups.sql"
 
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     if os.path.isfile(filename):
@@ -102,17 +102,17 @@ def test_import_living_tree_submission(submission: Submission, cfg: Config):
 
     opts: Options = Options(
         **{
-            'filename': cfg.get("test:dendrochronology:submission:source:filename"),
-            'data_types': 'submission',
-            'database': cfg.get("options:database"),
-            'output_folder': 'tests/output',
-            'skip': False,
-            'submission_id': None,
-            'table_names': None,
-            'xml_filename': None,
-            'check_only': False,
-            'register': True,
-            'transfer_format': 'csv',
+            "filename": cfg.get("test:dendrochronology:submission:source:filename"),
+            "data_types": "submission",
+            "database": cfg.get("options:database"),
+            "output_folder": "tests/output",
+            "skip": False,
+            "submission_id": None,
+            "table_names": None,
+            "xml_filename": None,
+            "check_only": False,
+            "register": True,
+            "transfer_format": "csv",
         }
     )
 
@@ -132,7 +132,7 @@ def test_import_living_tree_submission(submission: Submission, cfg: Config):
 
     exported_java_classes: set[str] = {child.tag for child in root}
 
-    assert 'TblContacts' in exported_java_classes
+    assert "TblContacts" in exported_java_classes
 
     expected_java_classes: set[str] = {submission.metadata[t].java_class for t in submission.data_table_names}
 
@@ -191,9 +191,9 @@ def test_statistics(unprocessed_submission: Submission):
                 statistics.append((fk_table_name, fk_column_name, fk_table_exists, table_name, column.column_name))
 
     df = pd.DataFrame(
-        statistics, columns=['fk_table_name', 'fk_column_name', 'fk_table_exists', 'table_name', 'column_name']
+        statistics, columns=["fk_table_name", "fk_column_name", "fk_table_exists", "table_name", "column_name"]
     )
-    df.to_csv('living_tree_statistics.csv', index=False)
+    df.to_csv("living_tree_statistics.csv", index=False)
 
     assert True
 

@@ -80,7 +80,7 @@ class Submission:
         ]
         return set(int(x) for x in functools.reduce(flatten_sets, referenced_pk_ids or [], []))
 
-    @log_decorator(enter_message=' --> loading excel...', exit_message=' --> done loading excel', level='DEBUG')
+    @log_decorator(enter_message=" --> loading excel...", exit_message=" --> done loading excel", level="DEBUG")
     @staticmethod
     def load(*, metadata: Metadata, source: str | pd.ExcelFile, apply_policies: bool = True) -> "Submission":
         """Loads the submission file into a SubmissionData object"""
@@ -110,7 +110,7 @@ class Submission:
             if ignore_sheets:
                 logger.debug(f"<red>ignored sheets</red>: {','.join(ignore_sheets)}")
 
-            if 'data_table_index' in reader.sheet_names:
+            if "data_table_index" in reader.sheet_names:
                 logger.info("ignoring data_table_index found in Excel")
         return data_tables
 
@@ -124,5 +124,5 @@ class Submission:
             data.to_csv(f"{output_folder}/csv/{table_name}.csv", index=False)
             logger.debug(f" ---> {table_name}.csv written to {output_folder}")
 
-    def to_lookups_sql(self: Submission, filename: str = 'lookups_inserts.sql') -> None:
+    def to_lookups_sql(self: Submission, filename: str = "lookups_inserts.sql") -> None:
         to_lookups_sql(self, filename)

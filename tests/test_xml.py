@@ -10,8 +10,8 @@ from importer.dispatchers.to_xml import XmlProcessor
 def test_emit():
     outstream = Mock()
     processor = XmlProcessor(outstream)
-    processor.emit('test', 2)
-    outstream.write.assert_called_once_with('    test\n')
+    processor.emit("test", 2)
+    outstream.write.assert_called_once_with("    test\n")
 
 
 # def test_camel_case_name():
@@ -21,7 +21,7 @@ def test_emit():
 
 
 def test_read_xml():
-    source_file: str = 'tests/test_data/building_dendro_reduced.xml'
+    source_file: str = "tests/test_data/building_dendro_reduced.xml"
 
     data: pd.DataFrame = pd.read_xml(source_file)
     assert data is not None
