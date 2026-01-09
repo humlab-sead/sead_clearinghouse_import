@@ -9,14 +9,19 @@ This program uses `tidlib` to cleanup the resulting XML which you can install us
 sudo apt-get install tidy
 ```
 
-You will need Python ^3.12 (install with pyenv) and Poetry on your local machine.
+You will need Python ^3.12 (install with pyenv) and uv on your local machine.
+
+Install uv if you haven't already:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
 
 Clone the SEAD Clearinghouse import repository into a new folder and setup the local environment:
 
 ```bash
 git clone git@github.com:humlab-sead/sead_clearinghouse_import
 cd sead_clearinghouse_import
-poetry install
+uv sync
 ```
 ### Usage
 

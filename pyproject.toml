@@ -1,34 +1,37 @@
-[tool.poetry]
+[project]
 name = "sead-clearinghouse-import"
 version = "0.1.0"
 description = "SEAD Clearing House Import System"
-authors = ["Roger Mähler <roger.mahler@hotmail.com>"]
+authors = [{name = "Roger Mähler", email = "roger.mahler@hotmail.com"}]
 readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy>=1.26.2",
+    "pandas>=2.1.4",
+    "psycopg2-binary>=2.9.9",
+    "xlrd>=2.0.1",
+    "lxml>=4.9.4",
+    "click>=8.1.7",
+    "loguru>=0.7.2",
+    "python-dotenv>=1.0.0",
+    "openpyxl>=3.1.2",
+    "sqlalchemy>=2.0.23",
+    "jinja2>=3.1.2",
+    "xlsxwriter>=3.1.9",
+    "pyaml>=24.9.0",
+    "xlsx2csv>=0.8.4",
+]
 
-[tool.poetry.dependencies]
-python = "3.12.*"
-numpy = "^1.26.2"
-pandas = "^2.1.4"
-psycopg2 = "^2.9.9"
-xlrd = "^2.0.1"
-lxml = "^4.9.4"
-click = "^8.1.7"
-loguru = "^0.7.2"
-python-dotenv = "^1.0.0"
-openpyxl = "^3.1.2"
-sqlalchemy = "^2.0.23"
-jinja2 = "^3.1.2"
-xlsxwriter = "^3.1.9"
-pyaml = "^24.9.0"
-xlsx2csv = "^0.8.4"
+[project.optional-dependencies]
+dev = [
+    "pylint>=3.0.3",
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+    "black>=24.10.0",
+    "isort>=5.13.0",
+]
 
-
-[tool.poetry.group.dev.dependencies]
-pylint = "^3.0.3"
-pytest = "^7.4.3"
-black = "^24.10.0"
-
-[tool.poetry.scripts]
+[project.scripts]
 process-submission = "importer.scripts.process_submission:import_file"
 import-excel = "importer.scripts.process_submission:import_file"
 
@@ -59,5 +62,8 @@ float_to_top = true
 src_paths = ["importer", "tests"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["importer"]
