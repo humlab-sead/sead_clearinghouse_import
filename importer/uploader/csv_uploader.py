@@ -3,7 +3,7 @@ from typing import Any
 from psycopg import Connection
 
 from importer.utility import log_decorator
-from importer.xml_to_csv import xml_to_csv_to_db
+from importer.uploader.xml_to_csv import xml_to_csv_to_db
 
 from . import BaseUploader, Uploaders
 
