@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration import ConfigValue
 
 from .metadata import Metadata, Table
 from .submission import Submission
@@ -82,7 +82,9 @@ class SpecificationBase(abc.ABC):
         self.infos.append(f'{message}')
 
     def get_columns(self, table_name: str) -> list[Table]:
-        return [column for column in self.metadata[table_name].columns.values() if not self.is_ignored(column.column_name)]
+        return [
+            column for column in self.metadata[table_name].columns.values() if not self.is_ignored(column.column_name)
+        ]
 
     @abc.abstractmethod
     def is_satisfied_by(self, submission: Submission, table_name: str) -> None: ...
@@ -265,7 +267,7 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
         if submission.is_lookup(table_name):
             if not submission.has_new_rows(table_name):
                 return
-        
+
         # Only check new rows (otherwise it's just a system id to public id mapping)
         pk_name: str = submission.metadata[table_name].pk_name
         is_new_rows: pd.Series = data_table[pk_name].isnull()

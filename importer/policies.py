@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 from loguru import logger
 
-from .configuration.inject import ConfigValue
+from .configuration import ConfigValue
 from .metadata import Metadata, SeadSchema, Table
 from .utility import Registry, pascal_to_snake_case, snake_to_pascal_case
 
@@ -25,7 +25,7 @@ class PolicyRegistry(Registry):
 UpdatePolicies: PolicyRegistry = PolicyRegistry()
 
 
-class DisabledError(Exception):
+pythonclass DisabledError(Exception):
     pass
 
 

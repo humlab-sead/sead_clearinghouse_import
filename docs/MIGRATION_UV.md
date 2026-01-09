@@ -15,9 +15,10 @@ This document summarizes the migration from Poetry to uv for the SEAD Clearingho
 - Changed build backend from `poetry-core` to `hatchling`
 - Added `[tool.hatch.build.targets.wheel]` to specify package location
 - Converted dependency specifications:
-  - `python = "3.12.*"` → `requires-python = ">=3.12"`
+  - `python = "3.13.*"` → `requires-python = ">=3.13"`
   - `package = "^1.2.3"` → `package>=1.2.3"`
 - Changed `psycopg2` to `psycopg2-binary` to avoid compilation issues
+- **Updated**: Upgraded from `psycopg2-binary` to `psycopg[binary]>=3.1.0` (psycopg3)
 
 #### Makefile
 Updated all Poetry commands to uv equivalents:

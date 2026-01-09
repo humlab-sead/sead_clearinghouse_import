@@ -1,8 +1,8 @@
 from typing import Any
 
-import psycopg2
+import psycopg
 from loguru import logger
-from psycopg2.extensions import connection as Connection
+from psycopg import Connection
 
 from .uploader.xml_uploader import BaseUploader, Uploaders
 from .utility import log_decorator
@@ -11,7 +11,9 @@ from .utility import log_decorator
 class SubmissionRepository:
     def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader = None) -> None:
         self.db_options: dict[str, str] = db_options
-        self.uploader: BaseUploader | None = uploader if uploader is BaseUploader else Uploaders.get(uploader)() if uploader else None
+        self.uploader: BaseUploader | None = (
+            uploader if uploader is BaseUploader else Uploaders.get(uploader)() if uploader else None
+        )
         self.connection: Connection | None = None
         self.timeout_seconds: int = 300
 
@@ -119,7 +121,7 @@ class SubmissionRepository:
     def __enter__(self) -> Connection:
         if self.connection is None:
             timeout_ms: int = self.timeout_seconds * 1000
-            self.connection: Connection = psycopg2.connect(
+            self.connection: Connection = psycopg.connect(
                 **self.db_options,
                 options=f'-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}',
             )

@@ -1,10 +1,10 @@
 from dataclasses import asdict, dataclass, field
 from functools import cached_property
-from typing import Any
+from typing import Any, Iterator
 
 import pandas as pd
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration import ConfigValue
 
 from .utility import camel_case_name, load_sead_columns, load_sead_data
 
@@ -25,6 +25,7 @@ DTYPE_MAPPING: dict[str, str] = {
     'numrange': 'object',
     'int4range': 'object',
 }
+
 
 @dataclass
 class Column:
@@ -50,12 +51,12 @@ class Column:
         return self.__dict__[key]
 
     def keys(self) -> list[str]:
-        return self.asdict().keys()
+        return list(self.asdict().keys())
 
     def values(self) -> list[str]:
-        return self.asdict().values()
+        return list(self.asdict().values())
 
-    def asdict(self) -> list[str]:
+    def asdict(self) -> dict[str, Any]:
         return asdict(self)
 
     @property
@@ -77,22 +78,25 @@ class Table:
     def __contains__(self, key: str) -> bool:
         return key in self.columns
 
-    def __getitem__(self, key: str) -> Column:
+    def __getitem__(self, key: str) -> Column | dict[str, Column]:
         if key == "columns":
             return self.columns
         return self.columns[key]
 
-    def __iter__(self) -> Column:
+    def __iter__(self) -> Iterator[Column]:
         return iter(self.columns.values())
 
     def __len__(self) -> int:
         return len(self.columns)
 
+    def get_column(self, column_name: str) -> Column | None:
+        return self.columns.get(column_name)
+
     def keys(self) -> list[str]:
-        return asdict(self).keys()
+        return list(asdict(self).keys())
 
     def values(self) -> list[Column]:
-        return asdict(self).values()
+        return list(asdict(self).values())
 
     def column_names(self, skip_nullable: bool = False) -> list[str]:
         return sorted(c.column_name for c in self.columns.values() if not (skip_nullable and c.is_nullable))
@@ -118,14 +122,14 @@ class SeadSchema(dict[str, Table]):
         return [t for t in self.values() if t.excel_sheet != t.table_name]
 
     @cached_property
-    def table_name2excel_sheet(self) -> dict[str, Table]:
+    def table_name2excel_sheet(self) -> dict[str, str]:
         return {t: x.excel_sheet for t, x in self.items()}
 
 
 class Metadata:
     """Logic related to Excel metadata file"""
 
-    def __init__(self, db_uri: str, ignore_columns: list[str] = None) -> None:
+    def __init__(self, db_uri: str, ignore_columns: list[str] | None = None) -> None:
         self.db_uri: str = db_uri
         self.foreign_key_aliases: dict[str, str] = {"updated_dataset_id": "dataset_id"}
         self.ignore_columns: list[str] = ignore_columns or ConfigValue("options.ignore_columns", default=[]).resolve()
@@ -156,9 +160,9 @@ class Metadata:
     def sead_schema(self) -> SeadSchema:
         """Returns a dictionary of table attributes i.e. a row from sead_tables as a dictionary"""
 
-        def get_column_spec(table_name: str) -> Column:
+        def get_column_spec(table_name: str) -> dict[str, Column]:
             return {
-                k: Column(**v)
+                str(k): Column(**v)
                 for k, v in self.sead_columns[self.sead_columns.table_name == table_name]
                 .set_index('column_name', drop=False)
                 .to_dict(orient='index')
@@ -172,14 +176,23 @@ class Metadata:
 
     def __getitem__(self, what: str) -> Table | Column:
         table_name, column_name = what if isinstance(what, tuple) else (what, None)
+        if column_name is not None:
+            return self.get_column(table_name, column_name)
+        return self.get_table(table_name)
+
+    def get_table(self, table_name: str) -> Table:
         table: Table = self.sead_schema.get_table_spec(table_name)
         if table is None:
             raise KeyError(f"Table {table_name} not found in metadata")
-        if column_name is not None:
-            if column_name not in table.columns:
-                raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
-            return table.columns[column_name]
         return table
+
+    def get_column(self, table_name: str, column_name: str) -> Column:
+        table: Table | None = self.get_table(table_name)
+        if table is None:
+            raise KeyError(f"Table {table_name} not found in metadata")
+        if column_name not in table.columns:
+            raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
+        return table.columns[column_name]
 
     def __contains__(self, table_name: str) -> bool:
         return table_name in self.sead_schema
@@ -187,10 +200,10 @@ class Metadata:
     def is_fk(self, table_name: str, column_name: str) -> bool:
         if column_name in self.foreign_key_aliases:
             return True
-        return self[table_name, column_name].is_fk
+        return self.get_column(table_name, column_name).is_fk
 
     def is_pk(self, table_name: str, column_name: str) -> bool:
-        return self[table_name, column_name].is_pk
+        return self.get_column(table_name, column_name).is_pk
 
     @cached_property
     def foreign_keys(self) -> pd.DataFrame:
@@ -204,7 +217,9 @@ class Metadata:
     def get_primary_keys(self, table_name: str) -> set[int]:
         """Returns all unique primary keys for `table_name` in SEAD.
         NOTE: This function assumes PK and FK names are the same."""
-        pk_name: str = self[table_name].pk_name
+        table: Table | Column = self[table_name]
+        assert isinstance(table, Table), f"Table {table_name} not found in metadata"
+        pk_name: str = table.pk_name
         if pk_name is None:
             return set()
 

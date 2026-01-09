@@ -30,10 +30,12 @@ def submission(cfg: Config, metadata: Metadata) -> Iterator[Submission]:
     source: str = cfg.get("test:dendrochronology:living_tree:source:filename")
     return Submission.load(metadata=metadata, source=source, apply_policies=True)
 
+
 def test_pk_set(metadata: Metadata):
     keys: set[int] = metadata.get_primary_keys("tbl_sites")
 
     assert keys
+
 
 def test_load_living_tree(submission: Submission):
     assert submission is not None
@@ -164,13 +166,12 @@ def test_add_default_foreign_key_policy(unprocessed_submission: Submission):
 
 
 def test_if_table_is_missing_add_table_using_system_id_as_public_id(unprocessed_submission: Submission):
-    policy: policies.AddIdentityMappingSystemIdToPublicIdPolicy = (
-        policies.AddIdentityMappingSystemIdToPublicIdPolicy(
-            metadata=unprocessed_submission.metadata, submission=unprocessed_submission
-        )
+    policy: policies.AddIdentityMappingSystemIdToPublicIdPolicy = policies.AddIdentityMappingSystemIdToPublicIdPolicy(
+        metadata=unprocessed_submission.metadata, submission=unprocessed_submission
     )
     policy.apply()
     assert len(policy.logs) > 0
+
 
 def test_statistics(unprocessed_submission: Submission):
 
@@ -186,14 +187,15 @@ def test_statistics(unprocessed_submission: Submission):
                 fk_table_name: str = column.fk_table_name
                 fk_column_name: str = column.fk_column_name
                 fk_table_exists: bool = fk_table_name in unprocessed_submission.data_tables
-                                
+
                 statistics.append((fk_table_name, fk_column_name, fk_table_exists, table_name, column.column_name))
 
-    df = pd.DataFrame(statistics, columns=['fk_table_name', 'fk_column_name', 'fk_table_exists', 'table_name', 'column_name'])
+    df = pd.DataFrame(
+        statistics, columns=['fk_table_name', 'fk_column_name', 'fk_table_exists', 'table_name', 'column_name']
+    )
     df.to_csv('living_tree_statistics.csv', index=False)
 
     assert True
-
 
     # metadata = MagicMock(spec=Metadata)
     # submission = MagicMock(spec=Submission)
@@ -203,6 +205,8 @@ def test_statistics(unprocessed_submission: Submission):
     #     "col2": MagicMock(data_type="integer"),
     #     "col3": MagicMock(data_type="bigint"),
     # }
+
+
 #     metadata.__getitem__.return_value = table
 #     submission.data_tables = {
 #         "table1": pd.DataFrame(

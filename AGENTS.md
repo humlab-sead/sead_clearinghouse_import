@@ -63,7 +63,7 @@ uv sync  # or make install
 ```
 
 Requirements:
-- Python 3.12 (use pyenv)
+- Python 3.13 (use uv)
 - uv for dependency management
 - External dependency: `tidy` CLI tool for XML formatting (`sudo apt-get install tidy`)
 - Database credentials in `.env` or passed via CLI
@@ -135,7 +135,7 @@ make lint          # pylint across importer/ and tests/
 - Black formatting: 120 char line length, skip string normalization
 - Use `loguru` for logging (not stdlib logging)
 - Dataclasses preferred for config/options objects
-- Type hints required (Python 3.12 syntax)
+- Type hints required (Python 3.13 syntax)
 - Pandas DataFrames are primary data structure for table manipulation
 
 ## When Modifying Code

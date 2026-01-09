@@ -6,7 +6,7 @@ from typing import Type
 
 from loguru import logger
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration import ConfigValue
 
 from . import utility
 from .dispatchers import IDispatcher, to_xml
@@ -71,7 +71,7 @@ class Options:
         """Name of the source file"""
         return basename(self.filename) if self.filename else self.submission_name
 
-    
+
 class ImportService:
     def __init__(
         self,

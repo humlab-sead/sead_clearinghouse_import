@@ -3,7 +3,7 @@ import os
 from typing import Any
 
 from loguru import logger
-from psycopg2.extensions import connection as Connection
+from psycopg import Connection
 
 from ..utility import log_decorator
 from . import BaseUploader, Uploaders

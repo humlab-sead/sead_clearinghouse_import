@@ -9,7 +9,7 @@ This program uses `tidlib` to cleanup the resulting XML which you can install us
 sudo apt-get install tidy
 ```
 
-You will need Python ^3.12 (install with pyenv) and uv on your local machine.
+You will need Python ^3.13 (install with uv) and uv on your local machine.
 
 Install uv if you haven't already:
 ```bash

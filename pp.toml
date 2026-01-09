@@ -1,45 +1,60 @@
 [project]
-name = "sead-clearinghouse-import"
-version = "0.1.0"
-description = "SEAD Clearing House Import System"
-authors = [{name = "Roger Mähler", email = "roger.mahler@hotmail.com"}]
+name = "shape-shifter"
+version = "1.2.0"
+description = "Declarative data transformation framework with optional web editor API"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    # Core dependencies
     "click>=8.3.0",
+    "dotenv>=0.9.9",
+    "jaydebeapi>=1.2.3",
     "jinja2>=3.1.6",
+    "jpype1>=1.6.0",
     "loguru>=0.7.3",
-    "lxml>=4.9.4",
-    "numpy>=1.26.2",
-    "openpyxl>=3.1.2",
+    "networkx>=3.0",
+    "openpyxl>=3.1.5",
     "pandas>=2.3.3",
     "psycopg>=3.2.13",
     "pyaml>=25.7.0",
-    "python-dotenv>=1.0.0",
+    "pydantic-settings>=2.0.0",
+    "pydantic>=2.0.0",
+    "pyproj>=3.7.2",
+    "python-multipart>=0.0.20",
+    "ruamel.yaml>=0.18.0",
     "sqlalchemy>=2.0.44",
-    "xlrd>=2.0.1",
-    "xlsx2csv>=0.8.4",
-    "xlsxwriter>=3.1.9",
+    "uvicorn>=0.38.0",
+    "xxhash>=3.6.0",
+    # Shared dependencies (used by both core and backend)
 ]
 
 [project.optional-dependencies]
+# Backend API dependencies (FastAPI + related)
+api = [
+    "fastapi>=0.109.0",
+    "uvicorn[standard]>=0.27.0",
+    "sqlparse>=0.5.0",
+]
+# Development dependencies
 dev = [
-    "pylint>=3.0.3",
-    "pytest>=7.4.3",
-    "pytest-cov>=4.1.0",
-    "black>=24.10.0",
-    "isort>=5.13.0",    
+    "pylint>=3.3.8",
+    "ruff>=0.13.2",
+    "black>=25.9.0",
+    "pytest>=8.1.1,<9",
+    "pytest-asyncio>=0.22.0,<1",
+    "pytest-cov>=4.1.0,<5",
+    "httpx>=0.24.1,<1",
     "vulture>=2.14",
 ]
+# All dependencies (for full development setup)
 all = [
-    "sead-clearinghouse-import[api,dev]",
+    "shape-shifter[api,dev]",
 ]
-[project.scripts]
-process-submission = "importer.scripts.process_submission:import_file"
-import-excel = "importer.scripts.process_submission:import_file"
 
-[tool.pylint.format]
-max-line-length = 120
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
 
 [tool.ruff]
 # Ruff = linter + (optional) formatter
@@ -100,27 +115,19 @@ disable = [
 ]
 
 [tool.black]
-line-length = 120
-target-version = ["py313"]
-skip-magic-trailing-comma = false
-exclude = '''
-(
-  \.git
-  | \.pypy_cache
-  | \.pytest_cache
-  | \.mypy_cache
-  | deprecated
-  | .venv
-)
-'''
+line-length = 140
+# target-version = ['py313']
 
+
+[tool.pylint]
+max-line-length = 140
+max-args = 10
+
+# Import sorting (handled by Ruff)
 [tool.isort]
-line_length = 120
+line_length = 142
+# multi_line_output = 3
 profile = "black"
-py_version = "auto"
-float_to_top = true
-src_paths = ["importer", "tests"]
-
 
 # --------------------
 # mypy (type checking)
@@ -149,7 +156,7 @@ warn_return_any = false
 # --------------------
 [tool.pytest.ini_options]
 addopts = "-q -ra --strict-markers"
-testpaths = ["tests"]
+testpaths = ["tests", "backend/tests"]
 python_classes = "Test*"
 python_functions = "test_*"
 asyncio_mode = "auto"
@@ -158,11 +165,31 @@ markers = [
   "debug: marks tests for debugging purposes (typically run manually)",
   "manual: marks tests requiring manual setup (e.g., real database)",
 ]
+# python_files = "test_*.py" "*_test.py"
+# Uncomment to see logs during test runs:
+# log_cli = true
+# log_cli_level = "DEBUG"
 
+# --------------------
+# coverage.py
+# --------------------
+[tool.coverage.run]
+branch = true
+source = ["src", "backend/app"]
+omit = [
+  "backend/tests/*",
+  "tests/*",
+  "backend/app/api/v1/endpoints/*",
+  "src/configuration/*",
+  "*/__init__.py",
+  "*/venv/*",
+  "*/.venv/*"
+]
 
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 85
 
-[tool.hatch.build.targets.wheel]
-packages = ["importer"]
+[dependency-groups]
+dev = []
