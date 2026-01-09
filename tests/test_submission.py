@@ -37,7 +37,7 @@ def test_contains(submission: Submission):
 
 def test_exists(submission: Submission):
     assert "tbl_sites" in submission
-    assert not "tbl_dummy" in submission
+    assert "tbl_dummy" not in submission
 
 
 def test_data_tablenames(submission: Submission):

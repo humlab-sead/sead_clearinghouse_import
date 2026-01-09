@@ -7,8 +7,9 @@ import pandas as pd
 from jinja2 import Environment, select_autoescape
 from loguru import logger
 
-from ..metadata import Column, Metadata, Table
-from ..submission import Submission
+from importer.metadata import Column, Metadata, Table
+from importer.submission import Submission
+
 from . import IDispatcher
 
 # pylint: disable=too-many-nested-blocks, too-many-statements

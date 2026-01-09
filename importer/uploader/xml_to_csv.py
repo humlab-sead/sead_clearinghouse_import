@@ -11,7 +11,7 @@ import pandas as pd
 from loguru import logger
 from sqlalchemy.types import TEXT
 
-from ..utility import Registry, get_connection_uri
+from importer.utility import Registry, get_connection_uri
 
 Table = namedtuple("Table", "table_type, record_count")
 

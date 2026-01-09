@@ -2,9 +2,10 @@ from typing import Any
 
 from psycopg import Connection
 
-from ..utility import log_decorator
+from importer.utility import log_decorator
+from importer.xml_to_csv import xml_to_csv_to_db
+
 from . import BaseUploader, Uploaders
-from .xml_to_csv import xml_to_csv_to_db
 
 
 @Uploaders.register(key="csv")

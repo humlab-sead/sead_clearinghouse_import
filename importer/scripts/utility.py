@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import click
 
-from .. import utility
+from importer import utility
 
 CLI_LOG_PATH = "./logs"
 

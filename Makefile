@@ -21,7 +21,10 @@ build: requirements.txt
 publish:
 	@uv publish
 
-lint: tidy pylint flake8
+lint: tidy pylint ruff
+
+ruff:
+	@uv run ruff check $(SOURCE_FOLDERS) --fix
 
 tidy: black isort
 

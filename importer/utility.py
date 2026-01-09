@@ -299,11 +299,11 @@ def load_sead_columns(db_uri: str, ignore_columns: list[str] = None) -> pd.DataF
     return data
 
 
-def flatten(l) -> list:
+def flatten(lst: list[Any]) -> list[Any]:
     """
     Flattens a list of lists
     """
-    return [item for sublist in l for item in sublist]
+    return [item for sublist in lst for item in sublist]
 
 
 def flatten_sets(x, y) -> set:

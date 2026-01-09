@@ -5,7 +5,8 @@ from typing import Any
 from loguru import logger
 from psycopg import Connection
 
-from ..utility import log_decorator
+from importer.utility import log_decorator
+
 from . import BaseUploader, Uploaders
 
 
