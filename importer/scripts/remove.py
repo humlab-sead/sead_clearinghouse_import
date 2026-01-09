@@ -1,17 +1,11 @@
-import os
 import sys
-from typing import Any
 
 import click
 import dotenv
 from loguru import logger
 
-from importer.configuration import ConfigStore, ConfigValue
-from importer.metadata import Metadata
-from importer.process import ImportService, Options
 from importer.repository import SubmissionRepository
 from importer.scripts.utility import update_arguments_from_options_file
-from importer.submission import Submission
 from importer.utility import configure_logging, strip_path_and_extension
 
 dotenv.load_dotenv(dotenv.find_dotenv())
