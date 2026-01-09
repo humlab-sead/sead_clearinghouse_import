@@ -8,13 +8,27 @@ from .uploader.xml_uploader import BaseUploader, Uploaders
 from .utility import log_decorator
 
 
+class NullConnection:
+    def cursor(self):
+        raise RuntimeError("No active database connection")
+
+    def commit(self):
+        pass
+
+    def rollback(self):
+        pass
+
+    def close(self):
+        pass
+
+
 class SubmissionRepository:
     def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader = None) -> None:
         self.db_options: dict[str, str] = db_options
         self.uploader: BaseUploader | None = (
             uploader if uploader is BaseUploader else Uploaders.get(uploader)() if uploader else None
         )
-        self.connection: Connection | None = None
+        self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300
 
     def upload_xml(self, xml_filename: str, submission_id: int) -> None:
@@ -114,13 +128,14 @@ class SubmissionRepository:
                 on c.table_id = t.table_id
             where c.submission_id = %s
         """
-        with self.connection.cursor() as cursor:
-            cursor.execute(tables_names_sql, (submission_id,))
-            table_names: list[tuple[Any, ...]] = cursor.fetchall()
+        with self as connection:
+            with connection.cursor() as cursor:
+                cursor.execute(tables_names_sql, (submission_id,))
+                table_names: list[tuple[Any, ...]] = cursor.fetchall()
         return [t[0] for t in table_names]
 
     def __enter__(self) -> Connection:
-        if self.connection is None:
+        if isinstance(self.connection, NullConnection):
             timeout_ms: int = self.timeout_seconds * 1000
             self.connection: Connection = psycopg.connect(
                 **self.db_options,
@@ -129,10 +144,10 @@ class SubmissionRepository:
         return self.connection
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.connection:
+        if not isinstance(self.connection, NullConnection):
             if exc_type is not None:
                 self.connection.rollback()
             else:
                 self.connection.commit()
             self.connection.close()
-        self.connection = None
+        self.connection = NullConnection()

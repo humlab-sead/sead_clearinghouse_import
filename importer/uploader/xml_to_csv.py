@@ -1,6 +1,7 @@
 """
 Converts the XML file to CSV files for each table type., then uploads the CSV files to the database.
 """
+
 import os
 import xml.etree.ElementTree as ET
 from collections import namedtuple
