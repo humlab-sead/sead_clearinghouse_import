@@ -179,7 +179,7 @@ def test_pascal_to_snake_case():
 
 
 def test_load_sead_columns():
-    db_uri = "postgresql://user@localhost:5432/dbname"
+    db_uri = "postgresql+psycopg://user@localhost:5432/dbname"
     mock_data = pd.DataFrame(
         {"table_name": ["table1", "table1", "table2"], "column_name": ["col1", "col2", "col3"], "position": [1, 2, 1]}
     )

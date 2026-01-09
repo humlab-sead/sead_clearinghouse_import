@@ -29,7 +29,7 @@ def test_create_options(cfg: Config):
     assert opts.timestamp
     assert opts.target is not None
     assert opts.ignore_columns is not None
-    assert opts.db_uri().startswith("postgresql://")
+    assert opts.db_uri().startswith("postgresql+psycopg://")
 
 
 def test_import_reduced_submission(cfg: Config):

@@ -460,7 +460,7 @@ def create_db_uri(*, host: str, port: int | str, user: str, dbname: str) -> str:
     """
     Returns the database URI from the environment variables.
     """
-    return f"postgresql://{user}@{host}:{port}/{dbname}"
+    return f"postgresql+psycopg://{user}@{host}:{port}/{dbname}"
 
 
 def get_connection_uri(connection: Any) -> str:
@@ -469,7 +469,7 @@ def get_connection_uri(connection: Any) -> str:
     host: str = conn_info.get("host")
     port: str = conn_info.get("port")
     dbname: str = conn_info.get("dbname")
-    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
+    uri: str = f"postgresql+psycopg://{user}@{host}:{port}/{dbname}"
     return uri
 
 
