@@ -120,6 +120,7 @@ class SeadSchema:
         )
         self.source_tables: pd.DataFrame = source_tables
         self.source_columns: pd.DataFrame = source_columns
+        self.foreign_key_aliases: dict[str, str] = {"updated_dataset_id": "dataset_id"}
 
     def __getitem__(self, key: str) -> Table:
         return self._tables[key]
@@ -143,12 +144,20 @@ class SeadSchema:
         return self._tables.items()
 
     def get(self, key: str, default: Table | None = None) -> Table | None:
+        """Get a table by name, or return default if not found."""
         return self._tables.get(key, default)
 
-    def get_table(self, table_name: str) -> Table | None:
+    def get_table(self, table_name: str) -> Table:
+        """Get a table by name, table type or alias (excel_sheet), or raise KeyError if not found."""
         if table_name in self._tables_lookup:
             return self._tables_lookup[table_name]
-        return None
+        raise KeyError(f"Table {table_name} not found in schema") 
+    
+    def get_column(self, table_name: str, column_name: str) -> Column:
+        table: Table = self.get_table(table_name)
+        if column_name not in table.columns:
+            raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
+        return table.columns[column_name]
 
     @cached_property
     def lookup_tables(self) -> list[Table]:
@@ -162,7 +171,25 @@ class SeadSchema:
     def table_name2excel_sheet(self) -> dict[str, str]:
         return {t: x.excel_sheet for t, x in self.items()}
 
+    @cached_property
+    def _foreign_keys(self) -> pd.DataFrame:
+        """Returns foreign key columns from SEAD columns (performance only)."""
+        return self.source_columns[self.source_columns.is_fk][["table_name", "column_name", "fk_table_name", "class_name"]]
 
+    def get_tablenames_referencing(self, table_name: str) -> list[str]:
+        """Returns a list of tablenames referencing the given table"""
+        return self._foreign_keys.loc[(self._foreign_keys.fk_table_name == table_name)]["table_name"].tolist()
+
+
+    def is_fk(self, table_name: str, column_name: str) -> bool:
+        if column_name in self.foreign_key_aliases:
+            return True
+        return self.get_column(table_name, column_name).is_fk
+
+    def is_pk(self, table_name: str, column_name: str) -> bool:
+        return self.get_column(table_name, column_name).is_pk
+
+    
 class SeadSchemaFactory:
 
     def create(self, sead_tables: pd.DataFrame, sead_columns: pd.DataFrame) -> SeadSchema:
@@ -190,7 +217,7 @@ class SeadSchemaFactory:
         return SeadSchema(tables=tables, source_tables=sead_tables, source_columns=sead_columns)
 
 
-class MetadataService:
+class SchemaService:
     """Service class to access metadata information"""
 
     def __init__(self, db_uri: str, ignore_columns: list[str] | None = None) -> None:
@@ -227,7 +254,13 @@ class MetadataService:
         dtypes: dict[str, str] = {k: DTYPE_MAPPING[v] for k, v in sead_types.items() if v in DTYPE_MAPPING}
         return dtypes
 
-    # FIXME: Belongs in a data service class
+    # def get_primary_keys(self, table_name: str) -> set[int]:
+    #     """Returns all unique primary keys for `table_name` in SEAD."""
+    #     table: Table = self.get_table(table_name)
+    #     if table.pk_name is None:
+    #         return set()
+    #     return self.service.get_primary_key_values(table_name, table.pk_name)
+
     def get_primary_key_values(self, table_name: str, pk_name: str) -> set[int]:
         """Returns all unique primary keys for `table_name` in SEAD."""
         sql: str = f"""
@@ -237,7 +270,6 @@ class MetadataService:
         keys: set = set(self.load_sead_data(sql, index=[pk_name]).index)
         return keys
 
-    # FIXME: Belongs in a data service class
     def load_sead_data(
         self, sql: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None
     ) -> pd.DataFrame:
@@ -277,79 +309,9 @@ class MetadataService:
 
         return data
 
-
-class Metadata:
-    """Logic related to Excel metadata file
-    FIXME: The Excel metadata file is deprecated, this class should be removed in favor of SeadSchema and MetadataService
-    """
-
-    def __init__(self, db_uri: str, ignore_columns: list[str] | None = None) -> None:
-        self.service: MetadataService = MetadataService(db_uri, ignore_columns)
-        self.foreign_key_aliases: dict[str, str] = {"updated_dataset_id": "dataset_id"}
-
-    @cached_property
-    def sead_tables(self) -> pd.DataFrame:
-        """Returns a dataframe of tables from SEAD with attributes."""
-        return self.service.get_sead_tables()
-
-    @cached_property
-    def sead_columns(self) -> pd.DataFrame:
-        """Returns a dataframe of table columns from SEAD with attributes."""
-        return self.service.get_sead_columns()
-
-    @cached_property
-    def sead_dtypes(self) -> dict[str, str]:
-        """Returns a dict of table to datatype mappings."""
-        return self.service.get_sead_dtypes()
-
-    @cached_property
-    def sead_schema(self) -> SeadSchema:
-        """Returns a dictionary of table attributes i.e. a row from sead_tables as a dictionary"""
-        return SeadSchemaFactory().create(self.sead_tables, self.sead_columns)
-
-    def __getitem__(self, what: str) -> Table | Column:
-        table_name, column_name = what if isinstance(what, tuple) else (what, None)
-        if column_name is not None:
-            return self.get_column(table_name, column_name)
-        return self.get_table(table_name)
-
-    def get_table(self, table_name: str) -> Table:
-        table: Table = self.sead_schema.get_table(table_name)
-        if table is None:
-            raise KeyError(f"Table {table_name} not found in metadata")
-        return table
-
-    def get_column(self, table_name: str, column_name: str) -> Column:
-        table: Table | None = self.get_table(table_name)
-        if table is None:
-            raise KeyError(f"Table {table_name} not found in metadata")
-        if column_name not in table.columns:
-            raise KeyError(f"Column {column_name} not found in metadata for table {table_name}")
-        return table.columns[column_name]
-
-    def __contains__(self, table_name: str) -> bool:
-        return table_name in self.sead_schema
-
-    def is_fk(self, table_name: str, column_name: str) -> bool:
-        if column_name in self.foreign_key_aliases:
-            return True
-        return self.get_column(table_name, column_name).is_fk
-
-    def is_pk(self, table_name: str, column_name: str) -> bool:
-        return self.get_column(table_name, column_name).is_pk
-
-    @cached_property
-    def _foreign_keys(self) -> pd.DataFrame:
-        """Returns foreign key columns from SEAD columns (performance only)."""
-        return self.sead_columns[self.sead_columns.is_fk][["table_name", "column_name", "fk_table_name", "class_name"]]
-
-    def get_tablenames_referencing(self, table_name: str) -> list[str]:
-        """Returns a list of tablenames referencing the given table"""
-        return self._foreign_keys.loc[(self._foreign_keys.fk_table_name == table_name)]["table_name"].tolist()
-
-    def get_primary_keys(self, table_name: str) -> set[int]:
-        """Returns all unique primary keys for `table_name` in SEAD."""
-        table: Table = self.get_table(table_name)
-        if table.pk_name is None:
-            return set()
-        return self.service.get_primary_key_values(table_name, table.pk_name)
+    def load(self) -> SeadSchema:
+        """Loads the SEAD schema from the database."""
+        sead_tables: pd.DataFrame = self.get_sead_tables()
+        sead_columns: pd.DataFrame = self.get_sead_columns()
+        return SeadSchemaFactory().create(sead_tables, sead_columns)
+    

@@ -7,7 +7,7 @@ from typing import Any
 import pandas as pd
 
 from importer.configuration import ConfigValue
-from importer.metadata import Metadata
+from importer.metadata import SchemaService, SeadSchema
 from importer.submission import Submission
 from importer.utility import create_db_uri
 
@@ -91,7 +91,7 @@ def generate_test_excel(
     force: bool = False,
 ):
     def filter_table(
-        submission: pd.DataFrame, table_name: str, column_name: str, values: list[Any], flip: bool = False
+        submission: Submission, table_name: str, column_name: str, values: pd.Series[int], flip: bool = False
     ) -> pd.DataFrame:
         table: pd.DataFrame = submission[table_name]
         data: pd.DataFrame = table[table["system_id" if flip else column_name].isin(values)]
@@ -103,7 +103,7 @@ def generate_test_excel(
     assert submission is not None
     number_of_physical_samples: int = 2
 
-    sites: pd.DataFrame = filter_table(submission, "tbl_sites", "system_id", test_sites)
+    sites: pd.DataFrame = filter_table(submission, "tbl_sites", "system_id", pd.Series(test_sites))
     site_locations: pd.DataFrame = filter_table(submission, "tbl_site_locations", "site_id", sites.system_id)
     site_references: pd.DataFrame = filter_table(submission, "tbl_site_references", "site_id", sites.system_id)
     sample_groups: pd.DataFrame = filter_table(submission, "tbl_sample_groups", "site_id", sites.system_id)
@@ -142,14 +142,14 @@ def generate_test_excel(
         submission, "tbl_dendro_date_notes", "dendro_date_note_id", dendro_dates.system_id
     )
     datasets: pd.DataFrame = filter_table(
-        submission, "tbl_datasets", "dataset_id", analysis_entities.dataset_id.unique(), flip=True
+        submission, "tbl_datasets", "dataset_id", pd.Series(list(set(analysis_entities.dataset_id))), flip=True
     )
     dataset_contacts: pd.DataFrame = filter_table(submission, "tbl_dataset_contacts", "dataset_id", datasets.system_id)
     dataset_submissions: pd.DataFrame = filter_table(
         submission, "tbl_dataset_submissions", "dataset_id", datasets.system_id
     )
     projects: pd.DataFrame = filter_table(
-        submission, "tbl_projects", "project_id", datasets.project_id.unique(), flip=True
+        submission, "tbl_projects", "project_id", pd.Series(list(set(datasets.project_id))), flip=True
     )
     abundances: pd.DataFrame = filter_table(
         submission, "tbl_abundances", "analysis_entity_id", analysis_entities.system_id
@@ -196,8 +196,10 @@ def load_test_submission(excel_filename: str, test_sites: list[int], filename: s
     basename: str = os.path.splitext(os.path.basename(filename))[0]
     pickled_filename: str = f"{basename}_{encode_sites(test_sites)}.pkl"
     if not os.path.isfile(pickled_filename) or force:
-        metadata: Metadata = Metadata(create_db_uri(**ConfigValue("options:database").resolve()))
-        submission: Submission = Submission.load(metadata=metadata, source=excel_filename)
+        opts: dict[str, Any] = ConfigValue("options:database").resolve() or {}
+        service: SchemaService = SchemaService(create_db_uri(**opts))
+        schema: SeadSchema = service.load()
+        submission: Submission = Submission.load(schema=schema, source=excel_filename)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)
     else:

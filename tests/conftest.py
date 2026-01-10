@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 
 from importer.configuration import ConfigStore
 from importer.configuration.config import Config
-from importer.metadata import Metadata
+from importer.configuration.interface import ConfigLike
+from importer.metadata import SchemaService, SeadSchema
 from importer.submission import Submission
 from importer.utility import create_db_uri
 
@@ -26,34 +27,21 @@ load_dotenv(DOTENV_FILENAME)
 
 
 @pytest.fixture(scope="session")
-def cfg() -> Config:
+def cfg() -> ConfigLike:
     ConfigStore.get_instance().configure_context(
         source=CONFIG_FILENAME, env_filename=DOTENV_FILENAME, env_prefix=ENV_PREFIX
     )
-    return ConfigStore.get_instance().config()
+    return ConfigStore.get_instance().config()  # type: ignore[return-value]
 
 
 @pytest.fixture(scope="session")
-def metadata(cfg: Config) -> Iterator[Metadata]:
-    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
-    yield metadata
-
-    # instance = Metadata("a-dummy-db-uri")
-    # instance.__dict__['sead_tables'] = load_sead_data(
-    #     "",
-    #     pd.read_json('tests/test_data/sead_tables.json'),
-    #     ["table_name"],
-    # )
-    # instance.__dict__['sead_columns'] = load_sead_data(
-    #     "",
-    #     pd.read_json('tests/test_data/sead_columns.json'),
-    #     ["table_name", "column_name"],
-    #     ["table_name", "position"],
-    # )
-
-    # return instance
-
+def schema(cfg: ConfigLike) -> Iterator[SeadSchema]:
+    # FIXME: We need to mock this! Loading live metadata makes tests fragile.
+    # The SchemaService can be mocked using CSV files in test_data.
+    service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
+    schema: SeadSchema = service.load()
+    yield schema
 
 @pytest.fixture(scope="session")
-def submission(metadata: Metadata, cfg: Config) -> Iterator[Submission]:
-    yield Submission.load(metadata=metadata, source=cfg.get("test:reduced_excel_filename"))
+def submission(schema: SeadSchema, cfg: Config) -> Iterator[Submission]:
+    yield Submission.load(schema=schema, source=cfg.get("test:reduced_excel_filename"))

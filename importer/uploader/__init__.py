@@ -18,11 +18,27 @@ class BaseUploader(abc.ABC):
     def extract(self, connection: Connection, submission_id: int) -> None:
         pass
 
+class NullUploader(BaseUploader):
+    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("No uploader specified")
 
+    def extract(self, connection: Connection, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("No uploader specified")
+    
+class UnknownUploader(BaseUploader):
+
+    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("Invalid uploader specified")
+    
+    def extract(self, connection: Connection, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("Invalid uploader specified")
+    
 class UploaderRegistry(Registry):
     items: dict = {}
 
-
+    def get(self, key: str, default: Any = None) -> Any:
+        return self.items.get(key, UnknownUploader)
+    
 Uploaders: UploaderRegistry = UploaderRegistry()  # pylint: disable=invalid-name
 
 

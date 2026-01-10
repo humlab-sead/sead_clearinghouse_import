@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from importer.configuration.config import Config
-from importer.metadata import Metadata
+from importer.metadata import SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.submission import Submission
 
@@ -58,20 +58,20 @@ class TestImportService:
             }
         )
 
-        metadata: Metadata = Metadata(opts.db_uri())
+        schema_service: SchemaService = SchemaService(opts.db_uri())
+        schema: SeadSchema = schema_service.load()
+        submission: Submission = Submission.load(schema=schema, source=opts.filename)
 
-        submission: Submission = Submission.load(metadata=metadata, source=opts.filename)
-
-        service: ImportService = ImportService(metadata=metadata, opts=opts)
+        service: ImportService = ImportService(schema=schema, opts=opts)
         service.process(submission=submission)
         assert len(service.specification.errors) == 0
         assert filecmp.cmp(target_filename, expected_filename, shallow=False)
 
 
-def load_or_cache_submission(opts, metadata) -> Submission:
+def load_or_cache_submission(opts, schema: SeadSchema) -> Submission:
     pickled_filename: str = f"{opts.basename}.pkl"
     if not os.path.isfile(pickled_filename):
-        submission: Submission = Submission.load(metadata=metadata, source=opts.filename)
+        submission: Submission = Submission.load(schema=schema, source=opts.filename)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)
     else:

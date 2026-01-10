@@ -9,7 +9,7 @@ from loguru import logger
 
 from importer.configuration import ConfigValue
 
-from .metadata import Column, Metadata, SeadSchema, Table
+from .metadata import Column, SeadSchema, Table
 from .submission import Submission
 from .utility import Registry, log_decorator
 
@@ -122,7 +122,7 @@ class SubmissionSpecification(SpecificationBase):
 
     @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked", level="DEBUG")
     def is_satisfied_by(
-        self, submission: Submission, *, ignore_columns: list[str], **kwargs
+        self, submission: Submission, **kwargs
     ) -> bool:  # pylint: disable=unused-argument
         """
         Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
@@ -135,7 +135,7 @@ class SubmissionSpecification(SpecificationBase):
             bool: True if all the specifications are satisfied, False otherwise.
         """
         self.clear()
-        ignore_columns = ignore_columns or ConfigValue("options:ignore_columns").resolve() or []
+        ignore_columns = self.ignore_columns or ConfigValue("options:ignore_columns").resolve() or []
         for cls in SpecificationRegistry.items.values():
             specification: SpecificationBase = cls(self.schema, ignore_columns=self.ignore_columns)
             for table_name in submission.data_tables.keys():
@@ -304,7 +304,7 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
                 return not self.has_errors()
 
         # Only check new rows (otherwise it's just a system id to public id mapping)
-        pk_name: str = submission.metadata.get_table(table_name).pk_name
+        pk_name: str = submission.schema.get_table(table_name).pk_name
         is_new_rows: pd.Series = data_table[pk_name].isnull()
 
         for column in self.get_columns(table_name):

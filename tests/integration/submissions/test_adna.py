@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from importer.configuration.config import Config
-from importer.metadata import Metadata
+from importer.metadata import SeadSchema
 from importer.process import ImportService, Options
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission
@@ -23,8 +23,8 @@ class TestAdnaSubmission:
     def adna(self, cfg: Config) -> Iterator[Submission]:
         uri: str = create_db_uri(**cfg.get("options:database"))
         source: str = cfg.get("test:adna:source:filename")
-        metadata: Metadata = Metadata(uri)
-        submission: Submission = Submission.load(metadata=metadata, source=source)
+        metadata: SeadSchema = SeadSchema(uri)
+        submission: Submission = Submission.load(schema=metadata, source=source)
         return submission
 
     def test_to_lookups_sql(self, adna: Submission):
@@ -47,20 +47,20 @@ class TestAdnaSubmission:
         assert all(len(df) > 0 for df in adna.data_tables.values())
 
         # Verify that no table in the submission is keyed by excel sheet name for aliased tables
-        assert all(n.excel_sheet not in adna.data_tables for n in adna.metadata.sead_schema.aliased_tables)
+        assert all(n.excel_sheet not in adna.data_tables for n in adna.schema.sead_schema.aliased_tables)
 
         with pd.ExcelFile(source) as reader:
             # Verify that all excel sheet names are in the submission data tables
             excel_sheet_names: set[str] = set(reader.sheet_names)
             excel_table_names: set[str] = {
-                n for n, t in adna.metadata.sead_schema.items() if t.excel_sheet in excel_sheet_names
+                n for n, t in adna.schema.sead_schema.items() if t.excel_sheet in excel_sheet_names
             }
 
             assert all(table_name in adna.data_tables for table_name in excel_table_names)
 
     def test_adna_tables_specifications(self, adna: Submission, cfg: Config):
         specification: SubmissionSpecification = SubmissionSpecification(
-            metadata=adna.metadata, ignore_columns=cfg.get("options:ignore_columns"), raise_errors=False
+            schema=adna.schema, ignore_columns=cfg.get("options:ignore_columns"), raise_errors=False
         )
         specification.is_satisfied_by(adna)
         assert specification.messages.errors == []
@@ -79,7 +79,7 @@ class TestAdnaSubmission:
         if os.path.isfile(opts.target):
             os.remove(opts.target)
 
-        service: ImportService = ImportService(metadata=adna.metadata, opts=opts)
+        service: ImportService = ImportService(metadata=adna.schema, opts=opts)
 
         if os.path.isfile(opts.target):
             os.remove(opts.target)
@@ -116,7 +116,7 @@ class TestAdnaSubmission:
         if os.path.isfile(opts.target):
             os.remove(opts.target)
 
-        service: ImportService = ImportService(metadata=adna.metadata, opts=opts)
+        service: ImportService = ImportService(metadata=adna.schema, opts=opts)
 
         service.process(submission=adna)
 
@@ -131,6 +131,6 @@ class TestAdnaSubmission:
 
         assert "TblContacts" in exported_java_classes
 
-        expected_java_classes: set[str] = {adna.metadata[t].java_class for t in adna.data_table_names}
+        expected_java_classes: set[str] = {adna.schema[t].java_class for t in adna.data_table_names}
 
         assert all(t in exported_java_classes for t in expected_java_classes)

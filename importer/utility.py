@@ -260,7 +260,9 @@ def upload_dataframe_to_postgres(df: pd.DataFrame, table_name: str, db_uri: str)
     df.to_sql(table_name, engine, schema="public", if_exists="fail", index=False)
 
 
-def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str | None = None, dtype: Any = None) -> pd.DataFrame:
+def load_dataframe_from_postgres(
+    sql: str, db_uri: str, index_col: str | None = None, dtype: Any = None
+) -> pd.DataFrame:
     """
     Loads a pandas DataFrame from a PostgreSQL database.
 
@@ -273,30 +275,30 @@ def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str | None = 
     return pd.read_sql_query(sql, con=engine, index_col=index_col, dtype=dtype)
 
 
-def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortby: list[str] = None) -> pd.DataFrame:
-    """Returns a dataframe of tables from SEAD with attributes."""
-    index = index if isinstance(index, list) else [index]
-    sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
-    data: pd.DataFrame = (
-        (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
-        .set_index(index, drop=False)
-        .rename_axis([f"index_{x}" for x in index])
-        .sort_values(by=sortby if sortby else index)
-    )
-    return data
+# def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None) -> pd.DataFrame:
+#     """Returns a dataframe of tables from SEAD with attributes."""
+#     index = index if isinstance(index, list) else [index]
+#     sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
+#     data: pd.DataFrame = (
+#         (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
+#         .set_index(index, drop=False)
+#         .rename_axis([f"index_{x}" for x in index])
+#         .sort_values(by=sortby if sortby else index)
+#     )
+#     return data
 
 
-def load_sead_columns(db_uri: str, ignore_columns: list[str] = None) -> pd.DataFrame:
-    """Returns a dataframe of table columns from SEAD with attributes."""
-    sql: str = "select * from clearing_house.clearinghouse_import_columns"
-    data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
-    if ignore_columns:
-        columns_to_ignore: list[str] = [
-            c for c in data["column_name"].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
-        ]
-        data = data[~data["column_name"].isin(columns_to_ignore)]
+# def load_sead_columns(db_uri: str, ignore_columns: list[str] | None = None) -> pd.DataFrame:
+#     """Returns a dataframe of table columns from SEAD with attributes."""
+#     sql: str = "select * from clearing_house.clearinghouse_import_columns"
+#     data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
+#     if ignore_columns:
+#         columns_to_ignore: list[str] = [
+#             c for c in data["column_name"].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
+#         ]
+#         data = data[~data["column_name"].isin(columns_to_ignore)]
 
-    return data
+#     return data
 
 
 def flatten(lst: list[Any]) -> list[Any]:
@@ -510,7 +512,7 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
         for table_name in submission.data_table_names:
             excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith("(")), None)
             if excel_sql_columns:
-                pk_name: str = submission.metadata[table_name].pk_name
+                pk_name: str = submission.schema[table_name].pk_name
                 data = (
                     submission.data_tables[table_name][excel_sql_columns]
                     .str.strip()

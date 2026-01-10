@@ -8,7 +8,7 @@ import dotenv
 from loguru import logger
 
 from importer.configuration import ConfigStore, ConfigValue
-from importer.metadata import Metadata
+from importer.metadata import SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
 from importer.submission import Submission
@@ -80,7 +80,7 @@ def import_file(
     tidy_xml: bool,
     transfer_format: str,
     dump_to_csv: bool,
-    options_filename: str = None,
+    options_filename: str | None = None,
 ) -> None:
     """
     Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
@@ -97,7 +97,7 @@ def import_file(
 
     setup_configuration(ctx, dict(locals()))
 
-    return workflow(opts=Options(**ConfigValue("options").resolve()))
+    return workflow(opts=Options(**ConfigValue("options").resolve() or {}))
 
 
 def setup_configuration(ctx, opts: dict[str, Any]) -> None:
@@ -107,7 +107,7 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
     log_folder: str = opts.pop("log_folder")
 
     if not log_folder and opts.get("filename"):
-        log_folder = join(dirname(abspath(opts.get("filename"))), "logs")
+        log_folder = join(dirname(abspath(opts.get("filename") )), "logs")
 
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
@@ -118,11 +118,11 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
     )
     opts["database"] = {k: opts.pop(k) for k in ["host", "dbname", "user", "port"]}
 
-    ConfigStore.configure_context(source=config_filename, env_filename=".env", env_prefix="SEAD_IMPORT")
+    ConfigStore.get_instance().configure_context(source=config_filename, env_filename=".env", env_prefix="SEAD_IMPORT")
 
-    ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
+    ConfigStore.get_instance().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
 
-    configure_logging(ConfigValue("logging").resolve() | ({} if not log_folder else {"folder": log_folder}))
+    configure_logging(ConfigValue("logging").resolve()  or {} | ({} if not log_folder else {"folder": log_folder}))
 
 
 def _get_specified_cli_opts(ctx) -> set[str]:
@@ -139,8 +139,9 @@ def workflow(opts: Options) -> None:
     Returns:
         None: This function does not return any value.
     """
-    metadata: Metadata = Metadata(opts.db_uri())
-
+    schema_service: SchemaService = SchemaService(opts.db_uri())
+    schema: SeadSchema = schema_service.load()
+    
     if opts.filename.isnumeric():
         opts.submission_id = int(opts.filename)
         opts.filename = None
@@ -160,16 +161,16 @@ def workflow(opts: Options) -> None:
                 logger.error("The --check-only option is not supported when using an existing XML file")
                 return
 
-    submission: Submission | str = (
+    submission: int | Submission | str = (
         opts.submission_id
         if opts.use_existing_submission
         else (
             opts.xml_filename
             if isinstance(opts.xml_filename, str)
-            else Submission.load(metadata=metadata, source=opts.filename)
+            else Submission.load(schema=schema, source=opts.filename)
         )
     )
-    ImportService(metadata=metadata, opts=opts).process(submission=submission)
+    ImportService(schema=schema, opts=opts).process(submission=submission)
 
 
 # pylint: disable=line-too-long

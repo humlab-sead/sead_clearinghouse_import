@@ -10,7 +10,7 @@ from importer.configuration import ConfigValue
 
 from . import utility
 from .dispatchers import IDispatcher, to_xml
-from .metadata import Metadata
+from .metadata import SeadSchema
 from .repository import SubmissionRepository
 from .specification import SpecificationError, SubmissionSpecification
 from .submission import Submission
@@ -36,9 +36,9 @@ class Options:
     explode: bool = False
     timestamp: bool = True
     tidy_xml: bool = False
-    ignore_columns: list[str] | None = None
-    basename: str | None = field(init=False, default=None)
-    target: str | None = field(init=False, default=None)
+    ignore_columns: list[str] | None = None  # type: ignore[assignment]
+    basename: str | None = field(init=False, default=None)  # type: ignore[assignment]
+    target: str | None = field(init=False, default=None)  # type: ignore[assignment]
 
     output_folder: str = field(default="data/output")
     database: dict[str, str] = field(default_factory=dict)
@@ -77,7 +77,7 @@ class ImportService:
         self,
         *,
         opts: Options,
-        metadata: Metadata | None = None,
+        schema: SeadSchema,
         repository: SubmissionRepository | None = None,
         dispatcher_cls: Type[IDispatcher] | None = None,
     ) -> None:
@@ -85,10 +85,10 @@ class ImportService:
         self.repository: SubmissionRepository = repository or SubmissionRepository(
             opts.database, uploader=opts.transfer_format
         )
-        self.metadata: Metadata = metadata or Metadata(opts.db_uri())
-        self.dispatcher_cls: Type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
+        self.schema: SeadSchema = schema
+        self.dispatcher_cls: type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
         self.specification: SubmissionSpecification = SubmissionSpecification(
-            metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
+            schema=self.schema, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
 
     @utility.log_decorator(
@@ -101,7 +101,7 @@ class ImportService:
         """
 
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
-            self.dispatcher_cls(outstream).dispatch(self.metadata, submission, self.opts.table_names)
+            self.dispatcher_cls(outstream).dispatch(self.schema, submission, self.opts.table_names)
 
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)

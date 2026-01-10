@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from importer.configuration.config import Config
-from importer.metadata import Metadata
+from importer.metadata import SeadSchema, SchemaService
 from importer.utility import create_db_uri
 
 # @pytest.mark.skip(reason="sandbox test")
@@ -40,20 +40,21 @@ from importer.utility import create_db_uri
 @pytest.mark.skipif(isfile("tests/test_data/sead_columns.json"), reason="Used for generating test data only")
 def test_load_metadata_from_postgres(cfg: Config):
     """Use this test to store SEAD metadata in json files for regression testing"""
-    metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
+    service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
+    schema: SeadSchema = service.load()
     test_tables: list[str] = cfg.get("test:tables")
     with open("tests/test_data/sead_tables.json", "w", encoding="utf-8") as outfile:
-        data: dict = metadata.sead_tables[metadata.sead_tables.table_name.isin(test_tables)].to_dict("records")
+        data: list[dict] = schema.source_tables[schema.source_tables.table_name.isin(test_tables)].to_dict("records")
         json.dump(data, outfile, indent=4)
 
     with open("tests/test_data/sead_columns.json", "w", encoding="utf-8") as outfile:
-        data: dict = metadata.sead_columns.fillna(0)[metadata.sead_columns.table_name.isin(test_tables)].to_dict(
+        data: list[dict] = schema.source_columns.fillna(0)[schema.source_columns.table_name.isin(test_tables)].to_dict(
             "records"
         )
         json.dump(data, outfile, indent=4)
 
-    assert isinstance(metadata, Metadata)
-    assert isinstance(metadata.sead_tables, pd.DataFrame)
-    assert isinstance(metadata.sead_columns, pd.DataFrame)
-    assert isinstance(metadata.sead_tables, pd.DataFrame)
-    assert isinstance(metadata.sead_schema, dict)
+    assert isinstance(schema, SeadSchema)
+    assert isinstance(schema.source_tables, pd.DataFrame)
+    assert isinstance(schema.source_columns, pd.DataFrame)
+    assert isinstance(schema.source_tables, pd.DataFrame)
+    assert isinstance(schema._tables, dict)

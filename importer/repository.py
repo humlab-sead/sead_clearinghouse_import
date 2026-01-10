@@ -4,6 +4,8 @@ import psycopg
 from loguru import logger
 from psycopg import Connection
 
+from importer.uploader import NullUploader
+
 from .uploader.xml_uploader import BaseUploader, Uploaders
 from .utility import log_decorator
 
@@ -23,10 +25,14 @@ class NullConnection:
 
 
 class SubmissionRepository:
-    def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader = None) -> None:
+    def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader | None = None) -> None:
         self.db_options: dict[str, str] = db_options
-        self.uploader: BaseUploader | None = (
-            uploader if uploader is BaseUploader else Uploaders.get(uploader)() if uploader else None
+        if isinstance(uploader, str):
+            logger.info(f"Using uploader: {uploader}")
+            uploader_instance: BaseUploader = Uploaders.get(uploader, NullUploader())()
+
+        self.uploader: BaseUploader = (
+            uploader if isinstance(uploader, BaseUploader) else Uploaders.get(uploader, UnknownUploader())() if uploader else UnknownUploader()
         )
         self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300

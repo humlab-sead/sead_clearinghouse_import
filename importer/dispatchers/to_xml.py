@@ -7,7 +7,7 @@ import pandas as pd
 from jinja2 import Environment, select_autoescape
 from loguru import logger
 
-from importer.metadata import Column, Metadata, Table
+from importer.metadata import Column, SeadSchema, Table
 from importer.submission import Submission
 
 from . import IDispatcher
@@ -60,7 +60,7 @@ class XmlProcessor(IDispatcher):
         self.emit(f"</{tag}>", indent)
 
     def process_tables(
-        self, metadata: Metadata, submission: Submission, table_names: list[str], max_rows: int = 0
+        self, schema: SeadSchema, submission: Submission, table_names: list[str], max_rows: int = 0
     ) -> None:
         """
         Import assumes that all FK references points to a local "system_id" in referenced table
@@ -71,13 +71,13 @@ class XmlProcessor(IDispatcher):
         for table_name in sorted(table_names):
             logger.debug(f"Processing {table_name}...")
 
-            if table_name not in metadata:
+            if table_name not in schema:
                 raise ValueError(f"Table {table_name}: not found in metadata")
 
-            table: Table = metadata[table_name]
+            table: Table = schema[table_name]
             data: pd.DataFrame = submission.data_tables[table_name]
 
-            referenced_keyset: set[str] = submission.get_referenced_keyset(metadata, table_name)
+            referenced_keyset: set[str] = submission.get_referenced_keyset(schema, table_name)
             table_namespace: str = f"com.sead.database.{table.java_class}"
 
             if data is None:
@@ -104,7 +104,7 @@ class XmlProcessor(IDispatcher):
                     if system_id is None:
                         system_id = public_id
 
-                    referenced_keyset.discard(system_id)
+                    referenced_keyset.discard(system_id)  # type: ignore[arg-type]
 
                     assert not (public_id is None and system_id is None)
 
@@ -128,7 +128,7 @@ class XmlProcessor(IDispatcher):
                         if not column_spec.is_fk:
                             self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
                         else:
-                            fk_table_spec: str = metadata[column_spec.class_name]
+                            fk_table_spec: Table = schema[column_spec.class_name]
                             fk_data_table: pd.DataFrame = submission.data_tables.get(fk_table_spec.table_name)
                             self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
@@ -218,14 +218,14 @@ class XmlProcessor(IDispatcher):
 
     def dispatch(
         self,
-        metadata: Metadata,
+        schema: SeadSchema,
         submission: Submission,
-        table_names: list[str] = None,
-        extra_names: list[str] = None,
+        table_names: list[str] | None = None,
+        extra_names: list[str] | None = None,
     ) -> None:
         tables_to_process: list[str] = list(submission.data_tables.keys()) if table_names is None else table_names
 
         self.emit('<?xml version="1.0" ?>')
         self.emit("<sead-data-upload>")
-        self.process_tables(metadata, submission, tables_to_process)
+        self.process_tables(schema, submission, tables_to_process)
         self.emit("</sead-data-upload>")

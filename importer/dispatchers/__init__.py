@@ -1,6 +1,6 @@
 import abc
 
-from ..metadata import Metadata
+from ..metadata import SeadSchema
 from ..submission import Submission
 
 
@@ -8,9 +8,9 @@ class IDispatcher(abc.ABC):
 
     def dispatch(
         self,
-        metadata: Metadata,
+        schema: SeadSchema,
         submission: Submission,
-        table_names: list[str] = None,
-        extra_names: list[str] = None,
+        table_names: list[str] | None = None,
+        extra_names: list[str] | None = None,
     ):
         raise NotImplementedError
