@@ -29,20 +29,20 @@ class Options:
     submission_id: int
     submission_name: str
     data_types: str
-    xml_filename: str = None
-    table_names: str = None
+    xml_filename: str | None = None
+    table_names: str | None = None
     check_only: bool = False
     register: bool = False
     explode: bool = False
     timestamp: bool = True
     tidy_xml: bool = False
-    ignore_columns: list[str] = None
-    basename: str = field(init=False, default=None)
-    target: str = field(init=False, default=None)
+    ignore_columns: list[str] | None = None
+    basename: str | None = field(init=False, default=None)
+    target: str | None = field(init=False, default=None)
 
     output_folder: str = field(default="data/output")
     database: dict[str, str] = field(default_factory=dict)
-    transfer_format: str = field(default="xml")
+    transfer_format: str | None = field(default="xml")
     dump_to_csv: bool = field(default=False)
 
     def __post_init__(self) -> None:
@@ -77,9 +77,9 @@ class ImportService:
         self,
         *,
         opts: Options,
-        metadata: Metadata = None,
-        repository: SubmissionRepository = None,
-        dispatcher_cls: Type[IDispatcher] = None,
+        metadata: Metadata | None = None,
+        repository: SubmissionRepository | None = None,
+        dispatcher_cls: Type[IDispatcher] | None = None,
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(

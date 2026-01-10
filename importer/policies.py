@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 
 
 class PolicyRegistry(Registry):
-    items: dict[str, PolicyBase] = {}
+    items: dict[str, type[PolicyBase]] = {}
 
-    def get_sorted_items(self) -> list[PolicyBase]:
+    def get_sorted_items(self) -> list[type[PolicyBase]]:
         return sorted(self.items.values(), key=lambda x: x(None, None).get_priority())
 
 
@@ -43,7 +43,7 @@ class PolicyBase:
         return ConfigValue(f"policies.{self.get_id()}.priority").resolve() or 0
 
     def is_disabled(self) -> bool:
-        return ConfigValue(f"policies.{self.get_id()}.disabled").resolve()
+        return ConfigValue(f"policies.{self.get_id()}.disabled").resolve() or False
 
     def apply(self) -> None:
         if self.is_disabled():
@@ -59,7 +59,7 @@ class PolicyBase:
     def update(self) -> None:
         raise NotImplementedError("Policy must implement _apply method")
 
-    def log(self, table: str, message: str = None) -> None:
+    def log(self, table: str, message: str | None = None) -> None:
         self.logs[table] = message or self.get_id()
 
 

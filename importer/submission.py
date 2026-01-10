@@ -24,11 +24,11 @@ class Submission:
         self.data_tables: dict[str, pd.DataFrame] = data_tables
         self.metadata: Metadata = metadata
 
-    def __getitem__(self, key: str) -> pd.DataFrame:
+    def __getitem__(self, key: str) -> pd.DataFrame | None:
         if key in self.data_tables:
             return self.data_tables[key]
         if key in self.metadata:
-            excel_sheet: str = self.metadata[key].excel_sheet
+            excel_sheet: str = self.metadata.get_table(key).excel_sheet
             if excel_sheet in self.data_tables:
                 return self.data_tables[excel_sheet]
         return None
@@ -37,20 +37,20 @@ class Submission:
         if key in self.data_tables:
             return True
         if key in self.metadata:
-            return self.metadata[key].excel_sheet in self.data_tables
+            return self.metadata.get_table(key).excel_sheet in self.data_tables
         return False
 
     def has_system_id(self, table_name: str) -> bool:
         return table_name in self.data_tables and "system_id" in self[table_name].columns
 
     def has_pk_id(self, table_name: str) -> bool:
-        return self.metadata[table_name].pk_name in self[table_name].columns
+        return self.metadata.get_table(table_name).pk_name in self[table_name].columns
 
     def is_lookup(self, table_name: str) -> bool:
-        return self.metadata[table_name].is_lookup
+        return self.metadata.get_table(table_name).is_lookup
 
     def has_new_rows(self, table_name: str) -> bool:
-        pk_name: str = self.metadata[table_name].pk_name
+        pk_name: str = self.metadata.get_table(table_name).pk_name
         if not self.has_pk_id(table_name):
             raise ValueError(f"Table {table_name}: PK column {pk_name} not found in submission")
         return any(self[table_name][pk_name].isnull())
@@ -63,7 +63,7 @@ class Submission:
     def get_referenced_keyset(self, metadata: Metadata, table_name: str) -> set[int]:
         """Returns all unique system ids in `table_name` that are referenced by any foreign key in any other table.
         NOTE: This function assumes PK and FK names are the same."""
-        pk_name: str = metadata[table_name].pk_name
+        pk_name: str = metadata.get_table(table_name).pk_name
         if pk_name is None:
             return []
 
