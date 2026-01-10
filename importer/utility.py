@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from .submission import Submission
 
 
-def configure_logging(opts: dict[str, str]) -> None:
+def configure_logging(opts: dict[str, dict]) -> None:
 
     logger.remove()
     logger.add(sys.stdout, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
@@ -111,7 +111,7 @@ def recursive_filter_dict(
     }
 
 
-def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
+def dget(data: dict, *path: str, default: Any = None) -> Any:
     if path is None or not data:
         return default
 
@@ -128,7 +128,7 @@ def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
     return d or default
 
 
-def dotexists(data: dict, *paths: list[str]) -> bool:
+def dotexists(data: dict, *paths: str) -> bool:
     for path in paths:
         if dotget(data, path, default="@@") != "@@":
             return True
@@ -153,9 +153,9 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
     if path is x:y:y then element is search using borh x.y.y or x_y_y."""
 
     for key in dotexpand(path):
-        d: dict = data
+        d: dict | None = data
         for attr in key.split("."):
-            d: dict = d.get(attr) if isinstance(d, dict) else None
+            d = d.get(attr) if isinstance(d, dict) else None
             if d is None:
                 break
         if d is not None:
@@ -260,7 +260,7 @@ def upload_dataframe_to_postgres(df: pd.DataFrame, table_name: str, db_uri: str)
     df.to_sql(table_name, engine, schema="public", if_exists="fail", index=False)
 
 
-def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str = None, dtype: Any = None) -> pd.DataFrame:
+def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str | None = None, dtype: Any = None) -> pd.DataFrame:
     """
     Loads a pandas DataFrame from a PostgreSQL database.
 
@@ -391,7 +391,7 @@ def replace_extension(filename: str, extension: str) -> str:
     return f"{base}{'' if extension.startswith('.') else '.'}{extension}"
 
 
-def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
+def path_add_suffix(path: str, suffix: str, new_extension: str | None = None) -> str:
     name, extension = splitext(path)
     return f"{name}{suffix}{extension if new_extension is None else new_extension}"
 
@@ -446,7 +446,7 @@ def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> d
     return data
 
 
-def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str] = None) -> dict:
+def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str] | None = None) -> dict:
     """Update dict `data` with values found in `yaml_file`."""
     if yaml_file is None:
         return data
