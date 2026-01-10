@@ -3,7 +3,6 @@ import pytest
 
 from importer.configuration.config import Config
 from importer.metadata import SchemaService, SeadSchema
-from importer.utility import create_db_uri
 
 # pylint: disable=redefined-outer-name,no-member
 

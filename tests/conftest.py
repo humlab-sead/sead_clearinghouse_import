@@ -4,7 +4,6 @@ import pytest
 from dotenv import load_dotenv
 
 from importer.configuration import ConfigStore
-from importer.configuration.config import Config
 from importer.configuration.interface import ConfigLike
 from importer.metadata import SchemaService, SeadSchema
 from importer.submission import Submission

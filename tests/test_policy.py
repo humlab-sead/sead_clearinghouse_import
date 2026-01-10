@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
-from importer.metadata import SeadSchema, Table
 
+from importer.metadata import SeadSchema, Table
 from importer.policies import (
     AddIdentityMappingSystemIdToPublicIdPolicy,
     AddPrimaryKeyColumnIfMissingPolicy,

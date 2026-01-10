@@ -3,17 +3,13 @@ from fnmatch import fnmatch
 from functools import cached_property
 from typing import Any, Iterator
 
-from pandas._typing import Dtype
+# pylint: disable=no-member
 import pandas as pd
+from pandas._typing import Dtype
 
 from importer.configuration import ConfigValue
 
 from .utility import camel_case_name, load_dataframe_from_postgres
-
-# pylint: disable=no-member
-
-import pandas as pd
-import numpy as np
 
 DTYPE_MAPPING: dict[str, Dtype] = {
     # identifiers

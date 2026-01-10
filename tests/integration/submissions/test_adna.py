@@ -1,13 +1,12 @@
 import os
 import xml.etree.ElementTree as ET
-from typing import Iterator
 
 import pandas as pd
 import pytest
 import xmltodict
 
 from importer.configuration.config import Config
-from importer.metadata import SchemaService, SchemaService, SeadSchema
+from importer.metadata import SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission

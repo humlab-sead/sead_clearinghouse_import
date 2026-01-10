@@ -1,8 +1,5 @@
 import filecmp
-import os
-import pickle
 
-import pandas as pd
 import pytest
 
 from importer.configuration.config import Config

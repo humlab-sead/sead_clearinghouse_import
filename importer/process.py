@@ -144,7 +144,7 @@ class ImportService:
             if not opts.use_existing_submission:
 
                 assert not isinstance(submission, int), "Submission id provided but use_existing_submission is False"
-                
+
                 opts.xml_filename = (
                     submission
                     if isinstance(submission, str)
@@ -162,7 +162,7 @@ class ImportService:
                     self.repository.extract_to_staging_tables(opts.submission_id)
 
             if opts.explode:
-                
+
                 assert opts.submission_id is not None, "Submission id is required for exploding submission"
 
                 self.repository.explode_to_public_tables(
