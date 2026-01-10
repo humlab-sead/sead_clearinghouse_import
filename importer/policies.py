@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pandas as pd
 from loguru import logger
-
+from pandas._typing import Dtype
 from .configuration import ConfigValue
 from .metadata import SchemaService, SeadSchema, Table
 from .utility import Registry, pascal_to_snake_case, snake_to_pascal_case
@@ -260,11 +260,11 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
 
     def fix_dtypes(self, data_table: pd.DataFrame) -> pd.DataFrame:
         """Fix data types of the column in the data table."""
-        sead_column_dtypes: dict[str, object] = self.service.sead_column_dtypes
+        sead_column_dtypes: dict[str, Dtype] = self.schema.sead_column_dtypes
         for column_name in data_table.columns:
             if data_table[column_name].isnull().all():
                 if sead_column_dtypes.get(column_name, None):
-                    data_table[column_name] = data_table[column_name].astype(sead_column_dtypes[column_name])
+                    data_table[column_name] = data_table[column_name].astype(sead_column_dtypes[column_name]) # type: ignore
         return data_table
 
     def update(self) -> None:

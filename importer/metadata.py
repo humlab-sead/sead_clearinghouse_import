@@ -3,7 +3,7 @@ from fnmatch import fnmatch
 from functools import cached_property
 from typing import Any, Iterator
 
-import numpy as np
+from pandas._typing import Dtype
 import pandas as pd
 
 from importer.configuration import ConfigValue
@@ -15,7 +15,7 @@ from .utility import camel_case_name, load_dataframe_from_postgres
 import pandas as pd
 import numpy as np
 
-DTYPE_MAPPING: dict[str, object] = {
+DTYPE_MAPPING: dict[str, Dtype] = {
     # identifiers
     "uuid": "string",
     # integers
@@ -216,6 +216,13 @@ class SeadSchema:
     def is_pk(self, table_name: str, column_name: str) -> bool:
         return self.get_column(table_name, column_name).is_pk
 
+    @cached_property
+    def sead_column_dtypes(self) -> dict[str, Dtype]:
+        """Returns a dict of table to datatype mappings."""
+        column_types: dict[str, str] = self.source_columns.set_index("column_name")["data_type"].to_dict()
+        dtypes: dict[str, Dtype] = {k: DTYPE_MAPPING[v] for k, v in column_types.items() if v in DTYPE_MAPPING}
+        return dtypes
+
 
 class SeadSchemaFactory:
 
@@ -271,6 +278,7 @@ class SchemaService:
         sql: str = """
             select  table_name,
                     column_name,
+                    data_type,
                     xml_column_name,
                     position,
                     numeric_precision,
@@ -292,18 +300,6 @@ class SchemaService:
             data = data[~data["column_name"].isin(columns_to_ignore)]
 
         return data
-
-    @cached_property
-    def sead_column_dtypes(self) -> dict[str, object]:
-        """Returns a dict of table to datatype mappings."""
-        sql: str = """
-            select distinct column_name, data_type
-            from sead_utility.table_columns where table_schema = 'public'
-        """
-        column_types: dict[str, str] = self._load_sead_data(sql, index=["column_name"]).to_dict()["data_type"]
-
-        dtypes: dict[str, object] = {k: DTYPE_MAPPING[v] for k, v in column_types.items() if v in DTYPE_MAPPING}
-        return dtypes
 
     def get_primary_key_values(self, table_name: str, pk_name: str) -> set[int]:
         """Returns all unique primary keys for `table_name` in SEAD."""
@@ -334,6 +330,7 @@ class SchemaService:
         sead_columns: pd.DataFrame = self.get_sead_columns()
         return SeadSchemaFactory().create(sead_tables, sead_columns)
 
+
 class MockSchemaService(SchemaService):
     """Mock SchemaService for testing purposes."""
 
@@ -341,10 +338,10 @@ class MockSchemaService(SchemaService):
         super().__init__(db_uri="")
         self._sead_tables: pd.DataFrame = sead_tables
         self._sead_columns: pd.DataFrame = sead_columns
+        self.ignore_columns = ["date_updated", "*_uuid", "(*"]
 
     def get_sead_tables(self) -> pd.DataFrame:
         return self._sead_tables
 
     def get_sead_columns(self) -> pd.DataFrame:
         return self._sead_columns
-    

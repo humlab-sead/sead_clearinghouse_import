@@ -161,7 +161,7 @@ def test_recursive_filter_dict_empty_filter_keys():
 def test_recursive_filter_dict_non_dict_input():
     d = "not a dict"
     filter_keys = {"a", "b"}
-    result = utility.recursive_filter_dict(d, filter_keys, "keep")
+    result = utility.recursive_filter_dict(d, filter_keys, "keep")  # type: ignore
     assert result == d
 
 
@@ -177,26 +177,3 @@ def test_pascal_to_snake_case():
     assert utility.pascal_to_snake_case("PascalCaseWithNumbers123") == "pascal_case_with_numbers123"
     assert utility.pascal_to_snake_case("PascalCaseWith123Numbers") == "pascal_case_with123_numbers"
 
-
-def test_load_sead_columns():
-    db_uri = "postgresql+psycopg://user@localhost:5432/dbname"
-    mock_data = pd.DataFrame(
-        {"table_name": ["table1", "table1", "table2"], "column_name": ["col1", "col2", "col3"], "position": [1, 2, 1]}
-    )
-
-    with patch("importer.utility.load_sead_data", return_value=mock_data):
-        result = utility.load_sead_columns(db_uri)
-        assert result.equals(mock_data)
-
-    # def test_load_sead_columns_with_ignore_columns():
-    ignore_columns: list[str] = ["col2"]
-    with patch("importer.utility.load_sead_data", return_value=mock_data):
-        result = utility.load_sead_columns(db_uri, ignore_columns)
-        expected_data = mock_data[mock_data["column_name"] != "col2"]
-        assert result.equals(expected_data)
-
-    # def test_load_sead_columns_with_empty_ignore_columns():
-    ignore_columns = []
-    with patch("importer.utility.load_sead_data", return_value=mock_data):
-        result = utility.load_sead_columns(db_uri, ignore_columns)
-        assert result.equals(mock_data)
