@@ -57,24 +57,14 @@ class TestImportService:
                 "tidy_xml": False,
             }
         )
+        assert opts.filename is not None
 
         schema_service: SchemaService = SchemaService(opts.db_uri())
         schema: SeadSchema = schema_service.load()
-        submission: Submission = Submission.load(schema=schema, source=opts.filename)
+        submission: Submission = Submission.load(schema=schema, source=opts.filename, service=schema_service)
 
         service: ImportService = ImportService(schema=schema, opts=opts)
         service.process(submission=submission)
         assert len(service.specification.errors) == 0
         assert filecmp.cmp(target_filename, expected_filename, shallow=False)
 
-
-def load_or_cache_submission(opts, schema: SeadSchema) -> Submission:
-    pickled_filename: str = f"{opts.basename}.pkl"
-    if not os.path.isfile(pickled_filename):
-        submission: Submission = Submission.load(schema=schema, source=opts.filename)
-        with open(pickled_filename, "wb") as fp:
-            pickle.dump(submission, fp)
-    else:
-        with open(pickled_filename, "rb") as fp:
-            submission: dict[str, pd.DataFrame] = pickle.load(fp)
-    return submission

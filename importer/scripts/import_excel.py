@@ -36,7 +36,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--port", "-p", "port", type=int, default=5432, help="Server port number.")
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
 @click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
-@click.option("--table-names", type=str, default=None, help="Only load specified tables.")
+@click.option("--table", "-t", type=str, multiple=True, default=None, help="Only load specified tables.")
 @click.option("--xml-filename", type=str, default=None, help="Name of existing XML file to use.")
 @click.option("--log-folder", type=str, default="./logs", help="Name of existing XML file to use.")
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
@@ -70,7 +70,7 @@ def import_file(
     output_folder: str,
     skip: str,
     submission_id: str,
-    table_names: str,
+    table: tuple[str, ...],
     xml_filename: str,
     check_only: bool,
     register: bool,
@@ -104,17 +104,21 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
     specified_keys: set[str] = _get_specified_cli_opts(ctx)
     config_filename: str = opts.pop("config_filename")
-    log_folder: str = opts.pop("log_folder")
+    log_folder: str = opts.pop("log_folder", "")
+    filename: str = str(opts.get("filename"))  if opts.get("filename") else ""
 
-    if not log_folder and opts.get("filename"):
-        log_folder = join(dirname(abspath(opts.get("filename") )), "logs")
+    if not log_folder and filename:
+        log_folder = join(dirname(abspath(filename)), "logs")
 
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
         sys.exit(1)
 
     opts = update_arguments_from_options_file(
-        arguments=opts, filename_key="options_filename", suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
+        arguments=opts,
+        filename_key="options_filename",
+        suffix=strip_path_and_extension(filename) if filename else "",
+        ctx=ctx,
     )
     opts["database"] = {k: opts.pop(k) for k in ["host", "dbname", "user", "port"]}
 
@@ -122,7 +126,7 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
     ConfigStore.get_instance().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
 
-    configure_logging(ConfigValue("logging").resolve()  or {} | ({} if not log_folder else {"folder": log_folder}))
+    configure_logging(ConfigValue("logging").resolve() or {} | ({} if not log_folder else {"folder": log_folder}))
 
 
 def _get_specified_cli_opts(ctx) -> set[str]:
@@ -141,12 +145,17 @@ def workflow(opts: Options) -> None:
     """
     schema_service: SchemaService = SchemaService(opts.db_uri())
     schema: SeadSchema = schema_service.load()
-    
-    if opts.filename.isnumeric():
+
+    if opts.filename and opts.filename.isnumeric():
+        """Submission id specified as filename, run workflow using existing submission in database"""
         opts.submission_id = int(opts.filename)
         opts.filename = None
 
     if not opts.use_existing_submission:
+
+        if not isinstance(opts.filename, str):
+            logger.error(" ---> no source filename specified")
+            return
 
         if opts.filename.endswith(".xml"):
             opts.xml_filename = opts.filename
@@ -161,15 +170,18 @@ def workflow(opts: Options) -> None:
                 logger.error("The --check-only option is not supported when using an existing XML file")
                 return
 
-    submission: int | Submission | str = (
-        opts.submission_id
-        if opts.use_existing_submission
-        else (
-            opts.xml_filename
-            if isinstance(opts.xml_filename, str)
-            else Submission.load(schema=schema, source=opts.filename)
-        )
-    )
+    submission: int | Submission | str
+    if opts.submission_id:
+        submission = opts.submission_id
+    elif isinstance(opts.xml_filename, str):
+        submission = opts.xml_filename
+    else:
+        if not isinstance(opts.filename, str):
+            logger.error(" ---> no source filename specified")
+            return
+
+        submission = Submission.load(schema=schema, source=opts.filename, service=schema_service)
+
     ImportService(schema=schema, opts=opts).process(submission=submission)
 
 

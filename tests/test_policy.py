@@ -2,8 +2,8 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
+from importer.metadata import SeadSchema, Table
 
-from importer.schema import schema, SeadSchema, Table
 from importer.policies import (
     AddIdentityMappingSystemIdToPublicIdPolicy,
     AddPrimaryKeyColumnIfMissingPolicy,
@@ -20,8 +20,9 @@ from importer.submission import Submission
 def test_initialization():
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
+    service = MagicMock()
 
-    policy = PolicyBase(schema=schema, submission=submission)
+    policy = PolicyBase(schema=schema, submission=submission, service=service)
 
     assert policy.schema == schema
     assert policy.submission == submission
@@ -30,8 +31,9 @@ def test_initialization():
 def test_get_policy_id():
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
+    service = MagicMock()
 
-    policy = PolicyBase(schema=schema, submission=submission)
+    policy = PolicyBase(schema=schema, submission=submission, service=service)
     assert policy.get_id() == "policy_base"
 
 

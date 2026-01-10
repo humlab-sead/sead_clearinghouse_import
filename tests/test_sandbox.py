@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 from importer.configuration.config import Config
-from importer.metadata import SeadSchema, SchemaService
+from importer.metadata import SchemaService, SeadSchema
 from importer.utility import create_db_uri
 
 # @pytest.mark.skip(reason="sandbox test")

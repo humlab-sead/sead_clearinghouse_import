@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass, field
 from fnmatch import fnmatch
 from functools import cached_property
-from typing import Any, Hashable, Iterator, Optional
+from typing import Any, Iterator
 
+import numpy as np
 import pandas as pd
 
 from importer.configuration import ConfigValue
@@ -11,21 +12,55 @@ from .utility import camel_case_name, load_dataframe_from_postgres
 
 # pylint: disable=no-member
 
-DTYPE_MAPPING: dict[str, str] = {
+import pandas as pd
+import numpy as np
+
+DTYPE_MAPPING: dict[str, object] = {
+    # identifiers
     "uuid": "string",
+
+    # integers
     "smallint": "Int16",
     "integer": "Int32",
+    "int": "Int32",
     "bigint": "Int64",
+
+    # numeric / floating
+    "real": "Float32",
+    "double precision": "Float64",
+    "numeric": "Float64",
+    "decimal": "Float64",
+
+    # boolean
     "boolean": "boolean",
+    "bool": "boolean",
+
+    # text / character
     "character varying": "string",
+    "varchar": "string",
+    "character": "string",
+    "char": "string",
     "text": "string",
-    # 'numeric': 'float64',  # Use 'object' if preserving precision with Decimal
+
+    # date / time
+    "date": "datetime64[ns]",
+    "timestamp": "datetime64[ns]",
     "timestamp without time zone": "datetime64[ns]",
     "timestamp with time zone": "datetime64[ns, UTC]",
-    "date": "datetime64[ns]",
-    "numrange": "object",
-    "int4range": "object",
+    "time": "string",  # pandas has no native time-only dtype
+
+    # json
+    "json": "object",
+    "jsonb": "object",
+
+    # binary
+    "bytea": "object",
+
+    # arrays (usually end up as Python lists)
+    "integer[]": "object",
+    "text[]": "object",
 }
+
 
 
 @dataclass
@@ -106,7 +141,7 @@ class Table:
         return sorted(c.column_name for c in self.columns.values() if c.is_nullable)
 
 
-from collections.abc import Iterator, KeysView, ValuesView, ItemsView
+from collections.abc import ItemsView, Iterator, KeysView, ValuesView
 
 
 class SeadSchema:
@@ -151,8 +186,8 @@ class SeadSchema:
         """Get a table by name, table type or alias (excel_sheet), or raise KeyError if not found."""
         if table_name in self._tables_lookup:
             return self._tables_lookup[table_name]
-        raise KeyError(f"Table {table_name} not found in schema") 
-    
+        raise KeyError(f"Table {table_name} not found in schema")
+
     def get_column(self, table_name: str, column_name: str) -> Column:
         table: Table = self.get_table(table_name)
         if column_name not in table.columns:
@@ -189,7 +224,7 @@ class SeadSchema:
     def is_pk(self, table_name: str, column_name: str) -> bool:
         return self.get_column(table_name, column_name).is_pk
 
-    
+
 class SeadSchemaFactory:
 
     def create(self, sead_tables: pd.DataFrame, sead_columns: pd.DataFrame) -> SeadSchema:
@@ -243,15 +278,16 @@ class SchemaService:
         """Returns a dataframe of table columns from SEAD with attributes."""
         return self.load_sead_columns(self.ignore_columns)
 
-    def get_sead_dtypes(self) -> dict[str, str]:
+    @cached_property
+    def sead_column_dtypes(self) -> dict[str, object]:
         """Returns a dict of table to datatype mappings."""
         sql: str = """
             select distinct column_name, data_type
             from sead_utility.table_columns where table_schema = 'public'
         """
-        sead_types: dict[str, str] = self.load_sead_data(sql, index=["column_name"]).to_dict()["data_type"]
+        column_types: dict[str, str] = self.load_sead_data(sql, index=["column_name"]).to_dict()["data_type"]
 
-        dtypes: dict[str, str] = {k: DTYPE_MAPPING[v] for k, v in sead_types.items() if v in DTYPE_MAPPING}
+        dtypes: dict[str, object] = {k: DTYPE_MAPPING[v] for k, v in column_types.items() if v in DTYPE_MAPPING}
         return dtypes
 
     # def get_primary_keys(self, table_name: str) -> set[int]:
@@ -314,4 +350,3 @@ class SchemaService:
         sead_tables: pd.DataFrame = self.get_sead_tables()
         sead_columns: pd.DataFrame = self.get_sead_columns()
         return SeadSchemaFactory().create(sead_tables, sead_columns)
-    

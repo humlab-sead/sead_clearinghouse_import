@@ -43,7 +43,7 @@ class XmlProcessor(IDispatcher):
     The format of the XML-file is conforms to clearinghouse specifications
     """
 
-    def __init__(self, outstream, level: int = logging.WARNING, ignore_columns: list[str] = None) -> None:
+    def __init__(self, outstream, level: int = logging.WARNING, ignore_columns: list[str] | None = None) -> None:
         self.outstream = outstream
         self.level: int = level
         self.ignore_columns: list[str] = ignore_columns or ["date_updated"]
@@ -52,7 +52,7 @@ class XmlProcessor(IDispatcher):
     def emit(self, data: str, indent: int = 0) -> None:
         self.outstream.write(f'{"  " * indent}{data}\n')
 
-    def emit_tag(self, tag: str, attributes: dict[str, Any] = None, indent=0, close=True) -> None:
+    def emit_tag(self, tag: str, attributes: dict[str, Any] | None = None, indent=0, close=True) -> None:
         attrib_str: str = " ".join([f'{x}="{y}"' for (x, y) in (attributes or {}).items()])
         self.emit(f"<{tag} {attrib_str}{'/' if close else ''}>", indent)
 
@@ -77,7 +77,7 @@ class XmlProcessor(IDispatcher):
             table: Table = schema[table_name]
             data: pd.DataFrame = submission.data_tables[table_name]
 
-            referenced_keyset: set[str] = submission.get_referenced_keyset(schema, table_name)
+            referenced_keyset: set[int] = submission.get_referenced_keyset(schema, table_name)
             table_namespace: str = f"com.sead.database.{table.java_class}"
 
             if data is None:
@@ -129,7 +129,7 @@ class XmlProcessor(IDispatcher):
                             self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
                         else:
                             fk_table_spec: Table = schema[column_spec.class_name]
-                            fk_data_table: pd.DataFrame = submission.data_tables.get(fk_table_spec.table_name)
+                            fk_data_table: pd.DataFrame | None = submission[fk_table_spec.table_name]
                             self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
 
                     # ClonedId tag is always emitted (NULL id missing)
@@ -207,7 +207,7 @@ class XmlProcessor(IDispatcher):
             value = "NULL"
         else:
             if isinstance(value, str) and any((c in "<>&") for c in value):
-                value: str = escape(value)
+                value = escape(value)
 
         self.emit(
             f'<{column.camel_case_column_name} class="{column.class_name}">{value}</{column.camel_case_column_name}>',

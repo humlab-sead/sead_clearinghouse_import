@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import base64
-import fnmatch
 import functools
 import importlib
 import io
 import os
+import pkgutil
 import re
 import sys
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
-from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Self, TypeVar, overload
 from xml.dom import minidom
 
 import pandas as pd
@@ -43,10 +43,10 @@ def configure_logging(opts: dict[str, dict]) -> None:
 
             elif isinstance(handler["sink"], str) and handler["sink"].endswith(".log"):
                 handler["sink"] = join(
-                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"
+                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}" # type: ignore[arg-type]
                 )
 
-        logger.configure(handlers=opts["handlers"])
+        logger.configure(handlers=opts["handlers"])  # type: ignore[arg-type]
 
 
 def pascal_to_snake_case(s: str) -> str:
@@ -115,11 +115,12 @@ def dget(data: dict, *path: str, default: Any = None) -> Any:
     if path is None or not data:
         return default
 
-    ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
+    # FIXME: *path must be a tuple of strings here
+    # ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
 
     d = None
 
-    for p in ps:
+    for p in path:
         d = dotget(data, p)
 
         if d is not None:
@@ -349,22 +350,43 @@ def compress_and_encode(path: str) -> None:
         outstream.write(compressed_data)
 
 
-class Registry:
-    items: dict = {}
+T = TypeVar("T")
+
+
+class Registry(Generic[T]):
+    items: dict[str, T] = {}
 
     @classmethod
-    def get(cls, key: str) -> Any | None:
+    def get(cls, key: str) -> T:
         if key not in cls.items:
-            raise ValueError(f"preprocessor {key} is not registered")
-        return cls.items.get(key)
+            raise KeyError(f"preprocessor {key} is not registered")
+        return cls.items[key]
 
     @classmethod
     def register(cls, **args) -> Callable[..., Any]:
-        def decorator(fn):
+        def decorator(fn_or_class):
+            key_or_keys: str | list[str] = args.get("key") or fn_or_class.__name__
+            keys: list[str] = [key_or_keys] if isinstance(key_or_keys, str) else key_or_keys
+
+            if len(keys) == 0:
+                raise ValueError("Registry: key(s) cannot be empty")
+
+            if keys[0] in cls.items:
+                raise KeyError(f"Registry: Overriding existing registration for key '{keys[0]}'")
+
             if args.get("type") == "function":
-                fn = fn()
-            cls.items[args.get("key") or fn.__name__] = fn
-            return fn
+                fn_or_class = fn_or_class()
+            else:
+                setattr(fn_or_class, "_registry_key", keys[0])
+                setattr(fn_or_class, "_registry_opts", {k: v for k, v in args.items() if k != "key"})
+
+                fn_or_class = _ensure_key_property(fn_or_class)
+
+            for k in keys:
+                cls.items[k] = fn_or_class
+
+            fn_or_class = cls.registered_class_hook(fn_or_class, **args)
+            return fn_or_class
 
         return decorator
 
@@ -372,9 +394,35 @@ class Registry:
     def is_registered(cls, key: str) -> bool:
         return key in cls.items
 
+    @classmethod
+    def registered_class_hook(cls, fn_or_class: Any, **args) -> Any:  # pylint: disable=unused-argument
+        return fn_or_class
+
+    def scan(self, module_folder: str) -> Self:
+        import_sub_modules(module_folder)
+        return self
+
+
+def _ensure_key_property(cls):
+    if not hasattr(cls, "key"):
+
+        def key(self) -> str:
+            return getattr(self, "_registry_key", "unknown")
+
+        cls.key = property(key)
+    return cls
+
+
+@overload
+def strip_path_and_extension(filename: str) -> str: ...
+
+
+@overload
+def strip_path_and_extension(filename: list[str]) -> list[str]: ...
+
 
 def strip_path_and_extension(filename: str | list[str]) -> str | list[str]:
-    """Remove path and extension from filename(s). Return list."""
+    """Remove path and extension from filename(s)."""
     if isinstance(filename, str):
         return splitext(basename(filename))[0]
     return [splitext(basename(x))[0] for x in filename]
@@ -510,7 +558,8 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as fp:
         for table_name in submission.data_table_names:
-            excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith("(")), None)
+
+            excel_sql_columns: str | None = next((x for x in submission.data_tables[table_name] if x.startswith("(")), None)  # type: ignore
             if excel_sql_columns:
                 pk_name: str = submission.schema[table_name].pk_name
                 data = (
@@ -539,3 +588,21 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
 
 def ensure_path(f: str) -> None:
     os.makedirs(dirname(f), exist_ok=True)
+
+
+def import_submodules(package_name: str):
+    """
+    Recursively import all submodules of the given package.
+
+    Example:
+        # Inside mypackage/__init__.py
+        import_submodules(__name__)
+    """
+    package = importlib.import_module(package_name)
+    package_path = package.__path__  # Namespace packages supported
+
+    for module_info in pkgutil.walk_packages(package_path, prefix=package_name + "."):
+        module_name = module_info.name
+
+        if module_name not in globals():
+            importlib.import_module(module_name)

@@ -1,13 +1,13 @@
 import os
 import xml.etree.ElementTree as ET
-from typing import Any, Iterator
+from typing import Any
 
 import pandas as pd
 import pytest
 
 from importer import policies
 from importer.configuration.config import Config
-from importer.metadata import SeadSchema
+from importer.metadata import SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.specification import (
     ForeignKeyColumnsHasValuesSpecification,
@@ -23,20 +23,24 @@ from importer.utility import create_db_uri
 @pytest.mark.living_tree
 @pytest.mark.skip(reason="Requires living tree data and live database connection")
 class TestLivingTreeSubmission:
+
     @pytest.fixture(scope="module")
-    def schema(self, cfg: Config) -> SeadSchema:
+    def schema_service(self, cfg: Config) -> SchemaService:
         db_opts: dict[str, Any] = cfg.get("options:database") | cfg.get("test:dendrochronology:database")
         uri: str = create_db_uri(**db_opts)
-        return SeadSchema(uri)
+        return SchemaService(uri)
 
     @pytest.fixture(scope="module")
-    def submission(self, cfg: Config, schema: SeadSchema) -> Submission:
+    def schema(self, schema_service: SchemaService) -> SeadSchema:
+        return schema_service.load()
+
+    @pytest.fixture(scope="module")
+    def submission(self, cfg: Config, schema: SeadSchema, service: SchemaService) -> Submission:
         source: str = cfg.get("test:dendrochronology:living_tree:source:filename")
-        return Submission.load(schema=schema, source=source, apply_policies=True)
+        return Submission.load(schema=schema, source=source, apply_policies=True, service=service)
 
-    def test_pk_set(self, schema: SeadSchema):
-        keys: set[int] = schema.get_primary_keys("tbl_sites")
-
+    def test_pk_set(self, schema_service: SchemaService):
+        keys: set[int] = schema_service.get_primary_key_values("tbl_sites", "site_id")
         assert keys
 
     def test_load_living_tree(self, submission: Submission):
@@ -84,13 +88,13 @@ class TestLivingTreeSubmission:
         assert len(empty_tables) == 0, f"Empty tables found: {empty_tables}"
 
         # Verify that no table in the submission is keyed by excel sheet name for aliased tables
-        assert all(n.excel_sheet not in submission.data_tables for n in submission.schema.sead_schema.aliased_tables)
+        assert all(n.excel_sheet not in submission.data_tables for n in submission.schema.aliased_tables)
 
         with pd.ExcelFile(source) as reader:
             # Verify that all excel sheet names are in the submission data tables
-            excel_sheet_names: set[str] = set(reader.sheet_names)
+            excel_sheet_names: set[int | str] = set(reader.sheet_names)
             excel_table_names: set[str] = {
-                n for n, t in submission.schema.sead_schema.items() if t.excel_sheet in excel_sheet_names
+                n for n, t in submission.schema.items() if t.excel_sheet in excel_sheet_names
             }
 
             assert all(table_name in submission.data_tables for table_name in excel_table_names)
@@ -138,9 +142,9 @@ class TestLivingTreeSubmission:
     # Policy tests in living tree data
 
     @pytest.fixture(scope="module")
-    def unprocessed_submission(self, cfg: Config, schema: SeadSchema) -> Iterator[Submission]:
+    def unprocessed_submission(self, cfg: Config, schema: SeadSchema, service: SchemaService) -> Submission:
         return Submission.load(
-            schema=schema, source=cfg.get("test:dendrochronology:living_tree:source:filename"), apply_policies=False
+            schema=schema, source=cfg.get("test:dendrochronology:living_tree:source:filename"), apply_policies=False, service=service
         )
 
     def test_add_primary_key_column_if_missing_policy(self, unprocessed_submission: Submission):
@@ -177,8 +181,8 @@ class TestLivingTreeSubmission:
             for column in table.columns.values():
 
                 if column.is_fk:
-                    fk_table_name: str = column.fk_table_name
-                    fk_column_name: str = column.fk_column_name
+                    fk_table_name: str | None = column.fk_table_name
+                    fk_column_name: str | None = column.fk_column_name
                     fk_table_exists: bool = fk_table_name in unprocessed_submission.data_tables
 
                     statistics.append((fk_table_name, fk_column_name, fk_table_exists, table_name, column.column_name))

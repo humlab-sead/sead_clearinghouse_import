@@ -9,6 +9,7 @@ from importer.utility import log_decorator
 
 from . import BaseUploader, Uploaders
 
+# NFIXME: Deprecate XML uploader in favor of CSV uploader.
 
 @Uploaders.register(key="xml")
 class XmlUploader(BaseUploader):
@@ -46,13 +47,13 @@ class XmlUploader(BaseUploader):
         """Extract submission into staging tables."""
         with connection.cursor() as cursor:
             logger.info("   --> extracting table names from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_tables", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_tables", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting columns from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_columns", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_columns", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting records from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_records", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_records", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting values from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_values", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_values", (submission_id,))  # type: ignore

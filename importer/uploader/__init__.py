@@ -33,11 +33,13 @@ class UnknownUploader(BaseUploader):
     def extract(self, connection: Connection, submission_id: int) -> None:  # pylint: disable=unused-argument
         raise ValueError("Invalid uploader specified")
     
-class UploaderRegistry(Registry):
-    items: dict = {}
+class UploaderRegistry(Registry[type[BaseUploader]]):
+    
+    items: dict[str, type[BaseUploader]] = {}
 
-    def get(self, key: str, default: Any = None) -> Any:
-        return self.items.get(key, UnknownUploader)
+    @classmethod
+    def get(cls, key: str) -> type[BaseUploader]:
+        return cls.items.get(key, UnknownUploader)
     
 Uploaders: UploaderRegistry = UploaderRegistry()  # pylint: disable=invalid-name
 

@@ -43,5 +43,10 @@ def schema(cfg: ConfigLike) -> Iterator[SeadSchema]:
     yield schema
 
 @pytest.fixture(scope="session")
-def submission(schema: SeadSchema, cfg: Config) -> Iterator[Submission]:
-    yield Submission.load(schema=schema, source=cfg.get("test:reduced_excel_filename"))
+def service(cfg: ConfigLike) -> Iterator[SchemaService]:
+    service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
+    yield service
+
+@pytest.fixture(scope="session")
+def submission(schema: SeadSchema, cfg: ConfigLike, service: SchemaService) -> Iterator[Submission]:
+    yield Submission.load(schema=schema, source=cfg.get("test:reduced_excel_filename"), service=service)

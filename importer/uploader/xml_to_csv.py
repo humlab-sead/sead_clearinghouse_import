@@ -52,14 +52,14 @@ def load_xml(source: str) -> ET.ElementTree | ET.Element | Any:
 
 @Parsers.register(key=Table)
 def xml_to_tables(source: str) -> Iterable[Table]:
-    root: ET.Element = load_xml(source)
+    root: ET.Element = load_xml(source)  # type: ignore
     for table in root.iterfind("./*"):
         yield Table(table.tag, table.get("length") or "NULL")
 
 
 @Parsers.register(key=RecordValue)
 def xml_to_record_values(source: str) -> Iterable[RecordValue]:
-    root: ET.Element = load_xml(source)
+    root: ET.Element = load_xml(source)  # type: ignore
     for table in root.iterfind("./*"):
         found_record_count: int = 0
         for record in table.iterfind("./*"):
@@ -74,7 +74,7 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
                     column.get("class") or "NULL",  # column_type
                     column.get("id") or "NULL",  # fk_system_id
                     column.get("clonedId") or "NULL",  # fk_public_id
-                    format_value(column.text, column.get("class")) or "NULL",
+                    format_value(column.text, column.get("class")) or "NULL",  # type: ignore
                 )
             if has_values:
                 found_record_count += 1
@@ -82,7 +82,7 @@ def xml_to_record_values(source: str) -> Iterable[RecordValue]:
 
 @Parsers.register(key=Column)
 def xml_to_columns(source: str) -> Iterable[Column]:
-    root: ET.Element = load_xml(source)
+    root: ET.Element = load_xml(source)  # type: ignore
     for table in root.iterfind("./*"):
         found: bool = False
         for record in table.findall("./*"):
@@ -110,10 +110,10 @@ def xml_to_records(source: str) -> Iterable[Record]:
     root: ET.Element | Any = load_xml(source)
     for table in root.iterfind("./*"):
         for record in table.iterfind("./*"):
-            local_id: str = record.get("id")
-            public_id: str = record.get("clonedId")
+            local_id: str | None = record.get("id")
+            public_id: str | None = record.get("clonedId")
             if public_id is None:
-                column: str = record.find("./clonedId")
+                column: ET.Element | None = record.find("./clonedId")
                 if column is not None:
                     public_id = column.text or "NULL"
             yield Record(table.tag, local_id or "NULL", public_id or "NULL")
@@ -121,10 +121,10 @@ def xml_to_records(source: str) -> Iterable[Record]:
 
 def xml_to_csv(xml_filename: str, csv_folder: str, iter_fn: Iterable[Any], iter_type: DbType) -> str:
     basename: str = os.path.splitext(os.path.basename(xml_filename))[0]
-    filename: str = os.path.join(csv_folder, f"{basename}_{iter_type.__name__.lower()}s.csv")
+    filename: str = os.path.join(csv_folder, f"{basename}_{iter_type.__name__.lower()}s.csv")  # type: ignore
     with open(filename, "w", encoding="utf-8") as f:
         f.write("\t".join(iter_type._fields) + "\n")
-        for record in iter_fn(xml_filename):
+        for record in iter_fn(xml_filename):  # type: ignore
             f.write("\t".join("" if x is None else x for x in record) + "\n")
     return filename
 

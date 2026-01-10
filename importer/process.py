@@ -24,13 +24,13 @@ class Options:
     Options for the importer
     """
 
-    filename: str
+    filename: str | None
     skip: bool
-    submission_id: int
+    submission_id: int | None
     submission_name: str
     data_types: str
     xml_filename: str | None = None
-    table_names: str | None = None
+    table_names: list[str] = field(default_factory=list)
     check_only: bool = False
     register: bool = False
     explode: bool = False
@@ -101,7 +101,7 @@ class ImportService:
         """
 
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
-            self.dispatcher_cls(outstream).dispatch(self.schema, submission, self.opts.table_names)
+            self.dispatcher_cls(outstream).dispatch(schema=self.schema, submission=submission, table_names=self.opts.table_names)
 
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)
@@ -118,8 +118,8 @@ class ImportService:
         - a SubmissionData object (parsed Excel file, see importer/submission.py)
         - a submission id (int) already stored in the database
         """
+        opts: Options = self.opts
         try:
-            opts: Options = self.opts
             if opts.skip is True:
                 logger.debug("Skipping: %s", opts.basename)
                 return
@@ -138,11 +138,13 @@ class ImportService:
                     submission.to_csv(self.opts.output_folder)
 
             if opts.use_existing_submission:
-
+                assert isinstance(opts.submission_id, int), "Submission id required when use_existing_submission is True"
                 self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             if not opts.use_existing_submission:
 
+                assert not isinstance(submission, int), "Submission id provided but use_existing_submission is False"
+                
                 opts.xml_filename = (
                     submission
                     if isinstance(submission, str)
@@ -160,6 +162,8 @@ class ImportService:
                     self.repository.extract_to_staging_tables(opts.submission_id)
 
             if opts.explode:
+                
+                assert opts.submission_id is not None, "Submission id is required for exploding submission"
 
                 self.repository.explode_to_public_tables(
                     opts.submission_id, p_dry_run=False, p_add_missing_columns=False

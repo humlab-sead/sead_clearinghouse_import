@@ -33,4 +33,4 @@ class XmlToCsvUploader(BaseUploader):
     def extract(self, connection: Connection, submission_id: int) -> None:
         """Extract submission into staging tables."""
         with connection.cursor() as cursor:
-            cursor.callproc("clearing_house.fn_extract_csv_upload_to_staging_tables", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_csv_upload_to_staging_tables", (submission_id,))  # type: ignore

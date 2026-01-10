@@ -50,7 +50,7 @@ def import_csv(
 
     logger.info(f"Connecting to database '{url}'")
 
-    data: pd.DataFrame = pd.read_csv(filename, sep=delimiter, quoting=quoting)
+    data: pd.DataFrame = pd.read_csv(filename, sep=delimiter, quoting=quoting)  # type: ignore
     data.to_sql(name=tablename, con=create_engine(url), if_exists="replace" if overwrite else "fail", index=False)
 
     logger.info(f"Data imported successfully into table '{tablename}' in database '{dbname}'")

@@ -4,9 +4,10 @@ from typing import Iterator
 
 import pandas as pd
 import pytest
+import xmltodict
 
 from importer.configuration.config import Config
-from importer.metadata import SeadSchema
+from importer.metadata import SchemaService, SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission
@@ -20,11 +21,12 @@ from importer.utility import create_db_uri
 class TestAdnaSubmission:
 
     @pytest.fixture(scope="module")
-    def adna(self, cfg: Config) -> Iterator[Submission]:
+    def adna(self, cfg: Config) -> Submission:
         uri: str = create_db_uri(**cfg.get("options:database"))
         source: str = cfg.get("test:adna:source:filename")
-        metadata: SeadSchema = SeadSchema(uri)
-        submission: Submission = Submission.load(schema=metadata, source=source)
+        service: SchemaService = SchemaService(uri)
+        schema: SeadSchema = service.load()
+        submission: Submission = Submission.load(schema=schema, source=source, service=service)
         return submission
 
     def test_to_lookups_sql(self, adna: Submission):
@@ -47,13 +49,13 @@ class TestAdnaSubmission:
         assert all(len(df) > 0 for df in adna.data_tables.values())
 
         # Verify that no table in the submission is keyed by excel sheet name for aliased tables
-        assert all(n.excel_sheet not in adna.data_tables for n in adna.schema.sead_schema.aliased_tables)
+        assert all(n.excel_sheet not in adna.data_tables for n in adna.schema.aliased_tables)
 
         with pd.ExcelFile(source) as reader:
             # Verify that all excel sheet names are in the submission data tables
-            excel_sheet_names: set[str] = set(reader.sheet_names)
+            excel_sheet_names: set[int|str] = set(reader.sheet_names)
             excel_table_names: set[str] = {
-                n for n, t in adna.schema.sead_schema.items() if t.excel_sheet in excel_sheet_names
+                n for n, t in adna.schema.items() if t.excel_sheet in excel_sheet_names
             }
 
             assert all(table_name in adna.data_tables for table_name in excel_table_names)
@@ -74,12 +76,13 @@ class TestAdnaSubmission:
             submission_id=None,
             database=cfg.get("options:database"),
             output_folder="tests/output",
+            submission_name="adna_test",
         )
 
         if os.path.isfile(opts.target):
             os.remove(opts.target)
 
-        service: ImportService = ImportService(metadata=adna.schema, opts=opts)
+        service: ImportService = ImportService(schema=adna.schema, opts=opts)
 
         if os.path.isfile(opts.target):
             os.remove(opts.target)
@@ -116,7 +119,7 @@ class TestAdnaSubmission:
         if os.path.isfile(opts.target):
             os.remove(opts.target)
 
-        service: ImportService = ImportService(metadata=adna.schema, opts=opts)
+        service: ImportService = ImportService(schema=adna.schema, opts=opts)
 
         service.process(submission=adna)
 

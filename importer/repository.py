@@ -25,14 +25,14 @@ class NullConnection:
 
 
 class SubmissionRepository:
-    def __init__(self, db_options: dict[str, str], uploader: str | BaseUploader | None = None) -> None:
-        self.db_options: dict[str, str] = db_options
+    def __init__(self, db_options: dict[str, Any], uploader: Any | BaseUploader | None = None) -> None:
+        self.db_options: dict[str, Any] = db_options
         if isinstance(uploader, str):
             logger.info(f"Using uploader: {uploader}")
-            uploader_instance: BaseUploader = Uploaders.get(uploader, NullUploader())()
+            uploader_instance: BaseUploader = (Uploaders.get(uploader) or NullUploader)()
 
         self.uploader: BaseUploader = (
-            uploader if isinstance(uploader, BaseUploader) else Uploaders.get(uploader, UnknownUploader())() if uploader else UnknownUploader()
+            uploader if isinstance(uploader, BaseUploader) else Uploaders.get(uploader or "unknown")()
         )
         self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300
@@ -64,12 +64,12 @@ class SubmissionRepository:
 
                 if p_add_missing_columns:
                     with connection.cursor() as cursor:
-                        cursor.callproc(
+                        cursor.callproc(  # type: ignore
                             "clearing_house.fn_add_new_public_db_columns", (submission_id, table_name_underscored)
                         )
 
                 with connection.cursor() as cursor:
-                    cursor.callproc(
+                    cursor.callproc(  # type: ignore
                         "clearing_house.fn_copy_extracted_values_to_entity_table",
                         (submission_id, table_name_underscored),
                     )
@@ -80,7 +80,7 @@ class SubmissionRepository:
         logger.info("   --> Cleaning up existing data for submission...")
         with self as connection:
             with connection.cursor() as cursor:
-                cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))
+                cursor.callproc("clearing_house.fn_delete_submission", (submission_id, clear_header, clear_exploded))  # type: ignore
 
     def get_id_by_name(self, name: str) -> int:
         sql: str = (
@@ -90,7 +90,7 @@ class SubmissionRepository:
         with self as connection:
             with connection.cursor() as cursor:
                 cursor.execute(sql, (name,))
-                submission_id: int = cursor.fetchone()[0]
+                submission_id: int = cursor.fetchone()[0]   # type: ignore
         return submission_id
 
     @log_decorator(
@@ -129,7 +129,7 @@ class SubmissionRepository:
                     ) values (%s, %s, %s, %s, %s, %s) returning submission_id;
                 """
                 cursor.execute(sql, (name, source_name, 1, data_types, 4, "New"))
-                submission_id: int = cursor.fetchone()[0]
+                submission_id: int = cursor.fetchone()[0]  # type: ignore
             return submission_id
 
     def get_table_names(self, submission_id: int) -> list[str]:
@@ -149,7 +149,7 @@ class SubmissionRepository:
     def __enter__(self) -> Connection:
         if isinstance(self.connection, NullConnection):
             timeout_ms: int = self.timeout_seconds * 1000
-            self.connection: Connection = psycopg.connect(
+            self.connection = psycopg.connect(
                 **self.db_options,
                 options=f"-c statement_timeout={timeout_ms} -c idle_in_transaction_session_timeout={timeout_ms}",
             )

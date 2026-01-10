@@ -7,7 +7,7 @@ import os
 import pandas as pd
 from loguru import logger
 
-from .metadata import SeadSchema, Table
+from .metadata import SchemaService, SeadSchema, Table
 from .policies import UpdatePolicies
 from .utility import flatten_sets, log_decorator, to_lookups_sql
 
@@ -21,9 +21,10 @@ def load_excel_sheet(reader: pd.ExcelFile, sheetname: str) -> pd.DataFrame:
 class Submission:
     """Logic dealing with the submission data"""
 
-    def __init__(self, data_tables: dict[str, pd.DataFrame], schema: SeadSchema) -> None:
+    def __init__(self, data_tables: dict[str, pd.DataFrame], schema: SeadSchema, schema_service: SchemaService) -> None:
         self.data_tables: dict[str, pd.DataFrame] = data_tables
         self.schema: SeadSchema = schema
+        self.schema_service: SchemaService = schema_service
         self._table_lookup: dict[str, pd.DataFrame] = self._generate_table_lookup(data_tables, schema)
 
     def _generate_table_lookup(
@@ -90,16 +91,16 @@ class Submission:
 
     @log_decorator(enter_message=" --> loading excel...", exit_message=" --> done loading excel", level="DEBUG")
     @staticmethod
-    def load(*, schema: SeadSchema, source: str | pd.ExcelFile, apply_policies: bool = True) -> "Submission":
+    def load(*, schema: SeadSchema, service: SchemaService, source: str | pd.ExcelFile, apply_policies: bool = True) -> "Submission":
         """Loads the submission file into a SubmissionData object"""
 
         data_tables: dict[str, pd.DataFrame] = Submission.load_data_tables(source, schema)
 
-        submission: Submission = Submission(data_tables, schema)
+        submission: Submission = Submission(data_tables, schema, service)
 
         if apply_policies:
             for policy in UpdatePolicies.get_sorted_items():
-                policy(schema, submission).apply()
+                policy(schema, submission, service).apply()
 
         return submission
 

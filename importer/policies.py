@@ -8,18 +8,19 @@ import pandas as pd
 from loguru import logger
 
 from .configuration import ConfigValue
-from .metadata import SeadSchema, Table
+from .metadata import SchemaService, SeadSchema, Table
 from .utility import Registry, pascal_to_snake_case, snake_to_pascal_case
 
 if TYPE_CHECKING:
     from importer.submission import Submission
 
 
-class PolicyRegistry(Registry):
+class PolicyRegistry(Registry[type["PolicyBase"]]):
     items: dict[str, type[PolicyBase]] = {}
 
     def get_sorted_items(self) -> list[type[PolicyBase]]:
-        return sorted(self.items.values(), key=lambda x: x(None, None).get_priority())
+        """Get the registered policies sorted by priority. Creaete an instance of each policy to get its priority."""
+        return sorted(self.items.values(), key=lambda x: x(None, None, None).get_priority())  # type: ignore
 
 
 UpdatePolicies: PolicyRegistry = PolicyRegistry()  # pylint: disable=invalid-name
@@ -31,8 +32,9 @@ class DisabledError(Exception):
 
 class PolicyBase:
 
-    def __init__(self, schema: SeadSchema, submission: Submission) -> None:
+    def __init__(self, schema: SeadSchema, submission: Submission, service: SchemaService) -> None:
         self.schema: SeadSchema = schema
+        self.service: SchemaService = service
         self.submission: Submission = submission
         self.logs: dict[str, str] = {}
 
@@ -46,6 +48,7 @@ class PolicyBase:
         return ConfigValue(f"policies.{self.get_id()}.disabled").resolve() or False
 
     def apply(self) -> None:
+        """Applies the policy to the submission data."""
         if self.is_disabled():
             logger.info(f"Policy '{self.get_id()}' is disabled")
         try:
@@ -63,14 +66,14 @@ class PolicyBase:
         self.logs[table] = message or self.get_id()
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="add_primary_key_column_if_missing")
 class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
     """Adds a primary key column to the DataFrame if it is missing"""
 
     def update(self) -> None:
-
+        """For each table in index, add primary key column if missing."""
         for table_name, data in self.submission.data_tables.items():
-            table: Table = self.schema[table_name]
+            table: Table = self.schema.get_table(table_name)
             if table.pk_name not in data.columns:
                 self.log(
                     table_name,
@@ -79,17 +82,17 @@ class AddPrimaryKeyColumnIfMissingPolicy(PolicyBase):
                 data[table.pk_name] = None
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="update_missing_foreign_key")
 class UpdateMissingForeignKeyPolicy(PolicyBase):
     """Adds default FK value to DataFrame if it is missing"""
 
     def update(self) -> None:
-
+        """For each table in index, add default foreign key value if missing."""
         for table_name, cfg in (ConfigValue(f"policies.{self.get_id()}").resolve() or {}).items():
             if table_name not in self.submission:
                 return
 
-            data: pd.DataFrame = self.submission.get[table_name]
+            data: pd.DataFrame = self.submission[table_name]
 
             for fk_name, fk_value in cfg.items():
                 if fk_name not in data.columns:
@@ -108,7 +111,7 @@ class UpdateMissingForeignKeyPolicy(PolicyBase):
                     )
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="add_identity_mapping_system_id_to_public_id")
 class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
     """Rule: if an FK table is missing then add the table using system_id as public_id.
 
@@ -123,7 +126,7 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
 
     def table_names(self) -> set[str]:
         includes: set[str] = set(ConfigValue(f"policies.{self.get_id()}.tables.include").resolve() or []) or set(
-            self.schema.sead_schema.keys()
+            self.schema.keys()
         )
         excludes: set[str] = set(ConfigValue(f"policies.{self.get_id()}.tables.exclude").resolve() or [])
         return includes - excludes
@@ -140,10 +143,9 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
             if not referenced_keys:
                 continue
 
-            meta_table: Table = self.schema[table_name]
-            pk_name: str = meta_table.pk_name
+            table: Table = self.schema.get_table(table_name)
 
-            public_primary_keys: set[int] = self.schema.get_primary_keys(table_name)
+            public_primary_keys: set[int] = self.service.get_primary_key_values(table_name, table.pk_name)
             if set(referenced_keys) - public_primary_keys:
                 logger.warning(
                     f"Table '{table_name}' has referenced keys that are not primary keys: {', '
@@ -151,16 +153,16 @@ class AddIdentityMappingSystemIdToPublicIdPolicy(PolicyBase):
                 )
 
             self.submission.data_tables[table_name] = pd.DataFrame(
-                {"system_id": referenced_keys, pk_name: list(referenced_keys)}
+                {"system_id": referenced_keys, table.pk_name: list(referenced_keys)}
             )
 
             self.log(
                 table_name,
-                f"Added table '{table_name}' with system_id/{pk_name} mapping ({len(referenced_keys)} keys)",
+                f"Added table '{table_name}' with system_id/{table.pk_name} mapping ({len(referenced_keys)} keys)",
             )
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="update_types_based_on_sead_schema")
 class UpdateTypesBasedOnSeadSchema(PolicyBase):
     """Rule: update data types based on SEAD schema
 
@@ -173,9 +175,9 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
         for table_name in self.submission.data_tables:
 
             data_table: pd.DataFrame = self.submission.data_tables[table_name]
-            table_spec: Table = self.schema[table_name]
+            table: Table = self.schema.get_table(table_name)
 
-            for column_name, column_spec in table_spec.columns.items():
+            for column_name, column_spec in table.columns.items():
 
                 if column_name not in data_table.columns:
                     continue
@@ -217,7 +219,7 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
 #                 data_table[pk_name] = data_table[pk_name].astype(int)
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="set_system_id_to_public_id_if_missing")
 class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
     """Rule: assign temporary public primary key to new lookup table rows.
 
@@ -232,9 +234,9 @@ class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
         for table_name in self.submission.data_tables:
 
             data_table: pd.DataFrame = self.submission.data_tables[table_name]
-            table_spec: Table = self.schema[table_name]
+            table: Table = self.schema.get_table(table_name)
 
-            pk_name: str = table_spec.pk_name
+            pk_name: str = table.pk_name
 
             if pk_name == "ceramics_id":
                 pk_name = "ceramic_id"
@@ -252,24 +254,22 @@ class IfSystemIdIsMissingSetSystemIdToPublicId(PolicyBase):
             self.log(table_name, f"Updated system_id to public_id for new records in '{table_name}'")
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="add_identity_mapping_to_foreign_key_table_if_missing")
 class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
     """Any foreign key value that is missing in the submission is added to the foreign key table."""
 
     def fix_dtypes(self, data_table: pd.DataFrame) -> pd.DataFrame:
         """Fix data types of the column in the data table."""
+        sead_column_dtypes: dict[str, object] = self.service.sead_column_dtypes
         for column_name in data_table.columns:
             if data_table[column_name].isnull().all():
-                dtype: str | None = self.schema.sead_dtypes.get(column_name, None)
-                if dtype:
-                    data_table[column_name] = data_table[column_name].astype(dtype=dtype)
+                if sead_column_dtypes.get(column_name, None):
+                    data_table[column_name] = data_table[column_name].astype(sead_column_dtypes[column_name])
         return data_table
 
-    def update(self) -> pd.DataFrame:
+    def update(self) -> None:
 
-        sead_schema: SeadSchema = self.schema.sead_schema
-
-        for table in sead_schema.lookup_tables:
+        for table in self.schema.lookup_tables:
 
             table_name: str = table.table_name
 
@@ -283,15 +283,15 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
                 continue
 
             data_table: pd.DataFrame = self.submission.data_tables[table_name]
-            pk_name: str = sead_schema[table_name].pk_name
+            pk_name: str = self.schema.get_table(table_name).pk_name
 
             missing_keys: list[int] = [k for k in referenced_keys if k not in data_table["system_id"].values]
 
             if not missing_keys:
                 continue
 
-            template: dict[str, int] = {c: None for c in data_table.columns}
-            rows_to_add: list[dict[str, int]] = [
+            template: dict[str, int | None] = {c: None for c in data_table.columns}
+            rows_to_add: list[dict[str, int|None]] = [
                 template | {"system_id": system_id, pk_name: system_id} for system_id in missing_keys
             ]
 
@@ -320,7 +320,7 @@ class DropIgnoredColumns(PolicyBase):
     This rule currently only applies "date_updated" and "*_uuid" columns.
     """
 
-    def filter_columns(self, patterns: list[str], columns: list[str]) -> list[str]:
+    def filter_columns(self, patterns: list[str], columns: pd.Index[str]) -> list[str]:
         """Filter out columns that are ignored."""
         return [c for c in columns if any(fnmatch(c, x) for x in patterns)]
 
@@ -353,20 +353,18 @@ class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
         for table_name in self.submission.data_tables:
 
             data_table: pd.DataFrame = self.submission.data_tables[table_name]
-            table: Table = self.schema[table_name]
+            table: Table = self.schema.get_table(table_name)
 
             if not table.is_lookup:
                 continue
 
-            pk_name: str = table.pk_name
-
-            if pk_name not in data_table.columns:
+            if table.pk_name not in data_table.columns:
                 continue
 
-            if data_table[pk_name].isnull().any():
+            if data_table[table.pk_name].isnull().any():
                 continue
 
-            columns_to_drop: list[str] = [c for c in data_table.columns if c not in ["system_id", pk_name]]
+            columns_to_drop: list[str] = [c for c in data_table.columns if c not in ["system_id", table.pk_name]]
 
             if not columns_to_drop:
                 continue

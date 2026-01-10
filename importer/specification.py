@@ -49,9 +49,9 @@ class SpecificationMessages:
 
 
 class SpecificationError(Exception):
-    def __init__(self, messages: SpecificationMessages) -> None:
+    def __init__(self, messages: SpecificationMessages| str) -> None:
         super().__init__("Submission specification failed")
-        self.messages: SpecificationMessages = messages
+        self.messages: SpecificationMessages = messages if isinstance(messages, SpecificationMessages) else SpecificationMessages(errors=[messages])
 
 
 class SpecificationBase(abc.ABC):
