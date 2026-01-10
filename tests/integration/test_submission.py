@@ -43,15 +43,12 @@ class TestSubmission:
         assert "tbl_sites" in submission
         assert "tbl_dummy" not in submission
 
-
     def test_data_tablenames(self, submission: Submission):
         assert "tbl_analysis_entities" in submission.data_table_names
-
 
     def test_has_system_id(self, submission: Submission):
         assert submission.has_system_id("tbl_sites")
         assert not submission.has_system_id("tbl_dummy")
-
 
     def test_referenced_keyset(self, submission: Submission, metadata: Metadata):
         """Note that submission is areduced versions of the real things, so all references do not exists."""
@@ -70,10 +67,11 @@ class TestSubmission:
 
         assert {10} == submission.get_referenced_keyset(metadata, "tbl_methods")
 
-
     def test_tables_specifications(self, cfg: Config, submission: Submission):
         metadata: Metadata = Metadata(create_db_uri(**cfg.get("options:database")))
         ignore_columns: list[str] = cfg.get("options:ignore_columns")
-        specifixation: SubmissionSpecification = SubmissionSpecification(metadata=metadata, ignore_columns=ignore_columns)
+        specifixation: SubmissionSpecification = SubmissionSpecification(
+            metadata=metadata, ignore_columns=ignore_columns
+        )
         specifixation.is_satisfied_by(submission)
         assert specifixation.messages.errors == []

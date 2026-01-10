@@ -32,6 +32,7 @@ def test_create_options(cfg: Config):
     assert opts.ignore_columns is not None
     assert opts.db_uri().startswith("postgresql+psycopg://")
 
+
 @pytest.mark.integration
 @pytest.mark.skip(reason="Requires live database connection")
 class TestImportService:

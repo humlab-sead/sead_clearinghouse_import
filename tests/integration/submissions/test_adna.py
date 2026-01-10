@@ -12,12 +12,12 @@ from importer.specification import SubmissionSpecification
 from importer.submission import Submission
 from importer.utility import create_db_uri
 
+
 @pytest.mark.integration
 @pytest.mark.adna
 @pytest.mark.ancient_dna
 @pytest.mark.skip(reason="Requires ancient DNA data and live database connection")
 class TestAdnaSubmission:
-
 
     @pytest.fixture(scope="module")
     def adna(self, cfg: Config) -> Iterator[Submission]:
@@ -26,7 +26,6 @@ class TestAdnaSubmission:
         metadata: Metadata = Metadata(uri)
         submission: Submission = Submission.load(metadata=metadata, source=source)
         return submission
-
 
     def test_to_lookups_sql(self, adna: Submission):
 
@@ -39,7 +38,6 @@ class TestAdnaSubmission:
         adna.to_lookups_sql(filename)
 
         assert os.path.isfile(filename)
-
 
     def test_loaded_adna_source(self, adna: Submission, cfg: Config):
         source: str = cfg.get("test:adna:source:filename")
@@ -60,14 +58,12 @@ class TestAdnaSubmission:
 
             assert all(table_name in adna.data_tables for table_name in excel_table_names)
 
-
     def test_adna_tables_specifications(self, adna: Submission, cfg: Config):
         specification: SubmissionSpecification = SubmissionSpecification(
             metadata=adna.metadata, ignore_columns=cfg.get("options:ignore_columns"), raise_errors=False
         )
         specification.is_satisfied_by(adna)
         assert specification.messages.errors == []
-
 
     def test_dispatch_a_dna_submission_to_xml_file(self, adna: Submission, cfg: Config):
 
@@ -98,7 +94,6 @@ class TestAdnaSubmission:
         assert data is not None
 
         assert len(data["sead-data-upload"].keys()) == len(adna.data_tables)
-
 
     def test_import_a_dna_submission(self, adna: Submission, cfg: Config):
 

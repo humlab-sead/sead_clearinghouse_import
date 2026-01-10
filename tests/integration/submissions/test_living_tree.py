@@ -29,18 +29,15 @@ class TestLivingTreeSubmission:
         uri: str = create_db_uri(**db_opts)
         return Metadata(uri)
 
-
     @pytest.fixture(scope="module")
     def submission(self, cfg: Config, metadata: Metadata) -> Iterator[Submission]:
         source: str = cfg.get("test:dendrochronology:living_tree:source:filename")
         return Submission.load(metadata=metadata, source=source, apply_policies=True)
 
-
     def test_pk_set(self, metadata: Metadata):
         keys: set[int] = metadata.get_primary_keys("tbl_sites")
 
         assert keys
-
 
     def test_load_living_tree(self, submission: Submission):
         assert submission is not None
@@ -48,14 +45,12 @@ class TestLivingTreeSubmission:
         assert submission.data_tables is not None
         assert len(submission.data_tables) > 0
 
-
     def test_living_tree_tables_specifications(self, submission: Submission, cfg: Config):
         specification: SubmissionSpecification = SubmissionSpecification(
             metadata=submission.metadata, ignore_columns=cfg.get("options:ignore_columns"), raise_errors=False
         )
         specification.is_satisfied_by(submission)
         assert specification.messages.errors == []
-
 
     def test_living_tree_tables_specifications_bugg(self, submission: Submission, cfg: Config):
         specification: ForeignKeyColumnsHasValuesSpecification = ForeignKeyColumnsHasValuesSpecification(
@@ -66,7 +61,6 @@ class TestLivingTreeSubmission:
         specification.is_satisfied_by(submission, "tbl_dataset_submissions")
         assert specification.messages.errors == []
         assert specification.messages.warnings == []
-
 
     def test_to_lookups_sql(self, submission: Submission):
 
@@ -79,7 +73,6 @@ class TestLivingTreeSubmission:
         submission.to_lookups_sql(filename)
 
         assert os.path.isfile(filename)
-
 
     def test_loaded_living_tree_source(self, submission: Submission, cfg: Config):
         source: str = cfg.get("test:dendrochronology:submission:source:filename")
@@ -101,7 +94,6 @@ class TestLivingTreeSubmission:
             }
 
             assert all(table_name in submission.data_tables for table_name in excel_table_names)
-
 
     def test_import_living_tree_submission(self, submission: Submission, cfg: Config):
 
@@ -143,16 +135,13 @@ class TestLivingTreeSubmission:
 
         assert all(t in exported_java_classes for t in expected_java_classes)
 
-
     # Policy tests in living tree data
-
 
     @pytest.fixture(scope="module")
     def unprocessed_submission(self, cfg: Config, metadata: Metadata) -> Iterator[Submission]:
         return Submission.load(
             metadata=metadata, source=cfg.get("test:dendrochronology:living_tree:source:filename"), apply_policies=False
         )
-
 
     def test_add_primary_key_column_if_missing_policy(self, unprocessed_submission: Submission):
         policy: policies.AddPrimaryKeyColumnIfMissingPolicy = policies.AddPrimaryKeyColumnIfMissingPolicy(
@@ -161,7 +150,6 @@ class TestLivingTreeSubmission:
         policy.apply()
         assert not policy.logs
 
-
     def test_add_default_foreign_key_policy(self, unprocessed_submission: Submission):
         policy: policies.UpdateMissingForeignKeyPolicy = policies.UpdateMissingForeignKeyPolicy(
             metadata=unprocessed_submission.metadata, submission=unprocessed_submission
@@ -169,14 +157,14 @@ class TestLivingTreeSubmission:
         policy.apply()
         assert not policy.logs
 
-
     def test_if_table_is_missing_add_table_using_system_id_as_public_id(self, unprocessed_submission: Submission):
-        policy: policies.AddIdentityMappingSystemIdToPublicIdPolicy = policies.AddIdentityMappingSystemIdToPublicIdPolicy(
-            metadata=unprocessed_submission.metadata, submission=unprocessed_submission
+        policy: policies.AddIdentityMappingSystemIdToPublicIdPolicy = (
+            policies.AddIdentityMappingSystemIdToPublicIdPolicy(
+                metadata=unprocessed_submission.metadata, submission=unprocessed_submission
+            )
         )
         policy.apply()
         assert len(policy.logs) > 0
-
 
     def test_statistics(self, unprocessed_submission: Submission):
 
@@ -211,7 +199,6 @@ class TestLivingTreeSubmission:
         #     "col3": MagicMock(data_type="bigint"),
         # }
 
-
     #     metadata.__getitem__.return_value = table
     #     submission.data_tables = {
     #         "table1": pd.DataFrame(
@@ -229,7 +216,6 @@ class TestLivingTreeSubmission:
     #     assert submission.data_tables["table1"]["col1"].dtype == "Int16"
     #     assert submission.data_tables["table1"]["col2"].dtype == "Int32"
     #     assert submission.data_tables["table1"]["col3"].dtype == "Int64"
-
 
     # def test_if_system_id_is_missing_set_system_id_to_public_id(self, ):
     #     metadata = MagicMock(spec=Metadata)
@@ -251,7 +237,6 @@ class TestLivingTreeSubmission:
 
     #     assert list(submission.data_tables["table1"]["system_id"]) == [1, 2, 3]
 
-
     # def test_if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table(self, ):
     #     metadata = MagicMock(spec=Metadata)
     #     submission = MagicMock(spec=Submission)
@@ -272,7 +257,6 @@ class TestLivingTreeSubmission:
     #     assert list(submission.data_tables[table.table_name]["system_id"]) == [1, 2, 3]
     #     assert list(submission.data_tables[table.table_name][table.pk_name]) == [1, 2, 3]
 
-
     # def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__not_lookup(self, ):
     #     metadata = MagicMock(spec=Metadata)
     #     submission = MagicMock(spec=Submission)
@@ -285,7 +269,6 @@ class TestLivingTreeSubmission:
 
     #     assert "col1" in submission.data_tables["table1"].columns
     #     assert "col2" in submission.data_tables["table1"].columns
-
 
     # def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__pk_not_in_data_table(self, ):
     #     metadata = MagicMock(spec=Metadata)
@@ -301,7 +284,6 @@ class TestLivingTreeSubmission:
 
     #     assert "col1" in submission.data_tables["table1"].columns
     #     assert "col2" in submission.data_tables["table1"].columns
-
 
     # def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__all_pk_values_null(self, ):
     #     metadata = MagicMock(spec=Metadata)
@@ -321,7 +303,6 @@ class TestLivingTreeSubmission:
 
     #     assert "col1" in submission.data_tables["table1"].columns
     #     assert "col2" in submission.data_tables["table1"].columns
-
 
     # def test_not_all_pk_values_null(self, ):
     #     metadata = MagicMock(spec=Metadata)
