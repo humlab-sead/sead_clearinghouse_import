@@ -18,49 +18,40 @@ import numpy as np
 DTYPE_MAPPING: dict[str, object] = {
     # identifiers
     "uuid": "string",
-
     # integers
     "smallint": "Int16",
     "integer": "Int32",
     "int": "Int32",
     "bigint": "Int64",
-
     # numeric / floating
     "real": "Float32",
     "double precision": "Float64",
     "numeric": "Float64",
     "decimal": "Float64",
-
     # boolean
     "boolean": "boolean",
     "bool": "boolean",
-
     # text / character
     "character varying": "string",
     "varchar": "string",
     "character": "string",
     "char": "string",
     "text": "string",
-
     # date / time
     "date": "datetime64[ns]",
     "timestamp": "datetime64[ns]",
     "timestamp without time zone": "datetime64[ns]",
     "timestamp with time zone": "datetime64[ns, UTC]",
     "time": "string",  # pandas has no native time-only dtype
-
     # json
     "json": "object",
     "jsonb": "object",
-
     # binary
     "bytea": "object",
-
     # arrays (usually end up as Python lists)
     "integer[]": "object",
     "text[]": "object",
 }
-
 
 
 @dataclass
@@ -209,12 +200,13 @@ class SeadSchema:
     @cached_property
     def _foreign_keys(self) -> pd.DataFrame:
         """Returns foreign key columns from SEAD columns (performance only)."""
-        return self.source_columns[self.source_columns.is_fk][["table_name", "column_name", "fk_table_name", "class_name"]]
+        return self.source_columns[self.source_columns.is_fk][
+            ["table_name", "column_name", "fk_table_name", "class_name"]
+        ]
 
     def get_tablenames_referencing(self, table_name: str) -> list[str]:
         """Returns a list of tablenames referencing the given table"""
         return self._foreign_keys.loc[(self._foreign_keys.fk_table_name == table_name)]["table_name"].tolist()
-
 
     def is_fk(self, table_name: str, column_name: str) -> bool:
         if column_name in self.foreign_key_aliases:
@@ -272,11 +264,34 @@ class SchemaService:
                     is_unknown
             from clearing_house.clearinghouse_import_tables
         """
-        return self.load_sead_data(sql, ["table_name"])
+        return self._load_sead_data(sql, ["table_name"])
 
     def get_sead_columns(self) -> pd.DataFrame:
         """Returns a dataframe of table columns from SEAD with attributes."""
-        return self.load_sead_columns(self.ignore_columns)
+        sql: str = """
+            select  table_name,
+                    column_name,
+                    xml_column_name,
+                    position,
+                    numeric_precision,
+                    numeric_scale,
+                    character_maximum_length,
+                    is_nullable,
+                    is_pk,
+                    is_fk,
+                    fk_table_name,
+                    fk_column_name,
+                    class_name
+            from clearing_house.clearinghouse_import_columns
+        """
+        data: pd.DataFrame = self._load_sead_data(sql, ["table_name", "column_name"], ["table_name", "position"])
+        if self.ignore_columns:
+            columns_to_ignore: list[str] = [
+                c for c in data["column_name"].unique() if any(fnmatch(c, pattern) for pattern in self.ignore_columns)
+            ]
+            data = data[~data["column_name"].isin(columns_to_ignore)]
+
+        return data
 
     @cached_property
     def sead_column_dtypes(self) -> dict[str, object]:
@@ -285,17 +300,10 @@ class SchemaService:
             select distinct column_name, data_type
             from sead_utility.table_columns where table_schema = 'public'
         """
-        column_types: dict[str, str] = self.load_sead_data(sql, index=["column_name"]).to_dict()["data_type"]
+        column_types: dict[str, str] = self._load_sead_data(sql, index=["column_name"]).to_dict()["data_type"]
 
         dtypes: dict[str, object] = {k: DTYPE_MAPPING[v] for k, v in column_types.items() if v in DTYPE_MAPPING}
         return dtypes
-
-    # def get_primary_keys(self, table_name: str) -> set[int]:
-    #     """Returns all unique primary keys for `table_name` in SEAD."""
-    #     table: Table = self.get_table(table_name)
-    #     if table.pk_name is None:
-    #         return set()
-    #     return self.service.get_primary_key_values(table_name, table.pk_name)
 
     def get_primary_key_values(self, table_name: str, pk_name: str) -> set[int]:
         """Returns all unique primary keys for `table_name` in SEAD."""
@@ -303,10 +311,10 @@ class SchemaService:
             select distinct {pk_name}
             from {table_name}
         """
-        keys: set = set(self.load_sead_data(sql, index=[pk_name]).index)
+        keys: set = set(self._load_sead_data(sql, index=[pk_name]).index)
         return keys
 
-    def load_sead_data(
+    def _load_sead_data(
         self, sql: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None
     ) -> pd.DataFrame:
         """Returns a dataframe of tables from SEAD with attributes."""
@@ -320,33 +328,23 @@ class SchemaService:
         )
         return data
 
-    def load_sead_columns(self, ignore_columns: list[str] | None = None) -> pd.DataFrame:
-        """Returns a dataframe of table columns from SEAD with attributes."""
-        sql: str = """
-            select  xml_column_name
-                    position
-                    numeric_precision
-                    numeric_scale
-                    character_maximum_length
-                    is_nullable
-                    is_pk
-                    is_fk
-                    fk_table_name
-                    fk_column_name
-                    class_name
-            from clearing_house.clearinghouse_import_columns
-        """
-        data: pd.DataFrame = self.load_sead_data(sql, ["table_name", "column_name"], ["table_name", "position"])
-        if ignore_columns:
-            columns_to_ignore: list[str] = [
-                c for c in data["column_name"].unique() if any(fnmatch(c, pattern) for pattern in ignore_columns)
-            ]
-            data = data[~data["column_name"].isin(columns_to_ignore)]
-
-        return data
-
     def load(self) -> SeadSchema:
         """Loads the SEAD schema from the database."""
         sead_tables: pd.DataFrame = self.get_sead_tables()
         sead_columns: pd.DataFrame = self.get_sead_columns()
         return SeadSchemaFactory().create(sead_tables, sead_columns)
+
+class MockSchemaService(SchemaService):
+    """Mock SchemaService for testing purposes."""
+
+    def __init__(self, sead_tables: pd.DataFrame, sead_columns: pd.DataFrame) -> None:
+        super().__init__(db_uri="")
+        self._sead_tables: pd.DataFrame = sead_tables
+        self._sead_columns: pd.DataFrame = sead_columns
+
+    def get_sead_tables(self) -> pd.DataFrame:
+        return self._sead_tables
+
+    def get_sead_columns(self) -> pd.DataFrame:
+        return self._sead_columns
+    
