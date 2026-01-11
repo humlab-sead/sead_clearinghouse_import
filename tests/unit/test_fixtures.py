@@ -1,7 +1,6 @@
 """Tests for reusable fixtures module."""
 
 import pandas as pd
-import pytest
 
 from importer.metadata import SeadSchema
 from importer.submission import Submission

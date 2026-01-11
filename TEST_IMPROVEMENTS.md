@@ -228,12 +228,17 @@ def full_schema_service():
 
 **Result**: 41/42 unit tests passing (98% success rate), 0.22s execution time
 
-### Phase 3: Reorganize Structure ⚠️ **PARTIALLY COMPLETE**
-8. ✅ Integration tests already in `tests/integration/` subdirectory
-9. ⏳ Some integration tests still need refactoring (2 failures)
-10. ✅ Updated conftest.py with clear fixture organization
+### Phase 3: Reorganize Structure ✅ **COMPLETED**
+8. ✅ Created `tests/unit/` directory for pure unit tests
+9. ✅ Moved 6 unit test files to `tests/unit/`
+10. ✅ Created README.md files for both `tests/unit/` and `tests/integration/`
+11. ✅ Updated conftest.py with clear fixture organization
 
-**Status**: Structure is good, minor cleanup needed
+**Result**: Clear separation between unit tests (41 passing, 0.27s) and integration tests (requires DB)
+
+**Structure**:
+- `tests/unit/` - 41 tests, all passing, no database required
+- `tests/integration/` - 7 errors (require DB), 2 failures (need refactoring)
 
 ### Phase 4: Optimize ⏳ **READY TO START**
 11. ⏳ Add parametrized tests where appropriate
@@ -291,14 +296,17 @@ tests/
 ├── builders.py              # ✅ Factory functions for creating test data
 ├── conftest.py              # ✅ Pytest fixtures with minimal_config autouse
 ├── fixtures.py              # ✅ Reusable fixture library (14 patterns)
-├── test_config.py           # ✅ Config tests (1/1 passing)
-├── test_fixtures.py         # ✅ Fixture validation tests (14/14 passing)
-├── test_policy.py           # ✅ Policy tests (12/12 passing)
-├── test_to_csv.py           # ✅ Parser tests (2/2 passing)
-├── test_utility.py          # ✅ Utility tests (10/10 passing)
-├── test_xml.py              # ✅ XML tests (2/2 passing)
 ├── test_sandbox.py          # ⏭️ Skipped (data generation tool)
-├── integration/             # ⚠️ Integration tests (some failures)
+├── unit/                    # ✅ Pure unit tests (no DB, fast)
+│   ├── README.md            # Documentation for unit tests
+│   ├── test_config.py       # ✅ Config tests (1/1 passing)
+│   ├── test_fixtures.py     # ✅ Fixture validation tests (14/14 passing)
+│   ├── test_policy.py       # ✅ Policy tests (12/12 passing)
+│   ├── test_to_csv.py       # ✅ Parser tests (2/2 passing)
+│   ├── test_utility.py      # ✅ Utility tests (10/10 passing)
+│   └── test_xml.py          # ✅ XML tests (2/2 passing)
+├── integration/             # ⚠️ Integration tests (requires DB)
+│   ├── README.md            # Documentation for integration tests
 │   ├── test_metadata.py     # ⚠️ 1 failure
 │   ├── test_process.py      # ⚠️ 1 failure
 │   ├── test_submission.py   # 🔴 7 errors (requires DB)
@@ -312,15 +320,17 @@ tests/
 
 ### Fixture Usage Patterns
 
-**Unit Tests** (41/42 passing):
+**Unit Tests** (tests/unit/ - 41/41 passing):
 - Use `tests/fixtures.py` for pre-built patterns
 - Use `tests/builders.py` for custom schemas
-- Fast (0.22s), isolated, no database required
+- Fast (0.27s), isolated, no database required
+- Run with: `pytest tests/unit/`
 
-**Integration Tests** (need DB):
+**Integration Tests** (tests/integration/ - requires DB):
 - Use full CSV fixtures from `test_data/`
 - Require live database connection
 - Marked with `@pytest.mark.integration`
+- Run with: `pytest tests/integration/`
 
 ## Files Updated in Phases 1 & 2
 
@@ -332,7 +342,13 @@ tests/
 
 ### Modified Files ✅
 - `tests/conftest.py` - Added autouse `minimal_config` fixture
-- `tests/test_policy.py` - Refactored 7 tests, all now passing
-- `tests/test_to_csv.py` - Fixed 6 Parser API calls
-- `tests/test_config.py` - Fixed ConfigStore initialization
+- `tests/unit/test_policy.py` - Refactored 7 tests, all now passing
+- `tests/unit/test_to_csv.py` - Fixed 6 Parser API calls
+- `tests/unit/test_config.py` - Fixed ConfigStore initialization
 - `TEST_IMPROVEMENTS.md` - This file (updated status)
+
+### Reorganized Structure ✅
+- Created `tests/unit/` directory with 6 test files (41 tests)
+- Created `tests/unit/README.md` - Documentation for unit test development
+- Created `tests/integration/README.md` - Documentation for integration testing
+- Clear separation: unit tests (fast, no DB) vs integration tests (require DB)
