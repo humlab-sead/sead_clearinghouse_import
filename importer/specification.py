@@ -18,7 +18,7 @@ class SpecificationRegistry(Registry[type["SpecificationBase"]]):
     items: dict[str, type["SpecificationBase"]] = {}
 
 
-# pylint: disable=unused-argument
+# pylint: disable=unused-argument, arguments-differ
 
 
 @dataclass

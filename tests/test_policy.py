@@ -37,7 +37,7 @@ def test_get_policy_id():
     assert policy.get_id() == "policy_base"
 
 
-def test_add_primary_key_column_if_missing_policy():
+def test_add_primary_key_column_if_missing_policy(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -45,13 +45,13 @@ def test_add_primary_key_column_if_missing_policy():
     schema.__getitem__.return_value = table
     submission.data_tables = {"table1": pd.DataFrame(columns=["col1", "col2"])}
 
-    policy = AddPrimaryKeyColumnIfMissingPolicy(schema=schema, submission=submission)
+    policy = AddPrimaryKeyColumnIfMissingPolicy(schema=schema, submission=submission, service=service)
     policy.apply()
 
     assert "id" in submission.data_tables["table1"].columns
 
 
-def test_add_default_foreign_key_policy():
+def test_add_default_foreign_key_policy(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table: pd.DataFrame = pd.DataFrame({"fk_col": [None, None]})
@@ -65,14 +65,14 @@ def test_add_default_foreign_key_policy():
     submission.__getitem__.side_effect = lambda x: table
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
-        policy = UpdateMissingForeignKeyPolicy(schema=schema, submission=submission)
+        policy = UpdateMissingForeignKeyPolicy(schema=schema, submission=submission, service=service)
         policy.apply()
 
     assert (table["fk_col"] == 2).all()
     assert (table["fk_col2"] == 3).all()
 
 
-def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():
+def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -85,7 +85,7 @@ def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():
     config_value.resolve.return_value = {"table1"}
 
     with patch("importer.policies.ConfigValue", return_value=config_value):
-        policy = AddIdentityMappingSystemIdToPublicIdPolicy(schema=schema, submission=submission)
+        policy = AddIdentityMappingSystemIdToPublicIdPolicy(schema=schema, submission=submission, service=service)
         policy.apply()
 
     assert "table1" in submission.data_tables
@@ -93,7 +93,7 @@ def test_if_lookup_table_is_missing_add_table_using_system_id_as_public_id():
     assert list(submission.data_tables["table1"]["id"]) == [1, 2, 3]
 
 
-def test_update_types_based_on_sead_schema():
+def test_update_types_based_on_sead_schema(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -113,7 +113,7 @@ def test_update_types_based_on_sead_schema():
         )
     }
 
-    policy = UpdateTypesBasedOnSeadSchema(schema=schema, submission=submission)
+    policy = UpdateTypesBasedOnSeadSchema(schema=schema, submission=submission, service=service)
     policy.apply()
 
     assert submission.data_tables["table1"]["col1"].dtype == "Int16"
@@ -136,13 +136,13 @@ def test_if_system_id_is_missing_set_system_id_to_public_id():
         )
     }
 
-    policy = IfSystemIdIsMissingSetSystemIdToPublicId(schema=schema, submission=submission)
+    policy = IfSystemIdIsMissingSetSystemIdToPublicId(schema=schema, submission=submission, service=service)
     policy.apply()
 
     assert list(submission.data_tables["table1"]["system_id"]) == [1, 2, 3]
 
 
-def test_if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table():
+def test_if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_table(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     sead_schema = MagicMock(spec=SeadSchema)
@@ -156,28 +156,28 @@ def test_if_foreign_key_value_is_missing_add_identity_mapping_to_foreign_key_tab
     submission.data_tables = {table.table_name: pd.DataFrame({"system_id": [1], table.pk_name: [1]})}
     submission.__contains__.side_effect = lambda x: x in submission.data_tables
 
-    policy = IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(schema=schema, submission=submission)
+    policy = IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(schema=schema, submission=submission, service=service)
     policy.apply()
 
     assert list(submission.data_tables[table.table_name]["system_id"]) == [1, 2, 3]
     assert list(submission.data_tables[table.table_name][table.pk_name]) == [1, 2, 3]
 
 
-def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__not_lookup():
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__not_lookup(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
     table.is_lookup = False
     schema.__getitem__.return_value = table
     submission.data_tables = {"table1": pd.DataFrame(columns=["system_id", "public_id", "col1", "col2"])}
-    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission)
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission, service=service)
     policy.update()
 
     assert "col1" in submission.data_tables["table1"].columns
     assert "col2" in submission.data_tables["table1"].columns
 
 
-def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__pk_not_in_data_table():
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__pk_not_in_data_table(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -186,14 +186,14 @@ def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__pk_not_i
     schema.__getitem__.return_value = table
     submission.data_tables = {"table1": pd.DataFrame(columns=["system_id", "col1", "col2"])}
 
-    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission)
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission, service=service)
     policy.update()
 
     assert "col1" in submission.data_tables["table1"].columns
     assert "col2" in submission.data_tables["table1"].columns
 
 
-def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__all_pk_values_null():
+def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__all_pk_values_null(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -206,14 +206,14 @@ def test_if_lookup_with_no_new_data_then_keep_only_system_id_public_id__all_pk_v
         )
     }
 
-    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission)
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission, service=service)
     policy.update()
 
     assert "col1" in submission.data_tables["table1"].columns
     assert "col2" in submission.data_tables["table1"].columns
 
 
-def test_not_all_pk_values_null():
+def test_not_all_pk_values_null(service):
     schema = MagicMock(spec=SeadSchema)
     submission = MagicMock(spec=Submission)
     table = MagicMock(spec=Table)
@@ -226,7 +226,7 @@ def test_not_all_pk_values_null():
         )
     }
 
-    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission)
+    policy: PolicyBase = IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(schema=schema, submission=submission, service=service)
     policy.update()
 
     assert "col1" in submission.data_tables["table1"].columns

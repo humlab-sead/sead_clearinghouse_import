@@ -45,8 +45,8 @@ def schema(cfg: ConfigLike) -> Iterator[SeadSchema]:
 
 @pytest.fixture(scope="session")
 def service(cfg: ConfigLike) -> Iterator[SchemaService]:
-    sead_tables: pd.DataFrame = pd.read_csv("tests/test_data/source_tables.csv")
-    sead_columns: pd.DataFrame = pd.read_csv("tests/test_data/source_columns.csv")
+    sead_tables: pd.DataFrame = pd.read_csv("tests/test_data/sead_tables.csv")
+    sead_columns: pd.DataFrame = pd.read_csv("tests/test_data/sead_columns.csv")
 
     service: SchemaService = MockSchemaService(sead_tables=sead_tables, sead_columns=sead_columns)
     yield service
