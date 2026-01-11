@@ -1,15 +1,14 @@
 import os
 import sys
+from os.path import abspath, dirname, join
 from typing import Any
 
 import click
 import dotenv
 from loguru import logger
 
-from os.path import abspath, dirname, join
-
-from importer.configuration.inject import ConfigStore, ConfigValue
-from importer.metadata import Metadata
+from importer.configuration import ConfigStore, ConfigValue
+from importer.metadata import SchemaService, SeadSchema
 from importer.process import ImportService, Options
 from importer.scripts.utility import update_arguments_from_options_file
 from importer.submission import Submission
@@ -21,10 +20,10 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @click.command()
-@click.argument('config_filename')
+@click.argument("config_filename")
 @click.argument("filename")
 @click.option(
-    '--options-filename', type=str, default=None, help='Name of options file to use (alternative to CLI options).'
+    "--options-filename", type=str, default=None, help="Name of options file to use (alternative to CLI options)."
 )
 @click.option("--data-types", "-t", type=str, help="Types of data (short description)", required=False)
 @click.option(
@@ -37,7 +36,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--port", "-p", "port", type=int, default=5432, help="Server port number.")
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
 @click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
-@click.option("--table-names", type=str, default=None, help="Only load specified tables.")
+@click.option("--table", "-t", type=str, multiple=True, default=None, help="Only load specified tables.")
 @click.option("--xml-filename", type=str, default=None, help="Name of existing XML file to use.")
 @click.option("--log-folder", type=str, default="./logs", help="Name of existing XML file to use.")
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
@@ -49,7 +48,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option(
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
 )
-@click.option("--transfer-format", type=str, default='xml', help="Specify format to use in upload (XML or CSV).")
+@click.option("--transfer-format", type=str, default="xml", help="Specify format to use in upload (XML or CSV).")
 @click.option(
     "--dump-to-csv/--no-dump-to-csv",
     type=bool,
@@ -71,7 +70,7 @@ def import_file(
     output_folder: str,
     skip: str,
     submission_id: str,
-    table_names: str,
+    table: tuple[str, ...],
     xml_filename: str,
     check_only: bool,
     register: bool,
@@ -81,7 +80,7 @@ def import_file(
     tidy_xml: bool,
     transfer_format: str,
     dump_to_csv: bool,
-    options_filename: str = None,
+    options_filename: str | None = None,
 ) -> None:
     """
     Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
@@ -98,32 +97,36 @@ def import_file(
 
     setup_configuration(ctx, dict(locals()))
 
-    return workflow(opts=Options(**ConfigValue('options').resolve()))
+    return workflow(opts=Options(**ConfigValue("options").resolve() or {}))
 
 
 def setup_configuration(ctx, opts: dict[str, Any]) -> None:
 
     specified_keys: set[str] = _get_specified_cli_opts(ctx)
-    config_filename: str = opts.pop('config_filename')
-    log_folder: str = opts.pop('log_folder')
+    config_filename: str = opts.pop("config_filename")
+    log_folder: str = opts.pop("log_folder", "")
+    filename: str = str(opts.get("filename")) if opts.get("filename") else ""
 
-    if not log_folder and opts.get('filename'):
-        log_folder = join(dirname(abspath(opts.get('filename'))), "logs")
+    if not log_folder and filename:
+        log_folder = join(dirname(abspath(filename)), "logs")
 
     if not os.path.isfile(config_filename):
         logger.error(f" ---> file '{config_filename}' does not exist")
         sys.exit(1)
 
     opts = update_arguments_from_options_file(
-        arguments=opts, filename_key='options_filename', suffix=strip_path_and_extension(opts.get("filename")), ctx=ctx
+        arguments=opts,
+        filename_key="options_filename",
+        suffix=strip_path_and_extension(filename) if filename else "",
+        ctx=ctx,
     )
-    opts['database'] = {k: opts.pop(k) for k in ['host', 'dbname', 'user', 'port']}
+    opts["database"] = {k: opts.pop(k) for k in ["host", "dbname", "user", "port"]}
 
-    ConfigStore.configure_context(source=config_filename, env_filename='.env', env_prefix="SEAD_IMPORT")
+    ConfigStore.get_instance().configure_context(source=config_filename, env_filename=".env", env_prefix="SEAD_IMPORT")
 
-    ConfigStore().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
+    ConfigStore.get_instance().consolidate(opts, context="default", section="options", ignore_keys=specified_keys)
 
-    configure_logging(ConfigValue('logging').resolve() | ({} if not log_folder else {"folder": log_folder}))
+    configure_logging(ConfigValue("logging").resolve() or {} | ({} if not log_folder else {"folder": log_folder}))
 
 
 def _get_specified_cli_opts(ctx) -> set[str]:
@@ -140,13 +143,19 @@ def workflow(opts: Options) -> None:
     Returns:
         None: This function does not return any value.
     """
-    metadata: Metadata = Metadata(opts.db_uri())
+    schema_service: SchemaService = SchemaService(opts.db_uri())
+    schema: SeadSchema = schema_service.load()
 
-    if opts.filename.isnumeric():
+    if opts.filename and opts.filename.isnumeric():
+        """Submission id specified as filename, run workflow using existing submission in database"""
         opts.submission_id = int(opts.filename)
         opts.filename = None
 
     if not opts.use_existing_submission:
+
+        if not isinstance(opts.filename, str):
+            logger.error(" ---> no source filename specified")
+            return
 
         if opts.filename.endswith(".xml"):
             opts.xml_filename = opts.filename
@@ -161,17 +170,22 @@ def workflow(opts: Options) -> None:
                 logger.error("The --check-only option is not supported when using an existing XML file")
                 return
 
-    submission: Submission | str = (
-        opts.submission_id
-        if opts.use_existing_submission
-        else (
-            opts.xml_filename
-            if isinstance(opts.xml_filename, str)
-            else Submission.load(metadata=metadata, source=opts.filename)
-        )
-    )
-    ImportService(metadata=metadata, opts=opts).process(submission=submission)
+    submission: int | Submission | str
+    if opts.submission_id:
+        submission = opts.submission_id
+    elif isinstance(opts.xml_filename, str):
+        submission = opts.xml_filename
+    else:
+        if not isinstance(opts.filename, str):
+            logger.error(" ---> no source filename specified")
+            return
 
+        submission = Submission.load(schema=schema, source=opts.filename, service=schema_service)
+
+    ImportService(schema=schema, opts=opts).process(submission=submission)
+
+
+# pylint: disable=line-too-long
 
 if __name__ == "__main__":
     import_file()
@@ -210,5 +224,12 @@ if __name__ == "__main__":
     # )
 
     # copy-database --source sead_staging_202501 --target sead_staging_202501_adna --port 5433 --force --host humlabseadserv.srv.its.umu.se
-    # poetry run python importer/scripts/import_excel.py /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/config.yml /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx --no-timestamp --register --explode --database sead_staging_202501_adna --host humlabseadserv.srv.its.umu.se --user humlab_admin --port 5433 --data-types adna --name 20250108_DML_SUBMISSION_ADNA_COMMIT --transfer-format csv --output-folder /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/output --dump-to-csv
-    # bin/commit-submission --mode update --change 20250108_DML_SUBMISSION_ADNA_COMMIT --id 20250108_DML_SUBMISSION_ADNA_COMMIT --port 5433 --database sead_staging_202501_adna --project adna --no-create-issue
+    # uv run python importer/scripts/import_excel.py \
+    #   /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/config.yml \
+    #   /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/SEAD_aDNA_data_20241114_RM.xlsx  \
+    #       --no-timestamp --register --explode --database sead_staging_202501_adna  \
+    #       --host humlabseadserv.srv.its.umu.se --user humlab_admin --port 5433  \
+    #       --data-types adna --name 20250108_DML_SUBMISSION_ADNA_COMMIT --transfer-format csv \
+    #       --output-folder /home/roger/source/sead_clearinghouse_import/data/adna/SEAD_aDNA_data_20241114/output --dump-to-csv
+    # bin/commit-submission --mode update --change 20250108_DML_SUBMISSION_ADNA_COMMIT --id 20250108_DML_SUBMISSION_ADNA_COMMIT
+    #   --port 5433 --database sead_staging_202501_adna --project adna --no-create-issue

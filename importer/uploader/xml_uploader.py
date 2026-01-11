@@ -3,10 +3,13 @@ import os
 from typing import Any
 
 from loguru import logger
-from psycopg2.extensions import connection as Connection
+from psycopg import Connection
 
-from ..utility import log_decorator
+from importer.utility import log_decorator
+
 from . import BaseUploader, Uploaders
+
+# NFIXME: Deprecate XML uploader in favor of CSV uploader.
 
 
 @Uploaders.register(key="xml")
@@ -17,20 +20,20 @@ class XmlUploader(BaseUploader):
         self.target_schema: str = target_schema
 
     @log_decorator(enter_message=" ---> uploading XML...", exit_message=" ---> XML uploaded", level="DEBUG")
-    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:
+    def upload(self, connection: Connection, source: str | Any, submission_id: int) -> None:
         """Upload processed XML submission file to database."""
-        if xml_filename is None:
+        if source is None:
             raise ValueError("Either xml or filename must be provided")
 
-        if not isinstance(xml_filename, str):
+        if not isinstance(source, str):
             raise ValueError("XML must be a string or a filename")
 
-        if '<' in xml_filename:
-            xml: str = xml_filename
+        if "<" in source:
+            xml: str = source
         else:
-            if not os.path.exists(xml_filename):
-                raise ValueError(f"XML file {xml_filename} does not exist")
-            with io.open(xml_filename, mode="r", encoding="utf-8") as f:
+            if not os.path.exists(source):
+                raise ValueError(f"XML file {source} does not exist")
+            with io.open(source, mode="r", encoding="utf-8") as f:
                 xml: str = f.read()
 
         with connection.cursor() as cursor:
@@ -45,13 +48,13 @@ class XmlUploader(BaseUploader):
         """Extract submission into staging tables."""
         with connection.cursor() as cursor:
             logger.info("   --> extracting table names from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_tables", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_tables", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting columns from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_columns", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_columns", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting records from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_records", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_records", (submission_id,))  # type: ignore
 
             logger.info("   --> extracting values from xml...")
-            cursor.callproc("clearing_house.fn_extract_and_store_submission_values", (submission_id,))
+            cursor.callproc("clearing_house.fn_extract_and_store_submission_values", (submission_id,))  # type: ignore

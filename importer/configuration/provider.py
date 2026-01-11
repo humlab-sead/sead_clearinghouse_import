@@ -251,7 +251,9 @@ class MockConfigProvider(ConfigProvider):
     def get_config(self, context: str | None = None) -> ConfigLike:  # pylint: disable=unused-argument
         return self._config
 
-    def set_config(self, config: ConfigLike, context: str | None = None) -> ConfigLike | None:  # pylint: disable=unused-argument
+    def set_config(
+        self, config: ConfigLike, context: str | None = None
+    ) -> ConfigLike | None:  # pylint: disable=unused-argument
         old_config: ConfigLike | None = self._config
         self._config = config
         return old_config

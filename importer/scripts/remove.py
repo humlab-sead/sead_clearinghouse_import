@@ -1,18 +1,11 @@
-import os
 import sys
-from typing import Any
 
 import click
 import dotenv
 from loguru import logger
 
-from importer.configuration.inject import ConfigStore, ConfigValue
-from importer.metadata import Metadata
-from importer.process import ImportService, Options
 from importer.repository import SubmissionRepository
-from importer.scripts.utility import update_arguments_from_options_file
-from importer.submission import Submission
-from importer.utility import configure_logging, strip_path_and_extension
+from importer.uploader import NullUploader
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -20,7 +13,7 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 
 
 @click.command()
-@click.argument('key', type=str)
+@click.argument("key", type=str)
 @click.option("--clear-header", type=str, help="Output folder", required=False)
 @click.option("--clear-exploded", type=str, help="Remove (exploded) data in CH entity tables", required=False)
 @click.option("--host", "-h", "host", type=str, help="Target database server")
@@ -40,8 +33,8 @@ def remove_submission(
     Removes a SEAD data submission from the SEAD ClearingHouse database.
     The `key` argument can be either a submission ID or submission name (i.e. CR name).
     """
-    opts = dict(host=host, dbname=dbname, user=user, port=port)
-    repository: SubmissionRepository = SubmissionRepository(opts, uploader=None)
+    opts = {"host": host, "dbname": dbname, "user": user, "port": port}
+    repository: SubmissionRepository = SubmissionRepository(opts, uploader=NullUploader())
 
     submission_id: int = int(key) if key.isdigit() else repository.get_id_by_name(key)
 

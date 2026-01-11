@@ -4,9 +4,9 @@ from typing import Any, Optional
 
 import click
 
-from .. import utility
+from importer import utility
 
-CLI_LOG_PATH = './logs'
+CLI_LOG_PATH = "./logs"
 
 
 def update_arguments_from_options_file(
@@ -14,9 +14,9 @@ def update_arguments_from_options_file(
     arguments: dict,
     filename_key: str,
     log_args: bool = True,
-    ctx: click.Context = None,
-    skip_keys: str = 'ctx,config_filename',
-    suffix: str = None,
+    ctx: click.Context | None = None,
+    skip_keys: str = "ctx,config_filename",
+    suffix: str | None = None,
 ) -> dict:
     """Updates `arguments` based on values found in file specified by `filename_key`.
     Values specified at the command line overrides values from options file."""
@@ -28,7 +28,7 @@ def update_arguments_from_options_file(
         arguments = utility.update_dict_from_yaml(options_filename, arguments)
         arguments.update(passed_cli_arguments(ctx, arguments))
 
-    for k in skip_keys.split(','):
+    for k in skip_keys.split(","):
         if k in arguments:
             del arguments[k]
 
@@ -55,7 +55,7 @@ def update_arguments_from_options_file(
 
 
 def log_arguments(
-    args: dict, subdir: bool = False, skip_keys: str = 'ctx,options_filename', suffix: str = None
+    args: dict, subdir: bool = False, skip_keys: str = "ctx,options_filename", suffix: str | None = None
 ) -> None:
     """Log run time arguments to file"""
 
@@ -75,11 +75,11 @@ def log_arguments(
     if suffix:
         log_name = utility.path_add_suffix(log_name, suffix=f"_{suffix.strip('_')}")
 
-    log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(',')}
+    log_args: dict = {k: fix_value(v) for k, v in args.items() if k not in skip_keys.split(",")}
     utility.write_yaml(log_args, log_name)
 
 
-def passed_cli_arguments(ctx: click.Context, args: dict) -> dict:
+def passed_cli_arguments(ctx: click.Context | None, args: dict) -> dict:
     """Returns a dictionary of arguments passed at the command line"""
     ctx = ctx or click.get_current_context()
     cli_args = {

@@ -2,6 +2,12 @@
     "pylint.lintOnChange": true,
     "python.linting.pylint": true,
     "python.linting.enabled": true,
+    "python.analysis.exclude": [
+        ".venv",
+        ".github",
+        "tmp",
+        "**/__pycache__"
+    ],
     "black-formatter.args": [
         "--line-length",
         "120"
@@ -21,22 +27,27 @@
         "editor.defaultFormatter": "redhat.vscode-xml"
     },
     "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#b41706",
-        "activityBar.background": "#b41706",
+        "editor.background": "#000000",
+        "sideBar.background": "#000000",
+        "panel.background": "#000000",
+        "activityBar.activeBackground": "#7d50ac",
+        "activityBar.background": "#7d50ac",
         "activityBar.foreground": "#e7e7e7",
         "activityBar.inactiveForeground": "#e7e7e799",
-        "activityBarBadge.background": "#011f04",
+        "activityBarBadge.background": "#412f1e",
         "activityBarBadge.foreground": "#e7e7e7",
         "commandCenter.border": "#e7e7e799",
-        "sash.hoverBorder": "#b41706",
-        "statusBar.background": "#831104",
+        "sash.hoverBorder": "#7d50ac",
+        "statusBar.background": "#644089",
         "statusBar.foreground": "#e7e7e7",
-        "statusBarItem.hoverBackground": "#b41706",
-        "statusBarItem.remoteBackground": "#831104",
+        "statusBarItem.hoverBackground": "#7d50ac",
+        "statusBarItem.remoteBackground": "#644089",
         "statusBarItem.remoteForeground": "#e7e7e7",
-        "titleBar.activeBackground": "#831104",
+        "titleBar.activeBackground": "#644089",
         "titleBar.activeForeground": "#e7e7e7",
-        "titleBar.inactiveBackground": "#83110499",
+        "titleBar.inactiveBackground": "#64408999",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
+    "peacock.remoteColor": "#644089"
+
 }

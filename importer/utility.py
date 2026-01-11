@@ -1,17 +1,17 @@
 from __future__ import annotations
 
 import base64
-import fnmatch
 import functools
 import importlib
 import io
 import os
+import pkgutil
 import re
 import sys
 import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
-from typing import TYPE_CHECKING, Any, Callable, Literal, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Self, TypeVar, overload
 from xml.dom import minidom
 
 import pandas as pd
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from .submission import Submission
 
 
-def configure_logging(opts: dict[str, str]) -> None:
+def configure_logging(opts: dict[str, dict]) -> None:
 
     logger.remove()
     logger.add(sys.stdout, level="INFO", format="{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}")
@@ -41,23 +41,23 @@ def configure_logging(opts: dict[str, str]) -> None:
             if handler["sink"] == "sys.stdout":
                 handler["sink"] = sys.stdout
 
-            elif isinstance(handler['sink'], str) and handler['sink'].endswith(".log"):
+            elif isinstance(handler["sink"], str) and handler["sink"].endswith(".log"):
                 handler["sink"] = join(
-                    opts.get('folder', 'logs'), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"
+                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"  # type: ignore[arg-type]
                 )
 
-        logger.configure(handlers=opts["handlers"])
+        logger.configure(handlers=opts["handlers"])  # type: ignore[arg-type]
 
 
 def pascal_to_snake_case(s: str) -> str:
     """
     Converts a string from PascalCase to snake_case.
     """
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
 def snake_to_pascal_case(s: str) -> str:
-    return ''.join(part.capitalize() for part in s.split('_'))
+    return "".join(part.capitalize() for part in s.split("_"))
 
 
 def import_sub_modules(module_folder: str) -> Any:
@@ -84,7 +84,7 @@ def recursive_update(d1: dict, d2: dict) -> dict:
 
 
 def recursive_filter_dict(
-    D: dict[str, Any], filter_keys: set[str], filter_mode: Literal['keep', 'exclude'] = 'exclude'
+    data: dict[str, Any], filter_keys: set[str], filter_mode: Literal["keep", "exclude"] = "exclude"
 ) -> dict[str, Any]:
     """
     Recursively filters a dictionary to include only keys in the given set.
@@ -97,8 +97,8 @@ def recursive_filter_dict(
     Returns:
         dict: A new dictionary containing only the keys in K, with nested dictionaries also filtered.
     """
-    if not isinstance(D, dict):
-        return D
+    if not isinstance(data, dict):
+        return data
 
     return {
         key: (
@@ -106,20 +106,18 @@ def recursive_filter_dict(
             if isinstance(value, dict)
             else value
         )
-        for key, value in D.items()
-        if (key in filter_keys if filter_mode == 'keep' else key not in filter_keys)
+        for key, value in data.items()
+        if (key in filter_keys if filter_mode == "keep" else key not in filter_keys)
     }
 
 
-def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
+def dget(data: dict, *path: str, default: Any = None) -> Any:
+    """Gets element from dict using multiple possible "dot" paths."""
     if path is None or not data:
         return default
 
-    ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
-
     d = None
-
-    for p in ps:
+    for p in path:
         d = dotget(data, p)
 
         if d is not None:
@@ -128,7 +126,8 @@ def dget(data: dict, *path: str | list[str], default: Any = None) -> Any:
     return d or default
 
 
-def dotexists(data: dict, *paths: list[str]) -> bool:
+def dotexists(data: dict, *paths: str) -> bool:
+    """Checks if any of the given dot paths exist in the dict."""
     for path in paths:
         if dotget(data, path, default="@@") != "@@":
             return True
@@ -136,12 +135,12 @@ def dotexists(data: dict, *paths: list[str]) -> bool:
 
 
 def dotexpand(path: str) -> list[str]:
-    """Expands paths with ',' and ':'."""
+    """Expands dot paths with ',' and ':'."""
     paths: list[str] = []
-    for p in path.replace(' ', '').split(','):
+    for p in path.replace(" ", "").split(","):
         if not p:
             continue
-        if ':' in p:
+        if ":" in p:
             paths.extend([p.replace(":", "."), p.replace(":", "_")])
         else:
             paths.append(p)
@@ -153,9 +152,9 @@ def dotget(data: dict, path: str, default: Any = None) -> Any:
     if path is x:y:y then element is search using borh x.y.y or x_y_y."""
 
     for key in dotexpand(path):
-        d: dict = data
-        for attr in key.split('.'):
-            d: dict = d.get(attr) if isinstance(d, dict) else None
+        d: dict | None = data
+        for attr in key.split("."):
+            d = d.get(attr) if isinstance(d, dict) else None
             if d is None:
                 break
         if d is not None:
@@ -167,7 +166,7 @@ def dotset(data: dict, path: str, value: Any) -> dict:
     """Sets element in dict using dot notation x.y.z or x:y:z"""
 
     d: dict = data
-    attrs: list[str] = path.replace(":", ".").split('.')
+    attrs: list[str] = path.replace(":", ".").split(".")
     for attr in attrs[:-1]:
         if not attr:
             continue
@@ -187,7 +186,7 @@ def env2dict(prefix: str, data: dict[str, str] | None = None, lower_key: bool = 
         if lower_key:
             key = key.lower()
         if key.startswith(prefix.lower()):
-            dotset(data, key[len(prefix) + 1 :].replace('_', ':'), value)
+            dotset(data, key[len(prefix) + 1 :].replace("_", ":"), value)
     return data
 
 
@@ -207,8 +206,10 @@ def replace_env_vars(data: R) -> R:
 
 
 def log_decorator(
-    enter_message: str | None = 'Entering', exit_message: str | None = 'Exiting', level: int | str = "INFO"
+    enter_message: str | None = "Entering", exit_message: str | None = "Exiting", level: int | str = "INFO"
 ):
+    """Decorator to log entry and exit of a function."""
+
     def decorator(func):
 
         if __debug__:
@@ -221,10 +222,10 @@ def log_decorator(
                 return func(*args, **kwargs)
 
             if enter_message:
-                logger.log(level, f'{enter_message} ({func.__name__})')
+                logger.log(level, f"{enter_message} ({func.__name__})")
             result = func(*args, **kwargs)
             if exit_message:
-                logger.log(level, f'{exit_message} ({func.__name__})')
+                logger.log(level, f"{exit_message} ({func.__name__})")
             return result
 
         return wrapper
@@ -242,7 +243,7 @@ def log_decorator(
 
 def load_json_from_file(identifier: str) -> str:
     sql_path: str = join(dirname(abspath(__file__)), "json", identifier + ".json")
-    with open(sql_path, "r") as file:
+    with open(sql_path, "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -260,7 +261,9 @@ def upload_dataframe_to_postgres(df: pd.DataFrame, table_name: str, db_uri: str)
     df.to_sql(table_name, engine, schema="public", if_exists="fail", index=False)
 
 
-def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str = None, dtype: Any = None) -> pd.DataFrame:
+def load_dataframe_from_postgres(
+    sql: str, db_uri: str, index_col: str | None = None, dtype: Any = None
+) -> pd.DataFrame:
     """
     Loads a pandas DataFrame from a PostgreSQL database.
 
@@ -273,37 +276,37 @@ def load_dataframe_from_postgres(sql: str, db_uri: str, index_col: str = None, d
     return pd.read_sql_query(sql, con=engine, index_col=index_col, dtype=dtype)
 
 
-def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortby: list[str] = None) -> pd.DataFrame:
-    """Returns a dataframe of tables from SEAD with attributes."""
-    index = index if isinstance(index, list) else [index]
-    sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
-    data: pd.DataFrame = (
-        (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
-        .set_index(index, drop=False)
-        .rename_axis([f'index_{x}' for x in index])
-        .sort_values(by=sortby if sortby else index)
-    )
-    return data
+# def load_sead_data(db_uri: str, sql: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None) -> pd.DataFrame:
+#     """Returns a dataframe of tables from SEAD with attributes."""
+#     index = index if isinstance(index, list) else [index]
+#     sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
+#     data: pd.DataFrame = (
+#         (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, db_uri, index_col=None))
+#         .set_index(index, drop=False)
+#         .rename_axis([f"index_{x}" for x in index])
+#         .sort_values(by=sortby if sortby else index)
+#     )
+#     return data
 
 
-def load_sead_columns(db_uri: str, ignore_columns: list[str] = None) -> pd.DataFrame:
-    """Returns a dataframe of table columns from SEAD with attributes."""
-    sql: str = "select * from clearing_house.clearinghouse_import_columns"
-    data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
-    if ignore_columns:
-        columns_to_ignore: list[str] = [
-            c for c in data['column_name'].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
-        ]
-        data = data[~data['column_name'].isin(columns_to_ignore)]
+# def load_sead_columns(db_uri: str, ignore_columns: list[str] | None = None) -> pd.DataFrame:
+#     """Returns a dataframe of table columns from SEAD with attributes."""
+#     sql: str = "select * from clearing_house.clearinghouse_import_columns"
+#     data: pd.DataFrame = load_sead_data(db_uri, sql, ["table_name", "column_name"], ["table_name", "position"])
+#     if ignore_columns:
+#         columns_to_ignore: list[str] = [
+#             c for c in data["column_name"].unique() if any(fnmatch.fnmatch(c, pattern) for pattern in ignore_columns)
+#         ]
+#         data = data[~data["column_name"].isin(columns_to_ignore)]
 
-    return data
+#     return data
 
 
-def flatten(l) -> list:
+def flatten(lst: list[Any]) -> list[Any]:
     """
     Flattens a list of lists
     """
-    return [item for sublist in l for item in sublist]
+    return [item for sublist in lst for item in sublist]
 
 
 def flatten_sets(x, y) -> set:
@@ -319,10 +322,11 @@ def camel_case_name(undescore_name: str) -> str:
 
 
 def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
+    """Tidies XML file using minidom. Requires `tidy` to be installed."""
     try:
         doc = minidom.parse(path)
         tidy_doc = doc.toprettyxml(encoding="UTF-8", newl="")
-        tidy_path: str = path[:-4] + "{}.xml".format(suffix)
+        tidy_path: str = f"{path[:-4]}{suffix}.xml"
         with io.open(tidy_path, "wb") as outstream:
             outstream.write(tidy_doc)
     except OSError as _:
@@ -336,6 +340,7 @@ def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> st
 
 
 def compress_and_encode(path: str) -> None:
+    """Compress and encode file using zlib and base64."""
     compressed_data: bytes = zlib.compress(path.encode("utf8"))
     encoded: bytes = base64.b64encode(compressed_data)
     uue_filename: str = path + ".gz.uue"
@@ -347,22 +352,45 @@ def compress_and_encode(path: str) -> None:
         outstream.write(compressed_data)
 
 
-class Registry:
-    items: dict = {}
+T = TypeVar("T")
+
+
+class Registry(Generic[T]):
+    """Registry for functions or classes."""
+
+    items: dict[str, T] = {}
 
     @classmethod
-    def get(cls, key: str) -> Any | None:
+    def get(cls, key: str) -> T:
         if key not in cls.items:
-            raise ValueError(f"preprocessor {key} is not registered")
-        return cls.items.get(key)
+            raise KeyError(f"preprocessor {key} is not registered")
+        return cls.items[key]
 
     @classmethod
     def register(cls, **args) -> Callable[..., Any]:
-        def decorator(fn):
+        def decorator(fn_or_class):
+            key_or_keys: str | list[str] = args.get("key") or fn_or_class.__name__
+            keys: list[str] = [key_or_keys] if isinstance(key_or_keys, str) else key_or_keys
+
+            if len(keys) == 0:
+                raise ValueError("Registry: key(s) cannot be empty")
+
+            if keys[0] in cls.items:
+                raise KeyError(f"Registry: Overriding existing registration for key '{keys[0]}'")
+
             if args.get("type") == "function":
-                fn = fn()
-            cls.items[args.get("key") or fn.__name__] = fn
-            return fn
+                fn_or_class = fn_or_class()
+            else:
+                setattr(fn_or_class, "_registry_key", keys[0])
+                setattr(fn_or_class, "_registry_opts", {k: v for k, v in args.items() if k != "key"})
+
+                fn_or_class = _ensure_key_property(fn_or_class)
+
+            for k in keys:
+                cls.items[k] = fn_or_class
+
+            fn_or_class = cls.registered_class_hook(fn_or_class, **args)
+            return fn_or_class
 
         return decorator
 
@@ -370,9 +398,35 @@ class Registry:
     def is_registered(cls, key: str) -> bool:
         return key in cls.items
 
+    @classmethod
+    def registered_class_hook(cls, fn_or_class: Any, **args) -> Any:  # pylint: disable=unused-argument
+        return fn_or_class
+
+    def scan(self, module_folder: str) -> Self:
+        import_sub_modules(module_folder)
+        return self
+
+
+def _ensure_key_property(cls):
+    if not hasattr(cls, "key"):
+
+        def key(self) -> str:
+            return getattr(self, "_registry_key", "unknown")
+
+        cls.key = property(key)
+    return cls
+
+
+@overload
+def strip_path_and_extension(filename: str) -> str: ...
+
+
+@overload
+def strip_path_and_extension(filename: list[str]) -> list[str]: ...
+
 
 def strip_path_and_extension(filename: str | list[str]) -> str | list[str]:
-    """Remove path and extension from filename(s). Return list."""
+    """Remove path and extension from filename(s)."""
     if isinstance(filename, str):
         return splitext(basename(filename))[0]
     return [splitext(basename(x))[0] for x in filename]
@@ -391,17 +445,17 @@ def replace_extension(filename: str, extension: str) -> str:
     return f"{base}{'' if extension.startswith('.') else '.'}{extension}"
 
 
-def path_add_suffix(path: str, suffix: str, new_extension: str = None) -> str:
+def path_add_suffix(path: str, suffix: str, new_extension: str | None = None) -> str:
     name, extension = splitext(path)
-    return f'{name}{suffix}{extension if new_extension is None else new_extension}'
+    return f"{name}{suffix}{extension if new_extension is None else new_extension}"
 
 
 def path_add_timestamp(path: str, fmt: str = "%Y%m%d%H%M") -> str:
-    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+    return path_add_suffix(path, f"_{datetime.now().strftime(fmt)}")
 
 
 def path_add_date(path: str, fmt: str = "%Y%m%d") -> str:
-    return path_add_suffix(path, f'_{datetime.now().strftime(fmt)}')
+    return path_add_suffix(path, f"_{datetime.now().strftime(fmt)}")
 
 
 def ts_data_path(directory: str, filename: str) -> str:
@@ -410,8 +464,8 @@ def ts_data_path(directory: str, filename: str) -> str:
 
 def read_yaml(file: Any) -> dict:
     """Read yaml file. Return dict."""
-    if isinstance(file, str) and any(file.endswith(x) for x in ('.yml', '.yaml')):
-        with open(file, "r", encoding='utf-8') as fp:
+    if isinstance(file, str) and any(file.endswith(x) for x in (".yml", ".yaml")):
+        with open(file, "r", encoding="utf-8") as fp:
             return yaml.load(fp, Loader=yaml.FullLoader)
     data: list[dict] = yaml.load(file, Loader=yaml.FullLoader)
     return {} if len(data) == 0 else data[0]
@@ -419,7 +473,7 @@ def read_yaml(file: Any) -> dict:
 
 def write_yaml(data: dict, file: str) -> None:
     """Write yaml to file.."""
-    with open(file, "w", encoding='utf-8') as fp:
+    with open(file, "w", encoding="utf-8") as fp:
         return yaml.dump(data=data, stream=fp)
 
 
@@ -446,7 +500,7 @@ def remove_keys_recursively(data: dict[str, Any], keys_to_remove: set[str]) -> d
     return data
 
 
-def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str] = None) -> dict:
+def update_dict_from_yaml(yaml_file: str, data: dict, keep_keys: set[str] | None = None) -> dict:
     """Update dict `data` with values found in `yaml_file`."""
     if yaml_file is None:
         return data
@@ -460,16 +514,16 @@ def create_db_uri(*, host: str, port: int | str, user: str, dbname: str) -> str:
     """
     Returns the database URI from the environment variables.
     """
-    return f"postgresql://{user}@{host}:{port}/{dbname}"
+    return f"postgresql+psycopg://{user}@{host}:{port}/{dbname}"
 
 
 def get_connection_uri(connection: Any) -> str:
     conn_info = connection.get_dsn_parameters()
-    user: str = conn_info.get('user')
-    host: str = conn_info.get('host')
-    port: str = conn_info.get('port')
-    dbname: str = conn_info.get('dbname')
-    uri: str = f"postgresql://{user}@{host}:{port}/{dbname}"
+    user: str = conn_info.get("user")
+    host: str = conn_info.get("host")
+    port: str = conn_info.get("port")
+    dbname: str = conn_info.get("dbname")
+    uri: str = f"postgresql+psycopg://{user}@{host}:{port}/{dbname}"
     return uri
 
 
@@ -508,21 +562,22 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
 
     with open(filename, "w", encoding="utf-8") as fp:
         for table_name in submission.data_table_names:
-            excel_sql_columns: str = next((x for x in submission.data_tables[table_name] if x.startswith('(')), None)
+
+            excel_sql_columns: str | None = next((x for x in submission.data_tables[table_name] if x.startswith("(")), None)  # type: ignore
             if excel_sql_columns:
-                pk_name: str = submission.metadata[table_name].pk_name
+                pk_name: str = submission.schema[table_name].pk_name
                 data = (
                     submission.data_tables[table_name][excel_sql_columns]
                     .str.strip()
-                    .str.lstrip('(')
-                    .str.rstrip(',')
+                    .str.lstrip("(")
+                    .str.rstrip(",")
                     .str.strip()
-                    .str.rstrip(')')
+                    .str.rstrip(")")
                 )
                 attributes: list[str] = [
-                    x.strip() for x in excel_sql_columns.strip().lstrip('(').rstrip(')').split(',')
+                    x.strip() for x in excel_sql_columns.strip().lstrip("(").rstrip(")").split(",")
                 ]
-                non_pk_attributes = [x for x in attributes if x not in ('system_id', pk_name)]
+                non_pk_attributes = [x for x in attributes if x not in ("system_id", pk_name)]
                 data: pd.Series = submission.data_tables[table_name][excel_sql_columns]
 
                 sql_data: str = template.render(
@@ -530,10 +585,28 @@ def to_lookups_sql(submission: Submission, filename: str) -> None:
                     pk_name=pk_name,
                     excel_sql_columns=excel_sql_columns,
                     excel_sql_values=data[~data.isnull()],
-                    non_pk_attributes=', '.join(non_pk_attributes),
+                    non_pk_attributes=", ".join(non_pk_attributes),
                 )
                 fp.write(sql_data)
 
 
 def ensure_path(f: str) -> None:
     os.makedirs(dirname(f), exist_ok=True)
+
+
+def import_submodules(package_name: str):
+    """
+    Recursively import all submodules of the given package.
+
+    Example:
+        # Inside mypackage/__init__.py
+        import_submodules(__name__)
+    """
+    package = importlib.import_module(package_name)
+    package_path = package.__path__  # Namespace packages supported
+
+    for module_info in pkgutil.walk_packages(package_path, prefix=package_name + "."):
+        module_name = module_info.name
+
+        if module_name not in globals():
+            importlib.import_module(module_name)

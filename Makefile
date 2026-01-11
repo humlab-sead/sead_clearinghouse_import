@@ -8,7 +8,7 @@ RUN_TIMESTAMP := $(shell /bin/date "+%Y-%m-%d-%H%M%S")
 .PHONY: install
 install:
 	@uv sync --all-extras
-
+	
 fast-release: clean tidy build guard_clean_working_repository bump.patch tag publish
 
 release: ready guard_clean_working_repository bump.patch tag  publish
@@ -21,21 +21,41 @@ build: requirements.txt
 publish:
 	@uv publish
 
-lint: tidy pylint flake8
+lint: tidy pylint ruff
+
+ruff:
+	@uv run ruff check $(SOURCE_FOLDERS) --fix
 
 tidy: black isort
 
 test: output-dir
-	@echo SKIPPING LONG RUNNING TESTS!
-	@uv run pytest -m "not long_running" --durations=0 tests
+	@echo "Running unit tests (fast, no DB required)..."
+	@uv run pytest tests/unit/ --durations=0
+	@rm -rf ./tests/output/*
+
+test-unit: output-dir
+	@echo "Running unit tests only..."
+	@uv run pytest tests/unit/ -v
+	@rm -rf ./tests/output/*
+
+test-integration: output-dir
+	@echo "Running integration tests (requires DB)..."
+	@uv run pytest tests/integration/ --durations=0
 	@rm -rf ./tests/output/*
 
 pytest: output-dir
 	@uv run pytest -m "not long_running" --durations=0 tests
 
 test-coverage: output-dir
-	@echo SKIPPING LONG RUNNING TESTS!
-	@uv run pytest -m "not long_running" --cov=$(PACKAGE_FOLDER) --cov-report=html tests
+	@echo "Running tests with coverage report..."
+	@uv run pytest tests/unit/ --cov=$(PACKAGE_FOLDER) --cov-report=html --cov-report=term
+	@echo "Coverage report generated in htmlcov/index.html"
+	@rm -rf ./tests/output/*
+
+test-coverage-full: output-dir
+	@echo "Running all tests with coverage report..."
+	@uv run pytest tests/ --cov=$(PACKAGE_FOLDER) --cov-report=html --cov-report=term
+	@echo "Coverage report generated in htmlcov/index.html"
 	@rm -rf ./tests/output/*
 
 full-test: output-dir

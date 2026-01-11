@@ -1,16 +1,14 @@
-import io
 import time
 from dataclasses import dataclass, field
 from os.path import basename, join, splitext
-from typing import Type
 
 from loguru import logger
 
-from importer.configuration.inject import ConfigValue
+from importer.configuration import ConfigValue
 
 from . import utility
-from .dispatchers import IDispatcher, to_xml
-from .metadata import Metadata
+from .dispatchers import Dispatchers, IDispatcher, to_csv
+from .metadata import SeadSchema
 from .repository import SubmissionRepository
 from .specification import SpecificationError, SubmissionSpecification
 from .submission import Submission
@@ -24,25 +22,25 @@ class Options:
     Options for the importer
     """
 
-    filename: str
+    filename: str | None
     skip: bool
-    submission_id: int
+    submission_id: int | None
     submission_name: str
     data_types: str
-    xml_filename: str = None
-    table_names: str = None
+    xml_filename: str | None = None
+    table_names: list[str] = field(default_factory=list)
     check_only: bool = False
     register: bool = False
     explode: bool = False
     timestamp: bool = True
     tidy_xml: bool = False
-    ignore_columns: list[str] = None
-    basename: str = field(init=False, default=None)
-    target: str = field(init=False, default=None)
+    ignore_columns: list[str] | None = None  # type: ignore[assignment]
+    basename: str | None = field(init=False, default=None)  # type: ignore[assignment]
+    target: str | None = field(init=False, default=None)  # type: ignore[assignment]
 
     output_folder: str = field(default="data/output")
     database: dict[str, str] = field(default_factory=dict)
-    transfer_format: str = field(default="xml")
+    transfer_format: str | None = field(default="xml")
     dump_to_csv: bool = field(default=False)
 
     def __post_init__(self) -> None:
@@ -71,24 +69,26 @@ class Options:
         """Name of the source file"""
         return basename(self.filename) if self.filename else self.submission_name
 
-    
+
 class ImportService:
     def __init__(
         self,
         *,
         opts: Options,
-        metadata: Metadata = None,
-        repository: SubmissionRepository = None,
-        dispatcher_cls: Type[IDispatcher] = None,
+        schema: SeadSchema,
+        repository: SubmissionRepository | None = None,
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(
-            opts.database, uploader=opts.transfer_format
+            opts.database, uploader=opts.transfer_format or "unknown"
         )
-        self.metadata: Metadata = metadata or Metadata(opts.db_uri())
-        self.dispatcher_cls: Type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
+        self.schema: SeadSchema = schema
+
+        # Select dispatcher based on transfer_format
+        self.dispatcher_cls: type[IDispatcher] = Dispatchers.get(key=opts.transfer_format or "csv")
+
         self.specification: SubmissionSpecification = SubmissionSpecification(
-            metadata=self.metadata, ignore_columns=self.opts.ignore_columns, raise_errors=False
+            schema=self.schema, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )
 
     @utility.log_decorator(
@@ -100,8 +100,9 @@ class ImportService:
         Stores submission in output_filename and returns filename for a cleaned up version of the XML
         """
 
-        with io.open(self.opts.target, "w", encoding="utf8") as outstream:
-            self.dispatcher_cls(outstream).dispatch(self.metadata, submission, self.opts.table_names)
+        self.dispatcher_cls().dispatch(
+            target=self.opts.target, schema=self.schema, submission=submission, table_names=self.opts.table_names
+        )
 
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)
@@ -118,8 +119,8 @@ class ImportService:
         - a SubmissionData object (parsed Excel file, see importer/submission.py)
         - a submission id (int) already stored in the database
         """
+        opts: Options = self.opts
         try:
-            opts: Options = self.opts
             if opts.skip is True:
                 logger.debug("Skipping: %s", opts.basename)
                 return
@@ -138,16 +139,14 @@ class ImportService:
                     submission.to_csv(self.opts.output_folder)
 
             if opts.use_existing_submission:
-
+                assert isinstance(
+                    opts.submission_id, int
+                ), "Submission id required when use_existing_submission is True"
                 self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             if not opts.use_existing_submission:
 
-                opts.xml_filename = (
-                    submission
-                    if isinstance(submission, str)
-                    else self.dispatch(submission, format_document=opts.tidy_xml)
-                )
+                assert not isinstance(submission, int), "Submission id provided but use_existing_submission is False"
 
                 if opts.register:
                     opts.submission_id = self.repository.register(
@@ -155,11 +154,30 @@ class ImportService:
                         source_name=opts.source_name,
                         data_types=opts.data_types,
                     )
+                assert isinstance(opts.submission_id, int), "Submission id falsy is unexpected after registration"
+
+                if opts.transfer_format == "csv":
+                    assert isinstance(submission, Submission), "Submission object required for CSV export"
+                    to_csv.CsvProcessor(ignore_columns=opts.ignore_columns).dispatch(
+                        target=opts.output_folder,
+                        schema=self.schema,
+                        submission=submission,
+                        table_names=opts.table_names,
+                    )
+                else:
+                    # Generate XML file
+                    opts.xml_filename = (
+                        submission
+                        if isinstance(submission, str)
+                        else self.dispatch(submission, format_document=opts.tidy_xml)
+                    )
 
                     self.repository.upload_xml(opts.xml_filename, opts.submission_id)
                     self.repository.extract_to_staging_tables(opts.submission_id)
 
             if opts.explode:
+
+                assert opts.submission_id is not None, "Submission id is required for exploding submission"
 
                 self.repository.explode_to_public_tables(
                     opts.submission_id, p_dry_run=False, p_add_missing_columns=False
@@ -169,5 +187,5 @@ class ImportService:
         except SpecificationError:
             logger.error(f"Specification(s) not satisfied {opts.basename}")
 
-        except Exception:
+        except Exception:  # pylint: disable=broad-except
             logger.exception(f"aborted critical error {opts.basename}")

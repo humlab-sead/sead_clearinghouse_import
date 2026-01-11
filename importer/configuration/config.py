@@ -237,7 +237,9 @@ class ConfigFactory:
         if isinstance(source, (Config, ConfigLike)):
             return source
 
-        filename: str | None = source if isinstance(source, str) and is_config_path(source, raise_if_missing=False) else None
+        filename: str | None = (
+            source if isinstance(source, str) and is_config_path(source, raise_if_missing=False) else None
+        )
 
         if source is None:
             source = {}
@@ -287,7 +289,11 @@ class BaseResolver:
     directive: str = ""
 
     def __init__(
-        self, context: str | None = None, env_filename: str | None = None, env_prefix: str | None = None, source_path: str | None = None
+        self,
+        context: str | None = None,
+        env_filename: str | None = None,
+        env_prefix: str | None = None,
+        source_path: str | None = None,
     ) -> None:
         self.context: str | None = context
         self.env_filename: str | None = env_filename
@@ -332,7 +338,11 @@ class SubConfigResolver(BaseResolver):
     directive: str = "@include"
 
     def __init__(
-        self, context: str | None = None, env_filename: str | None = None, env_prefix: str | None = None, source_path: str | None = None
+        self,
+        context: str | None = None,
+        env_filename: str | None = None,
+        env_prefix: str | None = None,
+        source_path: str | None = None,
     ) -> None:
         super().__init__(context=context, env_filename=env_filename, env_prefix=env_prefix, source_path=source_path)
 
@@ -341,7 +351,9 @@ class SubConfigResolver(BaseResolver):
         if not Path(filename).is_absolute() and base_path is not None:
             filename = str(base_path / filename)
         loaded_data: dict[str, Any] = (
-            ConfigFactory().load(source=filename, context=self.context, env_filename=self.env_filename, env_prefix=None).data
+            ConfigFactory()
+            .load(source=filename, context=self.context, env_filename=self.env_filename, env_prefix=None)
+            .data
         )
         return self._resolve(loaded_data, Path(filename).parent)
 
@@ -351,7 +363,11 @@ class LoadResolver(BaseResolver):
     directive: str = "@load"
 
     def __init__(
-        self, context: str | None = None, env_filename: str | None = None, env_prefix: str | None = None, source_path: str | None = None
+        self,
+        context: str | None = None,
+        env_filename: str | None = None,
+        env_prefix: str | None = None,
+        source_path: str | None = None,
     ) -> None:
         super().__init__(context=context, env_filename=env_filename, env_prefix=env_prefix, source_path=source_path)
 
@@ -368,7 +384,9 @@ class LoadResolver(BaseResolver):
                 return directive_argument
 
             if "filename" not in opts:
-                logger.warning(f"ignoring load directive for path '{directive_argument}' since no filename is specified in options")
+                logger.warning(
+                    f"ignoring load directive for path '{directive_argument}' since no filename is specified in options"
+                )
                 return directive_argument
 
             filename, sep = opts["filename"], opts.get("delimiter", ",")
@@ -380,13 +398,22 @@ class LoadResolver(BaseResolver):
             filename = str(base_path / filename)
 
         if not is_path_to_existing_file(filename):
-            logger.warning(f"ignoring load directive for path '{directive_argument}' since file '{filename}' does not exist")
+            logger.warning(
+                f"ignoring load directive for path '{directive_argument}' since file '{filename}' does not exist"
+            )
             return directive_argument
 
         try:
-            loaded_data: list[dict[Any, Any]] = pd.read_csv(filename, sep=sep, dtype=str).to_dict(orient="records")
+            loaded_data: list[dict[Any, Any]] = pd.read_csv(
+                filename,
+                sep=sep,
+                dtype=str,
+            ).to_dict(orient="records")
         except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.warning(f"ignoring load directive for path '{directive_argument}' since file '{filename}' could not be parsed: {e}")
+            logger.warning(
+                f"ignoring load directive for path '{directive_argument}' since file '{
+                    filename}' could not be parsed: {e}"
+            )
             return directive_argument
 
         return loaded_data

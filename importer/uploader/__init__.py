@@ -4,14 +4,14 @@ import os
 from typing import Any
 
 from loguru import logger
-from psycopg2.extensions import connection as Connection
+from psycopg import Connection
 
 from importer.utility import Registry
 
 
 class BaseUploader(abc.ABC):
     @abc.abstractmethod
-    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:
+    def upload(self, connection: Connection, source: str | Any, submission_id: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -19,11 +19,37 @@ class BaseUploader(abc.ABC):
         pass
 
 
-class UploaderRegistry(Registry):
-    items: dict = {}
+class NullUploader(BaseUploader):
+    def upload(
+        self, connection: Connection, source: str | Any, submission_id: int
+    ) -> None:  # pylint: disable=unused-argument
+        raise ValueError("No uploader specified")
+
+    def extract(self, connection: Connection, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("No uploader specified")
 
 
-Uploaders: UploaderRegistry = UploaderRegistry()
+class UnknownUploader(BaseUploader):
+
+    def upload(
+        self, connection: Connection, source: str | Any, submission_id: int
+    ) -> None:  # pylint: disable=unused-argument
+        raise ValueError("Invalid uploader specified")
+
+    def extract(self, connection: Connection, submission_id: int) -> None:  # pylint: disable=unused-argument
+        raise ValueError("Invalid uploader specified")
+
+
+class UploaderRegistry(Registry[type[BaseUploader]]):
+
+    items: dict[str, type[BaseUploader]] = {}
+
+    @classmethod
+    def get(cls, key: str) -> type[BaseUploader]:
+        return cls.items.get(key, UnknownUploader)
+
+
+Uploaders: UploaderRegistry = UploaderRegistry()  # pylint: disable=invalid-name
 
 
 __all__ = []

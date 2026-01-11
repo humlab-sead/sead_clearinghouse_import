@@ -12,10 +12,12 @@ Python system that transforms Excel data submissions into XML/CSV formats confor
 
 ### Key Components
 - **`Submission`** ([submission.py](../importer/submission.py)): Wrapper for Excel data tables loaded as pandas DataFrames
-- **`Metadata`** ([metadata.py](../importer/metadata.py)): Database schema metadata (tables, columns, FKs, PKs) queried from PostgreSQL `information_schema`
+- **`SeadSchema`** ([metadata.py](../importer/metadata.py)): Database schema metadata (tables, columns, FKs, PKs) queried from PostgreSQL `information_schema` or loaded from test fixtures
+- **`SchemaService`** ([metadata.py](../importer/metadata.py)): Service for loading schema from database or mock sources
 - **`Policies`** ([policies.py](../importer/policies.py)): Auto-registered data transformation rules applied to submissions (see Registry pattern below)
 - **`Specifications`** ([specification.py](../importer/specification.py)): Validation rules for data integrity
 - **`ImportService`** ([process.py](../importer/process.py)): Orchestrates the full workflow
+- **`SubmissionRepository`** ([repository.py](../importer/repository.py)): Manages database connections and submission operations
 
 ### Data Model Conventions
 - **`system_id`**: Internal temporary ID used during submission (required on all tables, must be unique per table)
@@ -46,7 +48,7 @@ class Options:
 **Priority order**: CLI args → options file → environment vars (`SEAD_IMPORT_*`) → YAML config
 
 Configuration files: 
-- Project-wide: [config.yml](../config.yml)
+- Project-wide: [config.yml](../configs/config.yml)
 - Data-specific: [data/config.yml](../data/config.yml)
 
 ## Developer Workflows
@@ -69,23 +71,32 @@ PYTHONPATH=. python importer/scripts/import_excel.py config.yml 123 --name "exis
 
 ### Testing
 ```bash
-make test           # Fast tests (excludes @pytest.mark.long_running)
-make full-test      # All tests including long-running
+make test           # Fast tests (unit tests only)
+make full-test      # All tests including integration tests
 make test-coverage  # With HTML coverage report
 ```
+
+**Test Organization:**
+- Unit tests: `tests/test_*.py`
+- Integration tests: `tests/integration/test_*.py`
+- Test fixtures: `tests/test_data/*.csv`
 
 ### Code Quality
 ```bash
 make tidy          # black + isort (line-length=120)
 make lint          # pylint across importer/ and tests/
+make ruff          # ruff linter (fast)
 ```
 
+**Install dev dependencies first:** `uv sync --all-extras`
+
 ### Environment Setup
-- Requires Python 3.12 (use pyenv)
+- Requires Python 3.13 (use uv)
 - uv for dependency management (install: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
 - External dependency: `tidy` CLI tool for XML formatting (`sudo apt-get install tidy`)
 - Database credentials in `.env` or passed via CLI
-- Run `uv sync` to install dependencies
+- Install dependencies: `uv sync --all-extras` (includes dev tools)
+- Database uses **psycopg3** with SQLAlchemy URI: `postgresql+psycopg://user@host:port/dbname`
 
 ## Common Gotchas
 
@@ -125,5 +136,5 @@ make lint          # pylint across importer/ and tests/
 - Black formatting: 120 char line length, skip string normalization
 - Use `loguru` for logging (not stdlib logging)
 - Dataclasses preferred for config/options objects
-- Type hints required (Python 3.12 syntax)
+- Type hints required (Python 3.13 syntax)
 - Pandas DataFrames are primary data structure for table manipulation
