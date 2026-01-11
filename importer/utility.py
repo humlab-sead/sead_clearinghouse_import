@@ -112,14 +112,11 @@ def recursive_filter_dict(
 
 
 def dget(data: dict, *path: str, default: Any = None) -> Any:
+    """Gets element from dict using multiple possible "dot" paths."""
     if path is None or not data:
         return default
 
-    # FIXME: *path must be a tuple of strings here
-    # ps: list[str] = path if isinstance(path, (list, tuple)) else [path]
-
     d = None
-
     for p in path:
         d = dotget(data, p)
 
@@ -130,6 +127,7 @@ def dget(data: dict, *path: str, default: Any = None) -> Any:
 
 
 def dotexists(data: dict, *paths: str) -> bool:
+    """Checks if any of the given dot paths exist in the dict."""
     for path in paths:
         if dotget(data, path, default="@@") != "@@":
             return True
@@ -137,7 +135,7 @@ def dotexists(data: dict, *paths: str) -> bool:
 
 
 def dotexpand(path: str) -> list[str]:
-    """Expands paths with ',' and ':'."""
+    """Expands dot paths with ',' and ':'."""
     paths: list[str] = []
     for p in path.replace(" ", "").split(","):
         if not p:
@@ -210,6 +208,7 @@ def replace_env_vars(data: R) -> R:
 def log_decorator(
     enter_message: str | None = "Entering", exit_message: str | None = "Exiting", level: int | str = "INFO"
 ):
+    """Decorator to log entry and exit of a function."""
     def decorator(func):
 
         if __debug__:
@@ -322,6 +321,7 @@ def camel_case_name(undescore_name: str) -> str:
 
 
 def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
+    """Tidies XML file using minidom. Requires `tidy` to be installed."""
     try:
         doc = minidom.parse(path)
         tidy_doc = doc.toprettyxml(encoding="UTF-8", newl="")
@@ -339,6 +339,7 @@ def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> st
 
 
 def compress_and_encode(path: str) -> None:
+    """Compress and encode file using zlib and base64."""
     compressed_data: bytes = zlib.compress(path.encode("utf8"))
     encoded: bytes = base64.b64encode(compressed_data)
     uue_filename: str = path + ".gz.uue"
@@ -354,6 +355,7 @@ T = TypeVar("T")
 
 
 class Registry(Generic[T]):
+    """Registry for functions or classes."""
     items: dict[str, T] = {}
 
     @classmethod
