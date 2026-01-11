@@ -9,7 +9,6 @@ dependencies = [
     "click>=8.3.0",
     "jinja2>=3.1.6",
     "loguru>=0.7.3",
-    "lxml>=4.9.4",
     "numpy>=1.26.2",
     "openpyxl>=3.1.2",
     "pandas>=2.3.3",
@@ -20,7 +19,6 @@ dependencies = [
     "xlrd>=2.0.1",
     "xlsx2csv>=0.8.4",
     "xlsxwriter>=3.1.9",
-    "xmltodict>=1.0.2",
 ]
 
 [project.optional-dependencies]
