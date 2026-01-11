@@ -35,12 +35,9 @@ def test_csv_processor_creates_four_files(tmp_path):
 
     submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
-    # Create output file in temp directory
-    output_file = tmp_path / "test_output.csv"
 
-    with open(output_file, "w", encoding="utf-8") as outstream:
-        processor = CsvProcessor(outstream)
-        processor.dispatch(schema=schema, submission=submission)
+    processor = CsvProcessor()
+    processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 
     # Check that all 4 CSV files were created
     expected_files = [
@@ -117,12 +114,8 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
         schema=schema,
     )
 
-    # Create output file in temp directory
-    output_file = tmp_path / "test_fk.csv"
-
-    with open(output_file, "w", encoding="utf-8") as outstream:
-        processor = CsvProcessor(outstream)
-        processor.dispatch(schema=schema, submission=submission)
+    processor = CsvProcessor()
+    processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 
     # Verify recordvalues.csv contains FK information
     recordvalues_file = tmp_path / "test_fk_recordvalues.csv"
@@ -186,11 +179,9 @@ def test_csv_processor_format_compatibility():
     submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        output_file = Path(tmp_dir) / "test.csv"
 
-        with open(output_file, "w", encoding="utf-8") as outstream:
-            processor = CsvProcessor(outstream)
-            processor.dispatch(schema=schema, submission=submission)
+        processor = CsvProcessor()
+        processor.dispatch(target=tmp_dir, schema=schema, submission=submission)
 
         # Check each CSV file has the correct columns
         for file_type, expected_cols in expected_columns.items():
