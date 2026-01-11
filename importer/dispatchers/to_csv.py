@@ -354,6 +354,7 @@ class CsvProcessor(IDispatcher):
             table_names: Optional list of specific tables to process
             extra_names: Optional extra table names (not used in CSV output)
         """
+        self.output_folder = target
         tables_to_process: list[str] = list(submission.data_tables.keys()) if table_names is None else table_names
 
         # Reset collectors

@@ -141,6 +141,6 @@ def two_table_schema():
 
 # These provide backward compatibility for existing tests
 # Gradually migrate tests to use the explicit fixtures above
-service = full_schema_service
-schema = full_schema
-submission = full_submission
+# service = full_schema_service
+# schema = full_schema
+# submission = full_submission

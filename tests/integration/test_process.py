@@ -9,6 +9,7 @@ from importer.submission import Submission
 def test_create_options(cfg: Config):
     opts: Options = Options(
         **{
+            "submission_name": "42",
             "filename": "data/input/dummy.xlsx",
             "data_types": "dendrochronology",
             "database": cfg.get("options:database"),

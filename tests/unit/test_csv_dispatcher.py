@@ -41,10 +41,10 @@ def test_csv_processor_creates_four_files(tmp_path):
 
     # Check that all 4 CSV files were created
     expected_files = [
-        tmp_path / "test_output_tables.csv",
-        tmp_path / "test_output_columns.csv",
-        tmp_path / "test_output_records.csv",
-        tmp_path / "test_output_recordvalues.csv",
+        tmp_path / "submission_tables.csv",
+        tmp_path / "submission_columns.csv",
+        tmp_path / "submission_records.csv",
+        tmp_path / "submission_recordvalues.csv",
     ]
 
     for expected_file in expected_files:
@@ -118,7 +118,7 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
     processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 
     # Verify recordvalues.csv contains FK information
-    recordvalues_file = tmp_path / "test_fk_recordvalues.csv"
+    recordvalues_file = tmp_path / "submission_recordvalues.csv"
     recordvalues_df = pd.read_csv(recordvalues_file, sep="\t", na_values="NULL", keep_default_na=False)
 
     # Find FK column in recordvalues
@@ -185,8 +185,8 @@ def test_csv_processor_format_compatibility():
 
         # Check each CSV file has the correct columns
         for file_type, expected_cols in expected_columns.items():
-            csv_file = Path(tmp_dir) / f"test_{file_type}.csv"
-            assert csv_file.exists(), f"{file_type}.csv was not created"
+            csv_file = Path(tmp_dir) / f"submission_{file_type}.csv"
+            assert csv_file.exists(), f"{csv_file} was not created"
 
             df = pd.read_csv(csv_file, sep="\t", nrows=0)  # Just read headers
             assert (
