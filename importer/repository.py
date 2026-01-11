@@ -6,7 +6,7 @@ from psycopg import Connection
 
 from importer.uploader import NullUploader
 
-from .uploader.xml_uploader import BaseUploader, Uploaders
+from .uploader import BaseUploader, Uploaders
 from .utility import log_decorator
 
 
@@ -106,12 +106,6 @@ class SubmissionRepository:
         enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG"
     )
     def register(self, *, name: str, source_name: str, data_types: str = "") -> int:
-        # if xml is None and filename is None:
-        #     raise ValueError("Either xml or filename must be provided")
-
-        # if xml is None:
-        #     with io.open(filename, mode="r", encoding="utf-8") as f:
-        #         xml: str = f.read()
         with self as connection:
             with connection.cursor() as cursor:
                 sql = """
@@ -129,6 +123,7 @@ class SubmissionRepository:
             return submission_id
 
     def get_table_names(self, submission_id: int) -> list[str]:
+        # FIXME: do not use tbl_clearinghouse_submission_xml_content_tables
         tables_names_sql: str = """
             select distinct t.table_name_underscored
             from clearing_house.tbl_clearinghouse_submission_tables t
