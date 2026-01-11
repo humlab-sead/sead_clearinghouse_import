@@ -20,20 +20,20 @@ class XmlUploader(BaseUploader):
         self.target_schema: str = target_schema
 
     @log_decorator(enter_message=" ---> uploading XML...", exit_message=" ---> XML uploaded", level="DEBUG")
-    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:
+    def upload(self, connection: Connection, source: str | Any, submission_id: int) -> None:
         """Upload processed XML submission file to database."""
-        if xml_filename is None:
+        if source is None:
             raise ValueError("Either xml or filename must be provided")
 
-        if not isinstance(xml_filename, str):
+        if not isinstance(source, str):
             raise ValueError("XML must be a string or a filename")
 
-        if "<" in xml_filename:
-            xml: str = xml_filename
+        if "<" in source:
+            xml: str = source
         else:
-            if not os.path.exists(xml_filename):
-                raise ValueError(f"XML file {xml_filename} does not exist")
-            with io.open(xml_filename, mode="r", encoding="utf-8") as f:
+            if not os.path.exists(source):
+                raise ValueError(f"XML file {source} does not exist")
+            with io.open(source, mode="r", encoding="utf-8") as f:
                 xml: str = f.read()
 
         with connection.cursor() as cursor:

@@ -1,4 +1,5 @@
 import contextlib
+import io
 import logging
 from typing import Any
 from xml.sax.saxutils import escape
@@ -10,7 +11,7 @@ from loguru import logger
 from importer.metadata import Column, SeadSchema, Table
 from importer.submission import Submission
 
-from . import IDispatcher
+from . import Dispatchers, IDispatcher
 
 # pylint: disable=too-many-nested-blocks, too-many-statements
 
@@ -37,30 +38,37 @@ def _to_none(value: Any) -> int | None:
     return value
 
 
+@Dispatchers.register(key="xml", target="file")
 class XmlProcessor(IDispatcher):
     """
-    Main class that processes the Excel file and produces a corresponging XML-file.
-    The format of the XML-file is conforms to clearinghouse specifications
+    Main class that processes the Submission and produces a corresponding XML-file.
+    The format of the XML-file conforms to clearinghouse specifications
     """
 
-    def __init__(self, outstream, level: int = logging.WARNING, ignore_columns: list[str] | None = None) -> None:
-        self.outstream = outstream
+    def __init__(self, level: int = logging.WARNING, ignore_columns: list[str] | None = None) -> None:
         self.level: int = level
         self.ignore_columns: list[str] = ignore_columns or ["date_updated"]
         self.jinja_env = Environment(autoescape=select_autoescape(["xml"]))
 
-    def emit(self, data: str, indent: int = 0) -> None:
-        self.outstream.write(f'{"  " * indent}{data}\n')
+    def emit(self, outstream, data: str, indent: int = 0) -> None:
+        outstream.write(f'{"  " * indent}{data}\n')
 
-    def emit_tag(self, tag: str, attributes: dict[str, Any] | None = None, indent=0, close=True) -> None:
+    def emit_tag(
+        self, outstream: io.TextIOWrapper, tag: str, attributes: dict[str, Any] | None = None, indent=0, close=True
+    ) -> None:
         attrib_str: str = " ".join([f'{x}="{y}"' for (x, y) in (attributes or {}).items()])
-        self.emit(f"<{tag} {attrib_str}{'/' if close else ''}>", indent)
+        self.emit(outstream, f"<{tag} {attrib_str}{'/' if close else ''}>", indent)
 
-    def emit_close_tag(self, tag: str, indent: int) -> None:
-        self.emit(f"</{tag}>", indent)
+    def emit_close_tag(self, outstream: io.TextIOWrapper, tag: str, indent: int) -> None:
+        self.emit(outstream, f"</{tag}>", indent)
 
     def process_tables(
-        self, schema: SeadSchema, submission: Submission, table_names: list[str], max_rows: int = 0
+        self,
+        outstream: io.TextIOWrapper,
+        schema: SeadSchema,
+        submission: Submission,
+        table_names: list[str],
+        max_rows: int = 0,
     ) -> None:
         """
         Import assumes that all FK references points to a local "system_id" in referenced table
@@ -86,7 +94,7 @@ class XmlProcessor(IDispatcher):
             if data.shape[0] == 0:
                 continue
 
-            self.emit(f'<{table.java_class} length="{data.shape[0]}">', 1)
+            self.emit(outstream, f'<{table.java_class} length="{data.shape[0]}">', 1)
 
             for record in data.to_dict(orient="records"):
                 try:
@@ -109,10 +117,10 @@ class XmlProcessor(IDispatcher):
                     assert not (public_id is None and system_id is None)
 
                     if public_id is not None:
-                        self.emit(f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
+                        self.emit(outstream, f'<{table_namespace} id="{system_id}" clonedId="{public_id}"/>', 2)
                         continue
 
-                    self.emit(f'<{table_namespace} id="{system_id}">', 2)
+                    self.emit(outstream, f'<{table_namespace} id="{system_id}">', 2)
 
                     for column_name, column_spec in table.columns.items():
                         if column_name in self.ignore_columns:
@@ -126,21 +134,21 @@ class XmlProcessor(IDispatcher):
                             continue
 
                         if not column_spec.is_fk:
-                            self.process_pk_and_non_fk(data_row, public_id, system_id, column_spec)
+                            self.process_pk_and_non_fk(outstream, data_row, public_id, system_id, column_spec)
                         else:
                             fk_table_spec: Table = schema[column_spec.class_name]
                             fk_data_table: pd.DataFrame | None = submission[fk_table_spec.table_name]
-                            self.process_fk(data_row, column_spec, fk_table_spec, fk_data_table)
+                            self.process_fk(outstream, data_row, column_spec, fk_table_spec, fk_data_table)
 
                     # ClonedId tag is always emitted (NULL id missing)
                     self.emit(
+                        outstream,
                         f'<clonedId class="java.util.Integer">{"NULL" if public_id is None else public_id}</clonedId>',
                         3,
                     )
                     if "date_updated" in table.column_names():
-                        self.emit('<dateUpdated class="java.util.Date"/>', 3)
-
-                    self.emit(f"</{table_namespace}>", 2)
+                        self.emit(outstream, '<dateUpdated class="java.util.Date"/>', 3)
+                    self.emit(outstream, f"</{table_namespace}>", 2)
 
                 except Exception as x:
                     logger.error(f"CRITICAL FAILURE: Table {table_name} {x}")
@@ -151,10 +159,19 @@ class XmlProcessor(IDispatcher):
                     f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
                 )
                 for key in referenced_keyset:
-                    self.emit(f'<com.sead.database.{table.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2)
-            self.emit(f"</{table.java_class}>", 1)
+                    self.emit(
+                        outstream, f'<com.sead.database.{table.java_class} id="{int(key)}" clonedId="{int(key)}"/>', 2
+                    )
+            self.emit(outstream, f"</{table.java_class}>", 1)
 
-    def process_fk(self, data_row: dict, column: Column, fk_table_spec: Table, fk_data_table: pd.DataFrame) -> None:
+    def process_fk(
+        self,
+        outstream: io.TextIOWrapper,
+        data_row: dict,
+        column: Column,
+        fk_table_spec: Table,
+        fk_data_table: pd.DataFrame,
+    ) -> None:
         """The value is a FK system_id"""
         class_name: str = column.class_name
         camel_case_column_name: str = column.camel_case_column_name
@@ -167,7 +184,7 @@ class XmlProcessor(IDispatcher):
 
         fk_system_id: int | None = _to_int_or_none(data_row[column.column_name])
         if fk_system_id is None:
-            self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>', 3)
+            self.emit(outstream, f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="NULL"/>', 3)
             return
 
         fk_public_id: int | None = None
@@ -189,15 +206,20 @@ class XmlProcessor(IDispatcher):
         class_name = class_name.split(".")[-1]
 
         if fk_public_id is None:
-            self.emit(f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>', 3)
+            self.emit(
+                outstream, f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{fk_system_id}"/>', 3
+            )
         else:
             self.emit(
+                outstream,
                 f'<{camel_case_column_name} class="com.sead.database.{class_name}" id="{
                     int(fk_system_id)}" clonedId="{int(fk_public_id)}"/>',
                 3,
             )
 
-    def process_pk_and_non_fk(self, data_row: dict, public_id: int | None, system_id: int | None, column: Column):
+    def process_pk_and_non_fk(
+        self, outstream: io.TextIOWrapper, data_row: dict, public_id: int | None, system_id: int | None, column: Column
+    ):
         """The value is a PK or non-FK attribte"""
         value: Any = data_row[column.column_name]
 
@@ -210,6 +232,7 @@ class XmlProcessor(IDispatcher):
                 value = escape(value)
 
         self.emit(
+            outstream,
             f'<{column.camel_case_column_name} class="{column.class_name}">{value}</{column.camel_case_column_name}>',
             3,
         )
@@ -218,14 +241,15 @@ class XmlProcessor(IDispatcher):
 
     def dispatch(
         self,
+        target: str,
         schema: SeadSchema,
         submission: Submission,
         table_names: list[str] | None = None,
         extra_names: list[str] | None = None,
     ) -> None:
         tables_to_process: list[str] = list(submission.data_tables.keys()) if table_names is None else table_names
-
-        self.emit('<?xml version="1.0" ?>')
-        self.emit("<sead-data-upload>")
-        self.process_tables(schema, submission, tables_to_process)
-        self.emit("</sead-data-upload>")
+        with io.open(target, "w", encoding="utf8") as outstream:
+            self.emit(outstream, '<?xml version="1.0" ?>')
+            self.emit(outstream, "<sead-data-upload>")
+            self.process_tables(outstream, schema, submission, tables_to_process)
+            self.emit(outstream, "</sead-data-upload>")

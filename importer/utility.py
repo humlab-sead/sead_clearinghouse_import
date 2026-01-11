@@ -209,6 +209,7 @@ def log_decorator(
     enter_message: str | None = "Entering", exit_message: str | None = "Exiting", level: int | str = "INFO"
 ):
     """Decorator to log entry and exit of a function."""
+
     def decorator(func):
 
         if __debug__:
@@ -356,6 +357,7 @@ T = TypeVar("T")
 
 class Registry(Generic[T]):
     """Registry for functions or classes."""
+
     items: dict[str, T] = {}
 
     @classmethod

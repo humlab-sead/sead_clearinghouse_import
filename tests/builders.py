@@ -6,8 +6,7 @@ large CSV fixtures. Use these for unit tests that don't need the full schema.
 
 import pandas as pd
 
-from importer.metadata import Column, MockSchemaService, SeadSchema, Table
-from importer.metadata import SeadSchemaFactory
+from importer.metadata import Column, MockSchemaService, SeadSchema, SeadSchemaFactory, Table
 
 
 def build_column(

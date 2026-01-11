@@ -99,6 +99,7 @@ disable = [
     "protected-access",
     "f-string-without-interpolation",
     "pointless-string-statement",
+    "line-too-long"
 ]
 
 [tool.black]

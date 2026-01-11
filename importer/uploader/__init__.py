@@ -11,7 +11,7 @@ from importer.utility import Registry
 
 class BaseUploader(abc.ABC):
     @abc.abstractmethod
-    def upload(self, connection: Connection, xml_filename: str | Any, submission_id: int) -> None:
+    def upload(self, connection: Connection, source: str | Any, submission_id: int) -> None:
         pass
 
     @abc.abstractmethod
@@ -21,7 +21,7 @@ class BaseUploader(abc.ABC):
 
 class NullUploader(BaseUploader):
     def upload(
-        self, connection: Connection, xml_filename: str | Any, submission_id: int
+        self, connection: Connection, source: str | Any, submission_id: int
     ) -> None:  # pylint: disable=unused-argument
         raise ValueError("No uploader specified")
 
@@ -32,7 +32,7 @@ class NullUploader(BaseUploader):
 class UnknownUploader(BaseUploader):
 
     def upload(
-        self, connection: Connection, xml_filename: str | Any, submission_id: int
+        self, connection: Connection, source: str | Any, submission_id: int
     ) -> None:  # pylint: disable=unused-argument
         raise ValueError("Invalid uploader specified")
 

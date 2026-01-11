@@ -4,9 +4,8 @@ from typing import Any
 
 import pandas as pd
 from loguru import logger
-from tomlkit import key
 
-from importer.dispatchers import IDispatcher, Dispatchers
+from importer.dispatchers import Dispatchers, IDispatcher
 from importer.metadata import Column, SeadSchema, Table
 from importer.submission import Submission
 
@@ -41,12 +40,12 @@ def _format_value(value: Any, data_type: str) -> str:
     return str(value)
 
 
-@Dispatchers.register(key="csv", target="folder") 
+@Dispatchers.register(key="csv", target="folder")
 class CsvProcessor(IDispatcher):
     """
     Main class that processes the Submission and produces CSV files directly.
     The format of the CSV files conforms to exploded clearinghouse XML structure.
-    
+
     Creates 4 CSV files:
     - tables.csv: table metadata (table_type, record_count)
     - columns.csv: column metadata (table_type, column_name, column_type)
@@ -54,26 +53,16 @@ class CsvProcessor(IDispatcher):
     - recordvalues.csv: actual data values (class_name, system_id, public_id, column_name, column_type, fk_system_id, fk_public_id, column_value)
     """
 
-    def __init__(self, outstream, ignore_columns: list[str] | None = None) -> None:
-        self.outstream = outstream
+    def __init__(self, ignore_columns: list[str] | None = None) -> None:
         self.ignore_columns: list[str] = ignore_columns or ["date_updated"]
         self.output_folder: str | None = None
         self.basename: str = "submission"
-        
+
         # Data collectors
         self.tables_data: list[dict[str, Any]] = []
         self.columns_data: list[dict[str, Any]] = []
         self.records_data: list[dict[str, Any]] = []
         self.recordvalues_data: list[dict[str, Any]] = []
-
-    def _extract_folder_from_outstream(self) -> str:
-        """Extract output folder from outstream filename."""
-        if hasattr(self.outstream, 'name'):
-            filepath = self.outstream.name
-            folder = os.path.dirname(filepath)
-            self.basename = os.path.splitext(os.path.basename(filepath))[0]
-            return folder if folder else "."
-        return "."
 
     def _process_table(self, schema: SeadSchema, submission: Submission, table_name: str) -> None:
         """Process a single table and collect data for CSV export."""
@@ -89,10 +78,7 @@ class CsvProcessor(IDispatcher):
         logger.debug(f"Processing {table_name}...")
 
         # Add table metadata
-        self.tables_data.append({
-            "table_type": table.java_class,
-            "record_count": str(data.shape[0])
-        })
+        self.tables_data.append({"table_type": table.java_class, "record_count": str(data.shape[0])})
 
         # Track which columns we've seen for this table
         columns_added: set[str] = set()
@@ -103,9 +89,7 @@ class CsvProcessor(IDispatcher):
             try:
                 data_row: dict = record.to_dict()
 
-                public_id: int | None = _to_int_or_none(
-                    data_row[table.pk_name] if table.pk_name in data_row else None
-                )
+                public_id: int | None = _to_int_or_none(data_row[table.pk_name] if table.pk_name in data_row else None)
                 system_id: int | None = _to_int_or_none(data_row.get("system_id"))
 
                 if public_id is None and system_id is None:
@@ -118,11 +102,13 @@ class CsvProcessor(IDispatcher):
                 referenced_keyset.discard(system_id)  # type: ignore[arg-type]
 
                 # Add record metadata
-                self.records_data.append({
-                    "class_name": table.java_class,
-                    "system_id": str(system_id) if system_id else "NULL",
-                    "public_id": str(public_id) if public_id is not None else "NULL"
-                })
+                self.records_data.append(
+                    {
+                        "class_name": table.java_class,
+                        "system_id": str(system_id) if system_id else "NULL",
+                        "public_id": str(public_id) if public_id is not None else "NULL",
+                    }
+                )
 
                 # If public_id exists, this is just a reference record - skip column values
                 if public_id is not None:
@@ -142,11 +128,13 @@ class CsvProcessor(IDispatcher):
 
                     # Add column metadata (only once per table)
                     if column_name not in columns_added:
-                        self.columns_data.append({
-                            "table_type": table.java_class,
-                            "column_name": column_spec.camel_case_column_name,
-                            "column_type": column_spec.class_name
-                        })
+                        self.columns_data.append(
+                            {
+                                "table_type": table.java_class,
+                                "column_name": column_spec.camel_case_column_name,
+                                "column_type": column_spec.class_name,
+                            }
+                        )
                         columns_added.add(column_name)
 
                     # Process column value
@@ -157,33 +145,35 @@ class CsvProcessor(IDispatcher):
 
                 # Always add clonedId column
                 if "clonedId" not in columns_added:
-                    self.columns_data.append({
-                        "table_type": table.java_class,
-                        "column_name": "clonedId",
-                        "column_type": "java.util.Integer"
-                    })
+                    self.columns_data.append(
+                        {"table_type": table.java_class, "column_name": "clonedId", "column_type": "java.util.Integer"}
+                    )
                     columns_added.add("clonedId")
 
                 # Add clonedId value
-                self.recordvalues_data.append({
-                    "class_name": table.java_class,
-                    "system_id": str(system_id) if system_id else "NULL",
-                    "public_id": "NULL" if public_id is None else str(public_id),
-                    "column_name": "clonedId",
-                    "column_type": "java.util.Integer",
-                    "fk_system_id": "NULL",
-                    "fk_public_id": "NULL",
-                    "column_value": "NULL" if public_id is None else str(public_id)
-                })
+                self.recordvalues_data.append(
+                    {
+                        "class_name": table.java_class,
+                        "system_id": str(system_id) if system_id else "NULL",
+                        "public_id": "NULL" if public_id is None else str(public_id),
+                        "column_name": "clonedId",
+                        "column_type": "java.util.Integer",
+                        "fk_system_id": "NULL",
+                        "fk_public_id": "NULL",
+                        "column_value": "NULL" if public_id is None else str(public_id),
+                    }
+                )
 
                 # Add date_updated if present in schema
                 if "date_updated" in table.column_names():
                     if "dateUpdated" not in columns_added:
-                        self.columns_data.append({
-                            "table_type": table.java_class,
-                            "column_name": "dateUpdated",
-                            "column_type": "java.util.Date"
-                        })
+                        self.columns_data.append(
+                            {
+                                "table_type": table.java_class,
+                                "column_name": "dateUpdated",
+                                "column_type": "java.util.Date",
+                            }
+                        )
                         columns_added.add("dateUpdated")
 
             except Exception as x:
@@ -196,11 +186,9 @@ class CsvProcessor(IDispatcher):
                 f"Warning: {table_name} has {len(referenced_keyset)} referenced keys not found in submission"
             )
             for key in referenced_keyset:
-                self.records_data.append({
-                    "class_name": table.java_class,
-                    "system_id": str(int(key)),
-                    "public_id": str(int(key))
-                })
+                self.records_data.append(
+                    {"class_name": table.java_class, "system_id": str(int(key)), "public_id": str(int(key))}
+                )
 
     def _process_pk_and_non_fk_value(
         self, data_row: dict, public_id: int | None, system_id: int | None, column: Column, table: Table
@@ -217,16 +205,18 @@ class CsvProcessor(IDispatcher):
 
         formatted_value = _format_value(value, column.class_name)
 
-        self.recordvalues_data.append({
-            "class_name": table.java_class,
-            "system_id": str(system_id) if system_id else "NULL",
-            "public_id": "NULL" if public_id is None else str(public_id),
-            "column_name": column.camel_case_column_name,
-            "column_type": column.class_name,
-            "fk_system_id": "NULL",
-            "fk_public_id": "NULL",
-            "column_value": formatted_value
-        })
+        self.recordvalues_data.append(
+            {
+                "class_name": table.java_class,
+                "system_id": str(system_id) if system_id else "NULL",
+                "public_id": "NULL" if public_id is None else str(public_id),
+                "column_name": column.camel_case_column_name,
+                "column_type": column.class_name,
+                "fk_system_id": "NULL",
+                "fk_public_id": "NULL",
+                "column_value": formatted_value,
+            }
+        )
 
     def _process_fk_value(
         self, data_row: dict, column: Column, schema: SeadSchema, submission: Submission, table: Table
@@ -244,27 +234,29 @@ class CsvProcessor(IDispatcher):
 
         fk_system_id: int | None = _to_int_or_none(data_row.get(column.column_name))
         system_id: int | None = _to_int_or_none(data_row.get("system_id"))
-        public_id: int | None = _to_int_or_none(
-            data_row[table.pk_name] if table.pk_name in data_row else None
-        )
+        public_id: int | None = _to_int_or_none(data_row[table.pk_name] if table.pk_name in data_row else None)
 
         if fk_system_id is None:
-            self.recordvalues_data.append({
-                "class_name": table.java_class,
-                "system_id": str(system_id) if system_id else "NULL",
-                "public_id": "NULL" if public_id is None else str(public_id),
-                "column_name": camel_case_column_name,
-                "column_type": f"com.sead.database.{class_name}",
-                "fk_system_id": "NULL",
-                "fk_public_id": "NULL",
-                "column_value": "NULL"
-            })
+            self.recordvalues_data.append(
+                {
+                    "class_name": table.java_class,
+                    "system_id": str(system_id) if system_id else "NULL",
+                    "public_id": "NULL" if public_id is None else str(public_id),
+                    "column_name": camel_case_column_name,
+                    "column_type": f"com.sead.database.{class_name}",
+                    "fk_system_id": "NULL",
+                    "fk_public_id": "NULL",
+                    "column_value": "NULL",
+                }
+            )
             return
 
         # Look up the FK public_id from the referenced table
         fk_public_id: int | None = None
-        fk_data_table: pd.DataFrame | None = submission[fk_table_spec.table_name] if fk_table_spec.table_name in submission else None
-        
+        fk_data_table: pd.DataFrame | None = (
+            submission[fk_table_spec.table_name] if fk_table_spec.table_name in submission else None
+        )
+
         if fk_data_table is None:
             fk_public_id = fk_system_id
         else:
@@ -286,21 +278,24 @@ class CsvProcessor(IDispatcher):
 
         class_name_short = class_name.split(".")[-1]
 
-        self.recordvalues_data.append({
-            "class_name": table.java_class,
-            "system_id": str(system_id) if system_id else "NULL",
-            "public_id": "NULL" if public_id is None else str(public_id),
-            "column_name": camel_case_column_name,
-            "column_type": f"com.sead.database.{class_name_short}",
-            "fk_system_id": str(fk_system_id) if fk_system_id else "NULL",
-            "fk_public_id": str(fk_public_id) if fk_public_id is not None else "NULL",
-            "column_value": "NULL"
-        })
+        self.recordvalues_data.append(
+            {
+                "class_name": table.java_class,
+                "system_id": str(system_id) if system_id else "NULL",
+                "public_id": "NULL" if public_id is None else str(public_id),
+                "column_name": camel_case_column_name,
+                "column_type": f"com.sead.database.{class_name_short}",
+                "fk_system_id": str(fk_system_id) if fk_system_id else "NULL",
+                "fk_public_id": str(fk_public_id) if fk_public_id is not None else "NULL",
+                "column_value": "NULL",
+            }
+        )
 
     def _write_csv_files(self) -> None:
         """Write collected data to CSV files."""
-        if not self.output_folder:
-            self.output_folder = self._extract_folder_from_outstream()
+
+        if self.output_folder is None:
+            raise ValueError("Output folder is not set or does not exist")
 
         os.makedirs(self.output_folder, exist_ok=True)
 
@@ -331,7 +326,9 @@ class CsvProcessor(IDispatcher):
         # Write recordvalues.csv
         recordvalues_file = os.path.join(self.output_folder, f"{self.basename}_recordvalues.csv")
         with open(recordvalues_file, "w", encoding="utf-8") as f:
-            f.write("class_name\tsystem_id\tpublic_id\tcolumn_name\tcolumn_type\tfk_system_id\tfk_public_id\tcolumn_value\n")
+            f.write(
+                "class_name\tsystem_id\tpublic_id\tcolumn_name\tcolumn_type\tfk_system_id\tfk_public_id\tcolumn_value\n"
+            )
             for row in self.recordvalues_data:
                 f.write(
                     f"{row['class_name']}\t{row['system_id']}\t{row['public_id']}\t"
@@ -342,6 +339,7 @@ class CsvProcessor(IDispatcher):
 
     def dispatch(
         self,
+        target: str,
         schema: SeadSchema,
         submission: Submission,
         table_names: list[str] | None = None,
@@ -349,7 +347,7 @@ class CsvProcessor(IDispatcher):
     ) -> None:
         """
         Main dispatch method that processes submission and creates CSV files.
-        
+
         Args:
             schema: SeadSchema metadata
             submission: Submission data to process
@@ -363,6 +361,8 @@ class CsvProcessor(IDispatcher):
         self.columns_data = []
         self.records_data = []
         self.recordvalues_data = []
+
+        os.makedirs(self.output_folder or ".", exist_ok=True)
 
         # Process each table
         for table_name in sorted(tables_to_process):

@@ -80,7 +80,7 @@ class Submission:
         """Find all tables that reference the given table, and have the PK column i the referencing table's data"""
         fk_tables: list[str] = [
             fk_table
-            for fk_table in schema.get_tablenames_referencing(table_name)  # FIXME: call service!
+            for fk_table in schema.get_tablenames_referencing(table_name)
             if fk_table in self.data_tables and pk_name in self.data_tables[fk_table].columns
         ]
         # logger.debug(f"   {table_name} is referenced by: {','.join(fk_tables)}")

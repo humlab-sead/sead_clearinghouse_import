@@ -87,7 +87,7 @@ def generate_test_excel(
     force: bool = False,
 ):
     def filter_table(
-        submission: Submission, table_name: str, column_name: str, values: pd.Series[int], flip: bool = False
+        submission: Submission, table_name: str, column_name: str, values: pd.Series, flip: bool = False
     ) -> pd.DataFrame:
         table: pd.DataFrame = submission[table_name]
         data: pd.DataFrame = table[table["system_id" if flip else column_name].isin(values)]

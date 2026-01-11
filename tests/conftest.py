@@ -61,7 +61,9 @@ def full_schema_service(cfg: ConfigLike) -> Iterator[SchemaService]:  # pylint: 
 
 
 @pytest.fixture(scope="session")
-def full_schema(full_schema_service: SchemaService, cfg: ConfigLike) -> Iterator[SeadSchema]:  # pylint: disable=unused-argument
+def full_schema(
+    full_schema_service: SchemaService, cfg: ConfigLike  # pylint: disable=unused-argument
+) -> Iterator[SeadSchema]:  # pylint: disable=unused-argument
     """Full SeadSchema - session scoped, use for integration tests only."""
     schema: SeadSchema = full_schema_service.load()
     yield schema
