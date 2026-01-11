@@ -1,11 +1,12 @@
 from typing import Iterator
 
+import pandas as pd
 import pytest
 from dotenv import load_dotenv
 
 from importer.configuration import ConfigStore
 from importer.configuration.interface import ConfigLike
-from importer.metadata import SchemaService, SeadSchema
+from importer.metadata import MockSchemaService, SchemaService, SeadSchema
 from importer.submission import Submission
 from importer.utility import create_db_uri
 
@@ -43,7 +44,10 @@ def schema(cfg: ConfigLike) -> Iterator[SeadSchema]:
 
 @pytest.fixture(scope="session")
 def service(cfg: ConfigLike) -> Iterator[SchemaService]:
-    service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
+    sead_tables: pd.DataFrame = pd.read_csv("tests/test_data/source_tables.csv")
+    sead_columns: pd.DataFrame = pd.read_csv("tests/test_data/source_columns.csv")
+
+    service: SchemaService = MockSchemaService(sead_tables=sead_tables, sead_columns=sead_columns)
     yield service
 
 @pytest.fixture(scope="session")

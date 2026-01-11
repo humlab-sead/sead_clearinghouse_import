@@ -25,14 +25,10 @@ class NullConnection:
 
 
 class SubmissionRepository:
-    def __init__(self, db_options: dict[str, Any], uploader: Any | BaseUploader | None = None) -> None:
+    def __init__(self, db_options: dict[str, Any], uploader: str | BaseUploader) -> None:
         self.db_options: dict[str, Any] = db_options
-        if isinstance(uploader, str):
-            logger.info(f"Using uploader: {uploader}")
-            uploader_instance: BaseUploader = (Uploaders.get(uploader) or NullUploader)()
-
         self.uploader: BaseUploader = (
-            uploader if isinstance(uploader, BaseUploader) else Uploaders.get(uploader or "unknown")()
+            uploader if isinstance(uploader, BaseUploader) else (Uploaders.get(uploader) or NullUploader)()
         )
         self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300
@@ -47,7 +43,7 @@ class SubmissionRepository:
     )
     def extract_to_staging_tables(self, submission_id: int) -> None:
         with self as connection:
-            self.uploader.extract(connection, submission_id)
+            self.uploader.extract(connection=connection, submission_id=submission_id)
 
     @log_decorator(
         enter_message=" ---> exploding submission...", exit_message=" ---> submission exploded", level="DEBUG"

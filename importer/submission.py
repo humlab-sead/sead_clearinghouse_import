@@ -24,6 +24,7 @@ class Submission:
     def __init__(self, data_tables: dict[str, pd.DataFrame], schema: SeadSchema, schema_service: SchemaService) -> None:
         self.data_tables: dict[str, pd.DataFrame] = data_tables
         self.schema: SeadSchema = schema
+        # FIXME: unused?
         self.schema_service: SchemaService = schema_service
         self._table_lookup: dict[str, pd.DataFrame] = self._generate_table_lookup(data_tables, schema)
 

@@ -83,7 +83,7 @@ class ImportService:
     ) -> None:
         self.opts: Options = opts
         self.repository: SubmissionRepository = repository or SubmissionRepository(
-            opts.database, uploader=opts.transfer_format
+            opts.database, uploader=opts.transfer_format or "unknown"
         )
         self.schema: SeadSchema = schema
         self.dispatcher_cls: type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor

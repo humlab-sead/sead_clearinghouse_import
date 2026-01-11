@@ -80,10 +80,6 @@ from importer.utility import create_db_uri
 #     }
 
 
-def add_dummy_row(table: pd.DataFrame, row: list[Any]):
-    table.append(pd.Series([row]), index=table.columns, ignore_index=True, inplace=True)
-
-
 def generate_test_excel(
     excel_filename: str,
     test_sites: list[int],
@@ -199,10 +195,10 @@ def load_test_submission(excel_filename: str, test_sites: list[int], filename: s
         opts: dict[str, Any] = ConfigValue("options:database").resolve() or {}
         service: SchemaService = SchemaService(create_db_uri(**opts))
         schema: SeadSchema = service.load()
-        submission: Submission = Submission.load(schema=schema, source=excel_filename)
+        submission: Submission = Submission.load(schema=schema, source=excel_filename, service=service)
         with open(pickled_filename, "wb") as fp:
             pickle.dump(submission, fp)
     else:
         with open(pickled_filename, "rb") as fp:
-            submission: dict[str, pd.DataFrame] = pickle.load(fp)
+            submission = pickle.load(fp)
     return submission

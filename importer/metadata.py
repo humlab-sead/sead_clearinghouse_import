@@ -2,6 +2,7 @@ from dataclasses import asdict, dataclass, field
 from fnmatch import fnmatch
 from functools import cached_property
 from typing import Any, Iterator
+from collections.abc import ItemsView, Iterator, KeysView, ValuesView
 
 # pylint: disable=no-member
 import pandas as pd
@@ -128,7 +129,6 @@ class Table:
         return sorted(c.column_name for c in self.columns.values() if c.is_nullable)
 
 
-from collections.abc import ItemsView, Iterator, KeysView, ValuesView
 
 
 class SeadSchema:
@@ -289,12 +289,16 @@ class SchemaService:
             from clearing_house.clearinghouse_import_columns
         """
         data: pd.DataFrame = self._load_sead_data(sql, ["table_name", "column_name"], ["table_name", "position"])
+        data = self.remove_ignored_columns(data)
+
+        return data
+
+    def remove_ignored_columns(self, data: pd.DataFrame) -> pd.DataFrame:
         if self.ignore_columns:
             columns_to_ignore: list[str] = [
                 c for c in data["column_name"].unique() if any(fnmatch(c, pattern) for pattern in self.ignore_columns)
             ]
             data = data[~data["column_name"].isin(columns_to_ignore)]
-
         return data
 
     def get_primary_key_values(self, table_name: str, pk_name: str) -> set[int]:
@@ -307,18 +311,23 @@ class SchemaService:
         return keys
 
     def _load_sead_data(
-        self, sql: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None
+        self, source: str | pd.DataFrame, index: list[str], sortby: list[str] | None = None
     ) -> pd.DataFrame:
         """Returns a dataframe of tables from SEAD with attributes."""
         index = index if isinstance(index, list) else [index]
         sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
-        data: pd.DataFrame = (
-            (sql if isinstance(sql, pd.DataFrame) else load_dataframe_from_postgres(sql, self.db_uri, index_col=None))
+        data: pd.DataFrame = self._resolve_source(source)
+        data = (data
             .set_index(index, drop=False)
             .rename_axis([f"index_{x}" for x in index])
             .sort_values(by=sortby if sortby else index)
         )
         return data
+
+    def _resolve_source(self, source: str | pd.DataFrame) -> pd.DataFrame:
+        if isinstance(source, pd.DataFrame):
+            return source
+        return load_dataframe_from_postgres(source, self.db_uri, index_col=None)
 
     def load(self) -> SeadSchema:
         """Loads the SEAD schema from the database."""
@@ -332,8 +341,10 @@ class MockSchemaService(SchemaService):
 
     def __init__(self, sead_tables: pd.DataFrame, sead_columns: pd.DataFrame) -> None:
         super().__init__(db_uri="")
-        self._sead_tables: pd.DataFrame = sead_tables
-        self._sead_columns: pd.DataFrame = sead_columns
+        self._sead_tables: pd.DataFrame = self._load_sead_data(sead_tables, ["table_name"], ["table_name"])
+        self._sead_columns: pd.DataFrame = self._load_sead_data(
+            sead_columns, ["table_name", "column_name"], ["table_name", "position"]
+        )
         self.ignore_columns = ["date_updated", "*_uuid", "(*"]
 
     def get_sead_tables(self) -> pd.DataFrame:

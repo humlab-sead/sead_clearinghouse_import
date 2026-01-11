@@ -5,6 +5,7 @@ import dotenv
 from loguru import logger
 
 from importer.repository import SubmissionRepository
+from importer.uploader import NullUploader
 
 dotenv.load_dotenv(dotenv.find_dotenv())
 
@@ -33,7 +34,7 @@ def remove_submission(
     The `key` argument can be either a submission ID or submission name (i.e. CR name).
     """
     opts = {"host": host, "dbname": dbname, "user": user, "port": port}
-    repository: SubmissionRepository = SubmissionRepository(opts, uploader=None)
+    repository: SubmissionRepository = SubmissionRepository(opts, uploader=NullUploader())
 
     submission_id: int = int(key) if key.isdigit() else repository.get_id_by_name(key)
 
