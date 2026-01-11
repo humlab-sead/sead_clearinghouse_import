@@ -1,6 +1,5 @@
 import pytest
 
-from importer.metadata import SeadSchema
 from tests.builders import build_column, build_schema, build_table
 
 # pylint: disable=redefined-outer-name,no-member
@@ -9,7 +8,7 @@ from tests.builders import build_column, build_schema, build_table
 def test_metadata_load_metadata():
     """Test that schema structure has expected attributes."""
     schema = build_schema([build_table("tbl_test", "test_id")])
-    
+
     assert schema.source_tables is not None
     assert schema.source_columns is not None
     assert isinstance(schema._tables, dict)
@@ -36,15 +35,15 @@ def test_tables_specifications():
             }
         ),
     ])
-    
+
     assert isinstance(schema._tables, dict)
     assert len(schema.source_tables) == len(schema)
-    
+
     # Check table structure
     assert "columns" in schema["tbl_sites"].keys()
     assert "site_id" in schema["tbl_sites"].columns.keys()
     assert len(schema["tbl_sites"].columns) == 2
-    
+
     # Check PK/FK flags
     assert schema["tbl_sites"].columns["site_id"].is_pk is True
     assert schema["tbl_sites"].columns["site_name"].is_pk is False
@@ -73,7 +72,7 @@ def test_is_pk():
             }
         ),
     ])
-    
+
     assert schema.is_pk("tbl_sites", "site_id") is True
     assert schema.is_pk("tbl_sites", "site_name") is False
     assert schema.is_pk("tbl_locations", "location_type_id") is False
@@ -100,7 +99,7 @@ def test_is_fk():
             }
         ),
     ])
-    
+
     assert schema.is_fk("tbl_sites", "site_id") is False
     assert schema.is_fk("tbl_sites", "site_name") is False
     assert schema.is_fk("tbl_locations", "location_type_id") is True
@@ -128,7 +127,7 @@ def test_get_tablenames_referencing():
             }
         ),
     ])
-    
+
     referencing_tables = set(schema.get_tablenames_referencing("tbl_sites"))
     assert referencing_tables == {"tbl_sample_groups", "tbl_site_images"}
 
@@ -147,8 +146,8 @@ def test_foreign_keys(table_name: str, fk_column: str, fk_table: str, fk_class: 
     schema = build_schema([
         build_table(fk_table, f"{fk_table.replace('tbl_', '')}_id", columns={
             f"{fk_table.replace('tbl_', '')}_id": build_column(
-                fk_table, 
-                f"{fk_table.replace('tbl_', '')}_id", 
+                fk_table,
+                f"{fk_table.replace('tbl_', '')}_id",
                 is_pk=True
             )
         }),
@@ -172,11 +171,11 @@ def test_foreign_keys(table_name: str, fk_column: str, fk_table: str, fk_class: 
             }
         ),
     ])
-    
+
     # Verify FK metadata exists
     assert schema._foreign_keys is not None
     assert len(schema._foreign_keys) > 0
-    
+
     # Verify this specific FK relationship exists
     fk_row = schema._foreign_keys[
         (schema._foreign_keys["table_name"] == table_name) &

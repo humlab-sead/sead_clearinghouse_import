@@ -1,9 +1,8 @@
 """Tests for metadata edge cases and utilities."""
 
-import pandas as pd
 import pytest
 
-from importer.metadata import Column, SeadSchema, Table
+from importer.metadata import Column, Table
 from tests.builders import build_column, build_schema, build_table
 
 
@@ -140,7 +139,7 @@ class TestTableOperations:
                 "nullable_col": build_column("tbl_test", "nullable_col", is_nullable=True),
             }
         )
-        
+
         all_names = table.column_names()
         assert "test_id" in all_names
         assert "nullable_col" in all_names
@@ -226,7 +225,7 @@ class TestSeadSchemaOperations:
     def test_schema_get(self):
         """Test get() method with default."""
         schema = build_schema([build_table("tbl_test", "test_id")])
-        
+
         table = schema.get("tbl_test")
         assert table is not None
         assert table.table_name == "tbl_test"
@@ -243,7 +242,7 @@ class TestSeadSchemaOperations:
         schema = build_schema([
             build_table("tbl_test", "test_id", java_class="TblTest")
         ])
-        
+
         # Should work with table_name
         table = schema.get_table("tbl_test")
         assert table.table_name == "tbl_test"
@@ -257,7 +256,7 @@ class TestSeadSchemaOperations:
         schema = build_schema([
             build_table("tbl_test", "test_id", excel_sheet="TestSheet")
         ])
-        
+
         # Should work with excel_sheet alias
         table = schema.get_table("TestSheet")
         assert table.table_name == "tbl_test"
@@ -265,7 +264,7 @@ class TestSeadSchemaOperations:
     def test_schema_get_table_not_found(self):
         """Test get_table() raises KeyError when not found."""
         schema = build_schema([build_table("tbl_test", "test_id")])
-        
+
         with pytest.raises(KeyError, match="tbl_nonexistent"):
             schema.get_table("tbl_nonexistent")
 
@@ -280,7 +279,7 @@ class TestSeadSchemaOperations:
                 }
             )
         ])
-        
+
         col = schema.get_column("tbl_test", "test_id")
         assert col.column_name == "test_id"
         assert col.is_pk is True
@@ -288,7 +287,7 @@ class TestSeadSchemaOperations:
     def test_schema_get_column_not_found(self):
         """Test get_column() raises KeyError when column not found."""
         schema = build_schema([build_table("tbl_test", "test_id")])
-        
+
         with pytest.raises(KeyError, match="nonexistent"):
             schema.get_column("tbl_test", "nonexistent")
 
@@ -298,7 +297,7 @@ class TestSeadSchemaOperations:
             build_table("tbl_main", "main_id", is_lookup=False),
             build_table("tbl_lookup", "lookup_id", is_lookup=True),
         ])
-        
+
         lookup_tables = schema.lookup_tables
         assert len(lookup_tables) == 1
         assert lookup_tables[0].table_name == "tbl_lookup"
@@ -309,7 +308,7 @@ class TestSeadSchemaOperations:
             build_table("tbl_test1", "test1_id", excel_sheet="tbl_test1"),  # Not aliased
             build_table("tbl_test2", "test2_id", excel_sheet="TestSheet2"),  # Aliased
         ])
-        
+
         aliased = schema.aliased_tables
         assert len(aliased) == 1
         assert aliased[0].table_name == "tbl_test2"
@@ -319,7 +318,7 @@ class TestSeadSchemaOperations:
         schema = build_schema([
             build_table("tbl_test", "test_id", excel_sheet="TestSheet"),
         ])
-        
+
         mapping = schema.table_name2excel_sheet
         assert mapping["tbl_test"] == "TestSheet"
 

@@ -1,10 +1,7 @@
 """Test edge cases and error handling in CSV dispatcher."""
 
-import tempfile
-from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from importer.dispatchers.to_csv import CsvProcessor, _format_value, _to_int_or_none, _to_none
 from importer.submission import Submission
@@ -125,7 +122,7 @@ class TestCsvProcessorEdgeCases:
 
         recordvalues_file = tmp_path / "submission_recordvalues.csv"
         recordvalues_df = pd.read_csv(recordvalues_file, sep="\t", na_values="NULL", keep_default_na=False)
-        
+
         # NULL values should be represented as empty strings in CSV
         null_rows = recordvalues_df[recordvalues_df["column_name"].isin(["nullable_int", "nullable_str"])]
         assert all(null_rows["column_value"] == "")
@@ -156,7 +153,7 @@ class TestCsvProcessorEdgeCases:
 
         tables_file = tmp_path / "submission_tables.csv"
         tables_df = pd.read_csv(tables_file, sep="\t")
-        
+
         # Should only process tbl_test1
         assert len(tables_df) == 1
         assert tables_df.iloc[0]["table_type"] == "TblTest1"
@@ -192,7 +189,7 @@ class TestCsvProcessorEdgeCases:
 
         recordvalues_file = tmp_path / "submission_recordvalues.csv"
         recordvalues_df = pd.read_csv(recordvalues_file, sep="\t", na_values="NULL", keep_default_na=False)
-        
+
         name_rows = recordvalues_df[recordvalues_df["column_name"] == "name"]
         assert len(name_rows) == 3
 
@@ -223,7 +220,7 @@ class TestCsvProcessorEdgeCases:
 
         records_file = tmp_path / "submission_records.csv"
         records_df = pd.read_csv(records_file, sep="\t", na_values="NULL", keep_default_na=False)
-        
+
         assert len(records_df) == 3
         # Check that existing record has public_id
         existing_record = records_df[records_df["system_id"] == 2]
@@ -236,12 +233,12 @@ class TestCsvProcessorEdgeCases:
         """Test that dispatch creates output directory if it doesn't exist."""
         output_dir = tmp_path / "new_folder"
         assert not output_dir.exists()
-        
+
         schema = build_schema([build_table("tbl_test", "test_id", java_class="TblTest")])
         submission = Submission(data_tables={}, schema=schema)
-        
+
         processor = CsvProcessor()
         processor.dispatch(target=output_dir, schema=schema, submission=submission)
-        
+
         assert output_dir.exists()
         assert (output_dir / "submission_tables.csv").exists()

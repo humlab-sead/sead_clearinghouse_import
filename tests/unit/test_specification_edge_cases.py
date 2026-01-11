@@ -3,7 +3,6 @@
 import pandas as pd
 import pytest
 
-from importer.metadata import SeadSchema
 from importer.specification import (
     ColumnTypesSpecification,
     ForeignKeyColumnsHasValuesSpecification,
@@ -40,7 +39,7 @@ class TestSpecificationEdgeCases:
 
         spec = HasSystemIdSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_test")
-        
+
         assert len(spec.errors) > 0
         assert any("missing system id" in err.lower() for err in spec.errors)
 
@@ -52,7 +51,7 @@ class TestSpecificationEdgeCases:
 
         spec = HasSystemIdSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_test")
-        
+
         assert len(spec.errors) > 0
         assert any("duplicate" in err.lower() for err in spec.errors)
 
@@ -65,9 +64,9 @@ class TestSpecificationEdgeCases:
                 columns={
                     "main_id": build_column("tbl_main", "main_id", is_pk=True),
                     "nullable_fk": build_column(
-                        "tbl_main", 
-                        "nullable_fk", 
-                        is_fk=True, 
+                        "tbl_main",
+                        "nullable_fk",
+                        is_fk=True,
                         is_nullable=True,
                         fk_table_name="tbl_lookup"
                     ),
@@ -87,7 +86,7 @@ class TestSpecificationEdgeCases:
 
         spec = ForeignKeyColumnsHasValuesSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_main")
-        
+
         # Should pass without errors since FK is nullable
         assert len(spec.errors) == 0
         # May have info or warning about nullable FK, but not an error
@@ -117,7 +116,7 @@ class TestSpecificationEdgeCases:
 
         spec = NonNullableColumnHasValueSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_test")
-        
+
         # Should pass because it's an existing record
         assert len(spec.errors) == 0
 
@@ -144,7 +143,7 @@ class TestSpecificationEdgeCases:
 
         spec = NonNullableColumnHasValueSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_test")
-        
+
         assert len(spec.errors) > 0
         assert any("null" in err.lower() for err in spec.errors)
 
@@ -170,7 +169,7 @@ class TestSpecificationEdgeCases:
 
         spec = ColumnTypesSpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_test")
-        
+
         # Should have no warnings for compatible types
         assert len([w for w in spec.warnings if "type clash" in w]) == 0
 
@@ -205,7 +204,7 @@ class TestSpecificationEdgeCases:
 
         spec = ForeignKeyExistsAsPrimaryKeySpecification(schema=schema)
         spec.is_satisfied_by(submission, table_name="tbl_main")
-        
+
         assert len(spec.errors) > 0
         assert any("missing in data" in err.lower() for err in spec.errors)
 
@@ -220,7 +219,7 @@ class TestSpecificationEdgeCases:
         spec2.info("Info 1")
 
         spec1.merge(spec2)
-        
+
         assert "Error 1" in spec1.errors
         assert "Error 2" in spec1.errors
         assert "Warning 1" in spec1.warnings
@@ -229,20 +228,20 @@ class TestSpecificationEdgeCases:
     def test_specification_error_with_messages_object(self):
         """Test SpecificationError can be created with SpecificationMessages."""
         schema = build_schema([build_table("tbl_test", "test_id")])
-        
+
         spec = SubmissionSpecification(schema=schema, raise_errors=True)
         spec.error("Test error")
-        
+
         with pytest.raises(SpecificationError) as exc_info:
             if spec.has_errors():
                 raise SpecificationError(spec.messages)
-        
+
         assert "Test error" in str(exc_info.value.messages)
 
     def test_specification_error_with_string(self):
         """Test SpecificationError can be created with a string message."""
         with pytest.raises(SpecificationError) as exc_info:
             raise SpecificationError("Simple error message")
-        
+
         assert len(exc_info.value.messages.errors) == 1
         assert "Simple error message" in exc_info.value.messages.errors[0]
