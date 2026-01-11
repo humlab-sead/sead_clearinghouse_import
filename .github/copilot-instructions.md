@@ -1,14 +1,14 @@
 # SEAD Clearinghouse Import - AI Agent Instructions
 
 ## Project Purpose
-Python system that transforms Excel data submissions into XML/CSV formats conforming to the SEAD ClearingHouse database schema, then uploads and processes them into PostgreSQL staging/public tables.
+Python system that transforms Excel data submissions into CSV format conforming to the SEAD ClearingHouse database schema, then uploads and processes them into PostgreSQL staging/public tables.
 
 ## Architecture Overview
 
 ### Core Workflow (3-stage pipeline)
 1. **Load & Transform**: Excel → `Submission` object (via policies) → validated data
-2. **Dispatch**: `Submission` → XML/CSV (via `IDispatcher` implementations)  
-3. **Upload & Process**: Files → DB staging tables → explode to public schema
+2. **Dispatch**: `Submission` → CSV (via `CsvProcessor` dispatcher)  
+3. **Upload & Process**: CSV files → DB staging tables → explode to public schema
 
 ### Key Components
 - **`Submission`** ([submission.py](../importer/submission.py)): Wrapper for Excel data tables loaded as pandas DataFrames
@@ -62,7 +62,7 @@ PYTHONPATH=. python importer/scripts/import_excel.py \
   --output-folder output/ \
   --register --explode
 
-# Check-only mode (validation without XML generation)
+# Check-only mode (validation without CSV generation)
 PYTHONPATH=. python importer/scripts/import_excel.py config.yml file.xlsx --check-only
 
 # Using existing submission ID
@@ -93,7 +93,7 @@ make ruff          # ruff linter (fast)
 ### Environment Setup
 - Requires Python 3.13 (use uv)
 - uv for dependency management (install: `curl -LsSf https://astral.sh/uv/install.sh | sh`)
-- External dependency: `tidy` CLI tool for XML formatting (`sudo apt-get install tidy`)
+
 - Database credentials in `.env` or passed via CLI
 - Install dependencies: `uv sync --all-extras` (includes dev tools)
 - Database uses **psycopg3** with SQLAlchemy URI: `postgresql+psycopg://user@host:port/dbname`
@@ -123,12 +123,12 @@ make ruff          # ruff linter (fast)
 
 ### Input/Output
 - Excel inputs: `data/<domain>/` (e.g., `data/dendro/`, `data/ceramics/`)
-- Generated XML/CSV: `output/` (timestamped filenames by default)
+- Generated CSV: `output/` (timestamped filenames by default)
 - Logs: `logs/` (YAML format with timestamp prefix)
 
 ### Key Source Modules
 - Entry point: [importer/scripts/import_excel.py](../importer/scripts/import_excel.py)
-- Dispatchers: [importer/dispatchers/](../importer/dispatchers/) (XML generation logic)
+- Dispatchers: [importer/dispatchers/](../importer/dispatchers/) (CSV generation logic)
 - Uploaders: [importer/uploader/](../importer/uploader/) (DB interaction)
 - Tests: [tests/](../tests/) (includes test submissions in `tests/submissions/`)
 

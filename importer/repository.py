@@ -6,7 +6,7 @@ from psycopg import Connection
 
 from importer.uploader import NullUploader
 
-from .uploader.xml_uploader import BaseUploader, Uploaders
+from .uploader import BaseUploader, Uploaders
 from .utility import log_decorator
 
 
@@ -32,11 +32,6 @@ class SubmissionRepository:
         )
         self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300
-
-    def upload_xml(self, xml_filename: str, submission_id: int) -> None:
-        with self as connection:
-            logger.info(f"Uploading data file using {type(self.uploader).__name__} uploader")
-            self.uploader.upload(connection, xml_filename, submission_id)
 
     @log_decorator(
         enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG"
@@ -106,12 +101,6 @@ class SubmissionRepository:
         enter_message=" ---> registering submission...", exit_message=" ---> submission registered", level="DEBUG"
     )
     def register(self, *, name: str, source_name: str, data_types: str = "") -> int:
-        # if xml is None and filename is None:
-        #     raise ValueError("Either xml or filename must be provided")
-
-        # if xml is None:
-        #     with io.open(filename, mode="r", encoding="utf-8") as f:
-        #         xml: str = f.read()
         with self as connection:
             with connection.cursor() as cursor:
                 sql = """
@@ -129,6 +118,9 @@ class SubmissionRepository:
             return submission_id
 
     def get_table_names(self, submission_id: int) -> list[str]:
+        """Get list of table names in underscored format for a submission.
+        NOTE: even though XML format is deprecated, these legacy tables are used for the time being.
+        """
         tables_names_sql: str = """
             select distinct t.table_name_underscored
             from clearing_house.tbl_clearinghouse_submission_tables t

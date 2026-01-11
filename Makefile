@@ -21,7 +21,7 @@ build: requirements.txt
 publish:
 	@uv publish
 
-lint: tidy pylint ruff
+lint: tidy ruff pylint
 
 ruff:
 	@uv run ruff check $(SOURCE_FOLDERS) --fix

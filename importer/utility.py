@@ -12,7 +12,6 @@ import zlib
 from datetime import datetime
 from os.path import abspath, basename, dirname, join, splitext
 from typing import TYPE_CHECKING, Any, Callable, Generic, Literal, Self, TypeVar, overload
-from xml.dom import minidom
 
 import pandas as pd
 import yaml
@@ -319,24 +318,6 @@ def flatten_sets(x, y) -> set:
 def camel_case_name(undescore_name: str) -> str:
     first, *rest = undescore_name.split("_")
     return first + "".join(word.capitalize() for word in rest)
-
-
-def tidy_xml(path: str, suffix: str = "_tidy", remove_source: bool = True) -> str:
-    """Tidies XML file using minidom. Requires `tidy` to be installed."""
-    try:
-        doc = minidom.parse(path)
-        tidy_doc = doc.toprettyxml(encoding="UTF-8", newl="")
-        tidy_path: str = f"{path[:-4]}{suffix}.xml"
-        with io.open(tidy_path, "wb") as outstream:
-            outstream.write(tidy_doc)
-    except OSError as _:
-        logger.error("fatal: Tidy XML failed. Is tidy installed? (sudo apt-get install tidy)")
-        return path
-
-    if remove_source:
-        os.remove(path)
-
-    return tidy_path
 
 
 def compress_and_encode(path: str) -> None:

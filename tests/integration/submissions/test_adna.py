@@ -1,9 +1,8 @@
 import os
-import xml.etree.ElementTree as ET
+from tempfile import TemporaryDirectory
 
 import pandas as pd
 import pytest
-import xmltodict
 
 from importer.configuration.config import Config
 from importer.metadata import SchemaService, SeadSchema
@@ -62,73 +61,65 @@ class TestAdnaSubmission:
         specification.is_satisfied_by(adna)
         assert specification.messages.errors == []
 
-    def test_dispatch_a_dna_submission_to_xml_file(self, adna: Submission, cfg: Config):
+    def test_dispatch_a_dna_submission_to_csv_files(self, adna: Submission, cfg: Config, schema_service: SchemaService):
 
-        opts: Options = Options(
-            skip=False,
-            filename=cfg.get("test:adna:source:filename"),
-            data_types="adna",
-            submission_id=None,
-            database=cfg.get("options:database"),
-            output_folder="tests/output",
-            submission_name="adna_test",
-        )
+        # create a unique tmp folder using mktemp for output of CSV files
+        with TemporaryDirectory() as output_folder:
+            opts: Options = Options(
+                **{
+                    "filename": cfg.get("test:adna:source:filename"),
+                    "data_types": "adna",
+                    "database": cfg.get("options:database"),
+                    "output_folder": output_folder,
+                    "skip": False,
+                    "submission_id": None,
+                    "table_names": None,
+                    "check_only": False,
+                    "register": True,
+                    "explode": False,
+                    "timestamp": False,
+                    "transfer_format": "csv",
+                }
+            )
 
-        if os.path.isfile(opts.target):
-            os.remove(opts.target)
+            if os.path.isfile(opts.target):
+                os.remove(opts.target)
 
-        service: ImportService = ImportService(schema=adna.schema, opts=opts)
+            service: ImportService = ImportService(schema=adna.schema, opts=opts, service=schema_service)
 
-        if os.path.isfile(opts.target):
-            os.remove(opts.target)
+            service.process(process_target=adna)
+            assert not service.specification.messages.errors
 
-        service.dispatch(adna, format_document=False)
+            for table_name in ["tables", "columns", "records", "recordvalues"]:
+                filename: str = os.path.join(output_folder, f"{table_name}.csv")
+                assert os.path.isfile(filename)
 
-        assert os.path.isfile(opts.target)
+    def test_dispatch_a_dna_submission_to_database(self, adna: Submission, cfg: Config, schema_service: SchemaService):
+        """Test dispatching an ancient DNA submission to the database via CSV uploader."""
 
-        with open(opts.target, "r", encoding="utf-8") as f:
-            data: dict = xmltodict.parse(f.read())
+        # create a unique tmp folder using mktemp for output of CSV files
+        with TemporaryDirectory() as output_folder:
+            opts: Options = Options(
+                **{
+                    "filename": cfg.get("test:adna:source:filename"),
+                    "data_types": "adna",
+                    "database": cfg.get("options:database"),
+                    "output_folder": output_folder,
+                    "skip": False,
+                    "submission_id": None,
+                    "table_names": None,
+                    "check_only": False,
+                    "register": True,
+                    "explode": False,
+                    "timestamp": False,
+                    "transfer_format": "csv",
+                }
+            )
 
-        assert data is not None
+            if os.path.isfile(opts.target):
+                os.remove(opts.target)
 
-        assert len(data["sead-data-upload"].keys()) == len(adna.data_tables)
+            service: ImportService = ImportService(schema=adna.schema, opts=opts, service=schema_service)
 
-    def test_import_a_dna_submission(self, adna: Submission, cfg: Config):
-
-        opts: Options = Options(
-            **{
-                "filename": cfg.get("test:adna:source:filename"),
-                "data_types": "adna",
-                "database": cfg.get("options:database"),
-                "output_folder": "tests/output",
-                "skip": False,
-                "submission_id": None,
-                "table_names": None,
-                "xml_filename": None,
-                "check_only": False,
-                "register": True,
-                "transfer_format": "csv",
-            }
-        )
-
-        if os.path.isfile(opts.target):
-            os.remove(opts.target)
-
-        service: ImportService = ImportService(schema=adna.schema, opts=opts)
-
-        service.process(submission=adna)
-
-        assert not service.specification.messages.errors
-
-        assert os.path.isfile(opts.target)
-
-        with open(opts.target, "r") as f:
-            root: ET.Element = ET.fromstring(f.read())
-
-        exported_java_classes: set[str] = {child.tag for child in root}
-
-        assert "TblContacts" in exported_java_classes
-
-        expected_java_classes: set[str] = {adna.schema[t].java_class for t in adna.data_table_names}
-
-        assert all(t in exported_java_classes for t in expected_java_classes)
+            service.process(process_target=adna)
+            assert not service.specification.messages.errors

@@ -51,7 +51,10 @@ def test_add_primary_key_column_if_missing_policy(mock_service):
         ]
     )
 
-    submission = Submission(data_tables={"table1": pd.DataFrame(columns=["col1", "col2"])}, schema=schema)
+    submission = Submission(
+        data_tables={"table1": pd.DataFrame(columns=["col1", "col2"])},
+        schema=schema,
+    )
 
     policy = AddPrimaryKeyColumnIfMissingPolicy(schema=schema, submission=submission, service=mock_service)
     policy.apply()

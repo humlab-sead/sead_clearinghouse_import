@@ -1,15 +1,11 @@
 """Test the CSV dispatcher functionality."""
 
-import io
-import os
 import tempfile
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from importer.dispatchers.to_csv import CsvProcessor
-from importer.metadata import SeadSchema
 from importer.submission import Submission
 from tests.builders import build_column, build_schema, build_table
 
@@ -37,21 +33,17 @@ def test_csv_processor_creates_four_files(tmp_path):
     # Create minimal submission
     data = pd.DataFrame({"system_id": [1, 2], "test_id": [None, None], "name": ["Test A", "Test B"]})  # New records
 
-    submission = Submission(data_tables={"tbl_test": data}, schema=schema, schema_service=None)  # type: ignore
+    submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
-    # Create output file in temp directory
-    output_file = tmp_path / "test_output.csv"
-
-    with open(output_file, "w", encoding="utf-8") as outstream:
-        processor = CsvProcessor(outstream)
-        processor.dispatch(schema=schema, submission=submission)
+    processor = CsvProcessor()
+    processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 
     # Check that all 4 CSV files were created
     expected_files = [
-        tmp_path / "test_output_tables.csv",
-        tmp_path / "test_output_columns.csv",
-        tmp_path / "test_output_records.csv",
-        tmp_path / "test_output_recordvalues.csv",
+        tmp_path / "submission_tables.csv",
+        tmp_path / "submission_columns.csv",
+        tmp_path / "submission_records.csv",
+        tmp_path / "submission_recordvalues.csv",
     ]
 
     for expected_file in expected_files:
@@ -119,18 +111,13 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
     submission = Submission(
         data_tables={"tbl_main": main_data, "tbl_lookup": lookup_data},
         schema=schema,
-        schema_service=None,  # type: ignore
     )
 
-    # Create output file in temp directory
-    output_file = tmp_path / "test_fk.csv"
-
-    with open(output_file, "w", encoding="utf-8") as outstream:
-        processor = CsvProcessor(outstream)
-        processor.dispatch(schema=schema, submission=submission)
+    processor = CsvProcessor()
+    processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 
     # Verify recordvalues.csv contains FK information
-    recordvalues_file = tmp_path / "test_fk_recordvalues.csv"
+    recordvalues_file = tmp_path / "submission_recordvalues.csv"
     recordvalues_df = pd.read_csv(recordvalues_file, sep="\t", na_values="NULL", keep_default_na=False)
 
     # Find FK column in recordvalues
@@ -144,7 +131,7 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
 
 
 def test_csv_processor_format_compatibility():
-    """Test that CSV format matches xml_to_csv output format."""
+    """Test that CSV format matches expected output format."""
     # This is a structural test to ensure the CSV files have the correct columns
 
     # Expected columns for each CSV file type
@@ -188,19 +175,17 @@ def test_csv_processor_format_compatibility():
         }
     )
 
-    submission = Submission(data_tables={"tbl_test": data}, schema=schema, schema_service=None)  # type: ignore
+    submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
     with tempfile.TemporaryDirectory() as tmp_dir:
-        output_file = Path(tmp_dir) / "test.csv"
 
-        with open(output_file, "w", encoding="utf-8") as outstream:
-            processor = CsvProcessor(outstream)
-            processor.dispatch(schema=schema, submission=submission)
+        processor = CsvProcessor()
+        processor.dispatch(target=tmp_dir, schema=schema, submission=submission)
 
         # Check each CSV file has the correct columns
         for file_type, expected_cols in expected_columns.items():
-            csv_file = Path(tmp_dir) / f"test_{file_type}.csv"
-            assert csv_file.exists(), f"{file_type}.csv was not created"
+            csv_file = Path(tmp_dir) / f"submission_{file_type}.csv"
+            assert csv_file.exists(), f"{csv_file} was not created"
 
             df = pd.read_csv(csv_file, sep="\t", nrows=0)  # Just read headers
             assert (

@@ -6,7 +6,10 @@
         ".venv",
         ".github",
         "tmp",
-        "**/__pycache__"
+        "**/__pycache__",
+        "**/*.pyc",
+        "tests/test_data",
+        "deprecated"
     ],
     "black-formatter.args": [
         "--line-length",

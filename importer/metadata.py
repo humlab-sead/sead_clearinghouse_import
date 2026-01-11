@@ -55,7 +55,7 @@ DTYPE_MAPPING: dict[str, Dtype] = {
 class Column:
     table_name: str
     column_name: str
-    xml_column_name: str
+    xml_column_name: str  # Note: pending deprecation
     position: int
     data_type: str
     numeric_precision: int
