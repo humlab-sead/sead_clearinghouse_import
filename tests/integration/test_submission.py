@@ -6,7 +6,6 @@ from importer.configuration import Config
 from importer.metadata import SchemaService, SeadSchema
 from importer.specification import SubmissionSpecification
 from importer.submission import Submission
-from importer.utility import create_db_uri
 from tests.utility import generate_test_excel
 
 # pylint: disable=too-many-statements,unused-argument,redefined-outer-name

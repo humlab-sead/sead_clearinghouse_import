@@ -1,5 +1,5 @@
 import os
-import xml.etree.ElementTree as ET
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import pandas as pd
@@ -97,45 +97,35 @@ class TestLivingTreeSubmission:
 
             assert all(table_name in submission.data_tables for table_name in excel_table_names)
 
-    def test_import_living_tree_submission(self, submission: Submission, cfg: Config):
+    def test_import_living_tree_submission(self, submission: Submission, cfg: Config, schema_service: SchemaService):
 
-        opts: Options = Options(
-            **{
-                "filename": cfg.get("test:dendrochronology:submission:source:filename"),
-                "data_types": "submission",
-                "database": cfg.get("options:database"),
-                "output_folder": "tests/output",
-                "skip": False,
-                "submission_id": None,
-                "table_names": None,
-                "xml_filename": None,
-                "check_only": False,
-                "register": True,
-                "transfer_format": "csv",
-            }
-        )
+        with TemporaryDirectory() as output_folder:
 
-        if os.path.isfile(opts.target):
-            os.remove(opts.target)
+            opts: Options = Options(
+                **{
+                    "filename": cfg.get("test:dendrochronology:submission:source:filename"),
+                    "data_types": "submission",
+                    "database": cfg.get("options:database"),
+                    "output_folder": output_folder,
+                    "skip": False,
+                    "submission_id": None,
+                    "table_names": None,
+                    "check_only": False,
+                    "register": False,
+                    "explode": False,
+                    "timestamp": False,
+                    "transfer_format": "csv",
+                }
+            )
 
-        service: ImportService = ImportService(schema=submission.schema, opts=opts)
+            service: ImportService = ImportService(schema=submission.schema, opts=opts, service=schema_service)
 
-        service.process(submission=submission)
+            service.process(process_target=submission)
+            assert not service.specification.messages.errors
 
-        assert not service.specification.messages.errors
-
-        assert os.path.isfile(opts.target)
-
-        with open(opts.target, "r") as f:
-            root: ET.Element = ET.fromstring(f.read())
-
-        exported_java_classes: set[str] = {child.tag for child in root}
-
-        assert "TblContacts" in exported_java_classes
-
-        expected_java_classes: set[str] = {submission.schema[t].java_class for t in submission.data_table_names}
-
-        assert all(t in exported_java_classes for t in expected_java_classes)
+            for table_name in ["tables", "columns", "records", "recordvalues"]:
+                filename: str = os.path.join(output_folder, f"{table_name}.csv")
+                assert os.path.isfile(filename)
 
     # Policy tests in living tree data
 

@@ -44,13 +44,13 @@ def _format_value(value: Any, data_type: str) -> str:
 class CsvProcessor(IDispatcher):
     """
     Main class that processes the Submission and produces CSV files directly.
-    The format of the CSV files conforms to exploded clearinghouse XML structure.
 
     Creates 4 CSV files:
     - tables.csv: table metadata (table_type, record_count)
     - columns.csv: column metadata (table_type, column_name, column_type)
     - records.csv: record metadata (class_name, system_id, public_id)
-    - recordvalues.csv: actual data values (class_name, system_id, public_id, column_name, column_type, fk_system_id, fk_public_id, column_value)
+    - recordvalues.csv: actual data values (class_name, system_id, public_id, column_name, column_type,
+        fk_system_id, fk_public_id, column_value)
     """
 
     def __init__(self, ignore_columns: list[str] | None = None) -> None:

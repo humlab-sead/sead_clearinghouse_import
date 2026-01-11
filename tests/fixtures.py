@@ -138,7 +138,7 @@ def COMPLEX_SCHEMA() -> SeadSchema:
 # ============================================================================
 
 
-def SIMPLE_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
+def SIMPLE_SUBMISSION() -> Callable[[], Submission]:
     """Factory for simple single-table submission with new records."""
 
     def _factory():
@@ -153,12 +153,12 @@ def SIMPLE_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
                 }
             )
         }
-        return Submission(data_tables=data_tables, schema=schema, schema_service=mock_service)
+        return Submission(data_tables=data_tables, schema=schema)
 
     return _factory
 
 
-def LOOKUP_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
+def LOOKUP_SUBMISSION() -> Callable[[], Submission]:
     """Factory for lookup table submission with existing records."""
 
     def _factory():
@@ -172,12 +172,12 @@ def LOOKUP_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
                 }
             )
         }
-        return Submission(data_tables=data_tables, schema=schema, schema_service=mock_service)
+        return Submission(data_tables=data_tables, schema=schema)
 
     return _factory
 
 
-def TWO_TABLE_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
+def TWO_TABLE_SUBMISSION() -> Callable[[], Submission]:
     """Factory for submission with main table and lookup table."""
 
     def _factory():
@@ -195,17 +195,17 @@ def TWO_TABLE_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
                 {"system_id": [1, 2], "lookup_id": [10, 20], "name": ["Category A", "Category B"]}  # Existing records
             ),
         }
-        return Submission(data_tables=data_tables, schema=schema, schema_service=mock_service)
+        return Submission(data_tables=data_tables, schema=schema)
 
     return _factory
 
 
-def EMPTY_SUBMISSION(mock_service=None) -> Callable[[], Submission]:
+def EMPTY_SUBMISSION() -> Callable[[], Submission]:
     """Factory for empty submission (useful for policy testing)."""
 
     def _factory():
         schema = SIMPLE_SCHEMA()
-        return Submission(data_tables={}, schema=schema, schema_service=mock_service)
+        return Submission(data_tables={}, schema=schema)
 
     return _factory
 

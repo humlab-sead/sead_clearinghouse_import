@@ -33,11 +33,6 @@ class SubmissionRepository:
         self.connection: Connection | NullConnection = NullConnection()
         self.timeout_seconds: int = 300
 
-    def upload_xml(self, xml_filename: str, submission_id: int) -> None:
-        with self as connection:
-            logger.info(f"Uploading data file using {type(self.uploader).__name__} uploader")
-            self.uploader.upload(connection, xml_filename, submission_id)
-
     @log_decorator(
         enter_message=" ---> extracting submission...", exit_message=" ---> submission extracted", level="DEBUG"
     )
@@ -123,7 +118,9 @@ class SubmissionRepository:
             return submission_id
 
     def get_table_names(self, submission_id: int) -> list[str]:
-        # FIXME: do not use tbl_clearinghouse_submission_xml_content_tables
+        """Get list of table names in underscored format for a submission.
+        NOTE: even though XML format is deprecated, these legacy tables are used for the time being.
+        """
         tables_names_sql: str = """
             select distinct t.table_name_underscored
             from clearing_house.tbl_clearinghouse_submission_tables t

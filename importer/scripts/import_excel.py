@@ -37,25 +37,14 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--skip", default=False, is_flag=True, help="Skip the import (do nothing)")
 @click.option("--id", "submission_id", type=int, default=None, help="Replace existing submission.")
 @click.option("--table", "-t", type=str, multiple=True, default=None, help="Only load specified tables.")
-@click.option("--xml-filename", type=str, default=None, help="Name of existing XML file to use.")
-@click.option("--log-folder", type=str, default="./logs", help="Name of existing XML file to use.")
+@click.option("--log-folder", type=str, default="./logs", help="Where log files are stored.")
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
 @click.option("--register/--no-register", type=bool, is_flag=True, default=False, help="Register file in the database.")
-@click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode XML into public tables.")
+@click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode submission into public clearinghouse tables.")
 @click.option(
-    "--tidy-xml/--no-tidy-xml", type=bool, is_flag=True, default=False, help="Run XML formatting tool on document."
+    "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target file(s)/folder."
 )
-@click.option(
-    "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target XML filename."
-)
-@click.option("--transfer-format", type=str, default="xml", help="Specify format to use in upload (XML or CSV).")
-@click.option(
-    "--dump-to-csv/--no-dump-to-csv",
-    type=bool,
-    is_flag=True,
-    default=False,
-    help="Store (policy-updated) submission data as CSV files in output folder.",
-)
+@click.option("--transfer-format", type=str, default="csv", help="Specify format to use in upload (CSV).")
 @click.pass_context
 def import_file(
     ctx,
@@ -71,22 +60,19 @@ def import_file(
     skip: str,
     submission_id: str,
     table: tuple[str, ...],
-    xml_filename: str,
     check_only: bool,
     register: bool,
     explode: bool,
     log_folder: str,
     timestamp: bool,
-    tidy_xml: bool,
     transfer_format: str,
-    dump_to_csv: bool,
     options_filename: str | None = None,
 ) -> None:
     """
-    Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is either
-    an Excel file or an XML file that has previously been generated with this program.
+    Imports a new SEAD data submission to the SEAD ClearingHouse database. The source data is
+    an Excel file or CSV files that has previously been generated with this program.
 
-    The content of the Excel file is processed and stored in an XML file that conforms to the
+    The content of the Excel file is processed and stored in a CSV folder that conforms to the
     clearinghouse data import schema.
 
     The Excel file must satisfy the following requirements:
@@ -157,24 +143,9 @@ def workflow(opts: Options) -> None:
             logger.error(" ---> no source filename specified")
             return
 
-        if opts.filename.endswith(".xml"):
-            opts.xml_filename = opts.filename
-            opts.filename = None
-
-        if isinstance(opts.xml_filename, str):
-            if not os.path.isfile(opts.xml_filename):
-                logger.error(f" ---> file '{opts.xml_filename}' does not exist")
-                return
-
-            if opts.check_only:
-                logger.error("The --check-only option is not supported when using an existing XML file")
-                return
-
     submission: int | Submission | str
     if opts.submission_id:
         submission = opts.submission_id
-    elif isinstance(opts.xml_filename, str):
-        submission = opts.xml_filename
     else:
         if not isinstance(opts.filename, str):
             logger.error(" ---> no source filename specified")
@@ -182,7 +153,7 @@ def workflow(opts: Options) -> None:
 
         submission = Submission.load(schema=schema, source=opts.filename, service=schema_service)
 
-    ImportService(schema=schema, opts=opts).process(submission=submission)
+    ImportService(schema=schema, opts=opts, service=schema_service).process(process_target=submission)
 
 
 # pylint: disable=line-too-long

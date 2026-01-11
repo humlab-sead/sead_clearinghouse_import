@@ -1,15 +1,11 @@
 """Test the CSV dispatcher functionality."""
 
-import io
-import os
 import tempfile
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from importer.dispatchers.to_csv import CsvProcessor
-from importer.metadata import SeadSchema
 from importer.submission import Submission
 from tests.builders import build_column, build_schema, build_table
 
@@ -37,7 +33,7 @@ def test_csv_processor_creates_four_files(tmp_path):
     # Create minimal submission
     data = pd.DataFrame({"system_id": [1, 2], "test_id": [None, None], "name": ["Test A", "Test B"]})  # New records
 
-    submission = Submission(data_tables={"tbl_test": data}, schema=schema, schema_service=None)  # type: ignore
+    submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
     # Create output file in temp directory
     output_file = tmp_path / "test_output.csv"
@@ -119,7 +115,6 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
     submission = Submission(
         data_tables={"tbl_main": main_data, "tbl_lookup": lookup_data},
         schema=schema,
-        schema_service=None,  # type: ignore
     )
 
     # Create output file in temp directory
@@ -144,7 +139,7 @@ def test_csv_processor_handles_foreign_keys(tmp_path):
 
 
 def test_csv_processor_format_compatibility():
-    """Test that CSV format matches xml_to_csv output format."""
+    """Test that CSV format matches expected output format."""
     # This is a structural test to ensure the CSV files have the correct columns
 
     # Expected columns for each CSV file type
@@ -188,7 +183,7 @@ def test_csv_processor_format_compatibility():
         }
     )
 
-    submission = Submission(data_tables={"tbl_test": data}, schema=schema, schema_service=None)  # type: ignore
+    submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
     with tempfile.TemporaryDirectory() as tmp_dir:
         output_file = Path(tmp_dir) / "test.csv"
