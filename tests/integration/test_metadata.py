@@ -42,7 +42,8 @@ def test_tables_specifications(schema: SeadSchema):
     assert schema["tbl_locations"].columns["location_id"].is_pk is True
 
 
-def test_is_pk(schema: SeadSchema):
+def test_is_pk(service: SchemaService, cfg: Config):
+    schema: SeadSchema = service.load()
     assert schema.is_pk("tbl_sites", "site_id") is True
     assert schema.is_pk("tbl_sites", "site_name") is False
     assert schema.is_pk("tbl_locations", "location_type_id") is False
@@ -79,7 +80,8 @@ def test_get_tablenames_referencing(service: SchemaService, cfg: Config):
         ("tbl_datasets", "project_id", "tbl_projects", "TblProjects"),
     ],
 )
-def test_foreign_keys(schema: SeadSchema, values: list[str]):
+def test_foreign_keys(service: SchemaService, values: list[str]):
+    schema: SeadSchema = service.load()
     assert isinstance(schema._foreign_keys, pd.DataFrame)
     assert len(schema._foreign_keys) > 0
     assert (schema._foreign_keys == values).all(axis=1).any()

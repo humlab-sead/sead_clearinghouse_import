@@ -33,23 +33,20 @@ def cfg() -> ConfigLike:
     )
     return ConfigStore.get_instance().config()  # type: ignore[return-value]
 
-
-@pytest.fixture(scope="session")
-def schema(cfg: ConfigLike) -> Iterator[SeadSchema]:
-    # FIXME: We need to mock this! Loading live metadata makes tests fragile.
-    # The SchemaService can be mocked using CSV files in test_data.
-    service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
-    schema: SeadSchema = service.load()
-    yield schema
-
-
 @pytest.fixture(scope="session")
 def service(cfg: ConfigLike) -> Iterator[SchemaService]:
     sead_tables: pd.DataFrame = pd.read_csv("tests/test_data/sead_tables.csv")
     sead_columns: pd.DataFrame = pd.read_csv("tests/test_data/sead_columns.csv")
-
     service: SchemaService = MockSchemaService(sead_tables=sead_tables, sead_columns=sead_columns)
     yield service
+
+
+@pytest.fixture(scope="session")
+def schema(service: SchemaService, cfg: ConfigLike) -> Iterator[SeadSchema]:
+    schema: SeadSchema = service.load()
+    yield schema
+
+
 
 
 @pytest.fixture(scope="session")
