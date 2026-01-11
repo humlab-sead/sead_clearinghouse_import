@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 
 import pandas as pd
+import pytest
 
 from importer.dispatchers.to_xml import XmlProcessor
 
@@ -20,6 +21,7 @@ def test_emit():
 #     assert processor.camel_case_name('test_name') == 'testName'
 
 
+@pytest.mark.skipif(True, reason="Requires lxml optional dependency")
 def test_read_xml():
     source_file: str = "tests/test_data/building_dendro_reduced.xml"
 
