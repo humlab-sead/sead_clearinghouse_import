@@ -78,6 +78,104 @@ The import program reads configuration in the following order of priority:
 3. Environment variables having prefix "SEAD_IMPORT_ABC_DEF" corresponding to setting "options"[abc].def.
 4. Values in "options" section in YAML configuration file (argument)
 
+## Testing
+
+The test suite is organized into **unit tests** (fast, no database required) and **integration tests** (require database connection).
+
+### Test Structure
+
+```
+tests/
+├── unit/              # Pure unit tests (40+ tests, ~0.2s)
+│   ├── test_config.py
+│   ├── test_fixtures.py
+│   ├── test_policy.py
+│   ├── test_to_csv.py
+│   ├── test_utility.py
+│   └── test_xml.py
+├── integration/       # Integration tests (require DB)
+│   ├── test_metadata.py
+│   ├── test_process.py
+│   └── test_submission.py
+├── fixtures.py        # Reusable test fixtures
+└── builders.py        # Factory functions for test data
+```
+
+### Running Tests
+
+```bash
+# Run only unit tests (fast, no DB required)
+make test
+# or
+pytest tests/unit/
+
+# Run integration tests (requires database)
+make test-integration
+# or
+pytest tests/integration/
+
+# Run all tests
+make full-test
+# or
+pytest tests/
+
+# Run with coverage report
+make test-coverage        # Unit tests only
+make test-coverage-full   # All tests
+
+# Open coverage report
+open htmlcov/index.html
+```
+
+### Writing Tests
+
+**Unit Tests** (tests/unit/):
+- Use fixtures from `tests/fixtures.py` for common test data
+- Use builders from `tests/builders.py` for custom schemas
+- No database required - use `MockSchemaService`
+- Fast execution (milliseconds per test)
+
+**Integration Tests** (tests/integration/):
+- Mark with `@pytest.mark.integration` decorator
+- Use full CSV fixtures from `tests/test_data/`
+- Require live database connection
+- Test complete workflows
+
+See [tests/unit/README.md](tests/unit/README.md) and [tests/integration/README.md](tests/integration/README.md) for detailed guidelines.
+
+## Development
+
+### Code Quality
+
+```bash
+# Format code
+make tidy          # black + isort
+
+# Lint code
+make lint          # pylint + ruff
+
+# Type checking (if configured)
+make typecheck     # mypy
+```
+
+### Package Management
+
+This project uses `uv` for dependency management:
+
+```bash
+# Install dependencies
+uv sync --all-extras
+
+# Add a dependency
+uv add <package>
+
+# Add a dev dependency
+uv add --dev <package>
+
+# Update dependencies
+uv sync --upgrade
+```
+
 
 ### Examples
 

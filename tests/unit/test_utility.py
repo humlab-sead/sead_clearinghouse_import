@@ -1,17 +1,19 @@
 import io
 from typing import Any
 
+import pytest
+
 from importer import utility
 
 
-def test_flatten_empty_list_returns_empty_list():
-    results = utility.flatten([])
-    assert [] == results
-
-
-def test_flatten_one_empty_list_list_returns_the_list():
-    results = utility.flatten([[]])
-    assert [] == results
+@pytest.mark.parametrize("input_list,expected", [
+    ([], []),
+    ([[]], []),
+])
+def test_flatten(input_list, expected):
+    """Test flatten function with various inputs."""
+    results = utility.flatten(input_list)
+    assert expected == results
 
 
 def test_tidy_xml_returns_a_tidy_xml():
@@ -56,47 +58,26 @@ def test_recursive_delete():
     assert d == expected
 
 
-def test_recursive_update():
-    d1: dict[str, Any] = {"a": 1, "b": 2}
-    d2: dict[str, Any] = {"b": 3, "c": 4}
-    result: dict[str, Any] = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": 3, "c": 4}
-
-    # def test_recursive_update_nested():
-    d1 = {"a": 1, "b": {"x": 10, "y": 20}}
-    d2 = {"b": {"y": 30, "z": 40}, "c": 4}
+@pytest.mark.parametrize("d1,d2,expected", [
+    # Basic merge
+    ({"a": 1, "b": 2}, {"b": 3, "c": 4}, {"a": 1, "b": 3, "c": 4}),
+    # Nested merge
+    ({"a": 1, "b": {"x": 10, "y": 20}}, {"b": {"y": 30, "z": 40}, "c": 4}, {"a": 1, "b": {"x": 10, "y": 30, "z": 40}, "c": 4}),
+    # Empty d2
+    ({"a": 1, "b": 2}, {}, {"a": 1, "b": 2}),
+    # Empty d1
+    ({}, {"a": 1, "b": 2}, {"a": 1, "b": 2}),
+    # Overwrite dict with non-dict
+    ({"a": {"x": 10}}, {"a": 1}, {"a": 1}),
+])
+def test_recursive_update(d1, d2, expected):
+    """Test recursive_update merges dictionaries correctly."""
     result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": {"x": 10, "y": 30, "z": 40}, "c": 4}
+    assert result == expected
 
-    # def test_recursive_update_empty_d2():
-    d1 = {"a": 1, "b": 2}
-    d2 = {}
-    result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": 2}
 
-    # def test_recursive_update_empty_d1():
-    d1 = {}
-    d2 = {"a": 1, "b": 2}
-    result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": 2}
-
-    # def test_recursive_update_overwrite_with_non_dict():
-    d1 = {"a": {"x": 10}}
-    d2 = {"a": 1}
-    result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1}
-    d1 = {"a": 1, "b": 2}
-    d2 = {"b": 3, "c": 4}
-    result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": 3, "c": 4}
-
-    # def test_recursive_update_nested():
-    d1 = {"a": 1, "b": {"x": 10, "y": 20}}
-    d2 = {"b": {"y": 30, "z": 40}, "c": 4}
-    result = utility.recursive_update(d1, d2)
-    assert result == {"a": 1, "b": {"x": 10, "y": 30, "z": 40}, "c": 4}
-
-    # def test_recursive_update_empty_d2():
+def test_recursive_update_duplicate_basic():
+    """Legacy test for basic recursive update."""
     d1 = {"a": 1, "b": 2}
     d2 = {}
     result = utility.recursive_update(d1, d2)

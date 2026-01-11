@@ -161,6 +161,35 @@ markers = [
   "manual: marks tests requiring manual setup (e.g., real database)",
 ]
 
+# --------------------
+# pytest-cov (coverage)
+# --------------------
+[tool.coverage.run]
+source = ["importer"]
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/deprecated/*",
+    "*/scripts/*",
+]
+
+[tool.coverage.report]
+precision = 2
+show_missing = true
+skip_covered = false
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
 
 [build-system]
 requires = ["hatchling"]
