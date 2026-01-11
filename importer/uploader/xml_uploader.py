@@ -9,7 +9,7 @@ from importer.utility import log_decorator
 
 from . import BaseUploader, Uploaders
 
-# NFIXME: Deprecate XML uploader in favor of CSV uploader.
+# FIXME: Deprecate XML uploader in favor of CSV uploader.
 
 
 @Uploaders.register(key="xml")
