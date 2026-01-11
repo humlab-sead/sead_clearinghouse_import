@@ -13,6 +13,7 @@ from importer.utility import create_db_uri
 
 
 @pytest.mark.integration
+@pytest.mark.skip(reason="Requires ancient DNA data and live database connection")
 class TestAdnaSubmission:
 
     @pytest.fixture(scope="module")
@@ -93,7 +94,6 @@ class TestAdnaSubmission:
                 filename: str = os.path.join(output_folder, f"{table_name}.csv")
                 assert os.path.isfile(filename)
 
-    @pytest.mark.skip(reason="Requires ancient DNA data and live database connection")
     def test_dispatch_a_dna_submission_to_database(self, adna: Submission, cfg: Config, schema_service: SchemaService):
         """Test dispatching an ancient DNA submission to the database via CSV uploader."""
 
