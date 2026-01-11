@@ -64,9 +64,9 @@ def test_complex_schema():
 # ============================================================================
 
 
-def test_simple_submission(mock_service):
+def test_simple_submission():
     """Test SIMPLE_SUBMISSION fixture."""
-    factory = SIMPLE_SUBMISSION(mock_service)
+    factory = SIMPLE_SUBMISSION()
     submission = factory()
 
     assert isinstance(submission, Submission)
@@ -74,9 +74,9 @@ def test_simple_submission(mock_service):
     assert len(submission.data_tables["tbl_simple"]) == 3
 
 
-def test_lookup_submission(mock_service):
+def test_lookup_submission():
     """Test LOOKUP_SUBMISSION fixture."""
-    factory = LOOKUP_SUBMISSION(mock_service)
+    factory = LOOKUP_SUBMISSION()
     submission = factory()
 
     assert isinstance(submission, Submission)
@@ -84,9 +84,9 @@ def test_lookup_submission(mock_service):
     assert submission.schema["tbl_lookup"].is_lookup is True
 
 
-def test_two_table_submission(mock_service):
+def test_two_table_submission():
     """Test TWO_TABLE_SUBMISSION fixture."""
-    factory = TWO_TABLE_SUBMISSION(mock_service)
+    factory = TWO_TABLE_SUBMISSION()
     submission = factory()
 
     assert len(submission.data_tables) == 2
@@ -94,9 +94,9 @@ def test_two_table_submission(mock_service):
     assert "tbl_lookup" in submission.data_tables
 
 
-def test_empty_submission(mock_service):
+def test_empty_submission():
     """Test EMPTY_SUBMISSION fixture."""
-    factory = EMPTY_SUBMISSION(mock_service)
+    factory = EMPTY_SUBMISSION()
     submission = factory()
 
     assert isinstance(submission, Submission)
@@ -154,9 +154,9 @@ def test_fixtures_are_independent():
     assert schema1 is not schema2
 
 
-def test_submission_factories_are_independent(mock_service):
+def test_submission_factories_are_independent():
     """Test that submission factories create independent submissions."""
-    factory = SIMPLE_SUBMISSION(mock_service)
+    factory = SIMPLE_SUBMISSION()
     sub1 = factory()
     sub2 = factory()
 
