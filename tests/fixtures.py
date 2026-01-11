@@ -12,6 +12,7 @@ Usage:
         submission = TWO_TABLE_SUBMISSION()
         # Test logic here
 """
+
 # pylint: disable=invalid-name  # UPPER_CASE is intentional for fixture constants
 
 from typing import Callable
@@ -21,7 +22,6 @@ import pandas as pd
 from importer.metadata import SeadSchema
 from importer.submission import Submission
 from tests.builders import build_column, build_schema, build_table
-
 
 # ============================================================================
 # Schema Fixtures

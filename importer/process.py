@@ -9,7 +9,7 @@ from loguru import logger
 from importer.configuration import ConfigValue
 
 from . import utility
-from .dispatchers import IDispatcher, to_xml
+from .dispatchers import IDispatcher, to_csv, to_xml
 from .metadata import SeadSchema
 from .repository import SubmissionRepository
 from .specification import SpecificationError, SubmissionSpecification
@@ -86,7 +86,15 @@ class ImportService:
             opts.database, uploader=opts.transfer_format or "unknown"
         )
         self.schema: SeadSchema = schema
-        self.dispatcher_cls: type[IDispatcher] = dispatcher_cls or to_xml.XmlProcessor
+        
+        # Select dispatcher based on transfer_format
+        if dispatcher_cls:
+            self.dispatcher_cls: type[IDispatcher] = dispatcher_cls
+        elif opts.transfer_format == "csv":
+            self.dispatcher_cls = to_csv.CsvProcessor
+        else:
+            self.dispatcher_cls = to_xml.XmlProcessor
+            
         self.specification: SubmissionSpecification = SubmissionSpecification(
             schema=self.schema, ignore_columns=self.opts.ignore_columns, raise_errors=False
         )

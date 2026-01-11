@@ -6,10 +6,13 @@ import pytest
 from importer import utility
 
 
-@pytest.mark.parametrize("input_list,expected", [
-    ([], []),
-    ([[]], []),
-])
+@pytest.mark.parametrize(
+    "input_list,expected",
+    [
+        ([], []),
+        ([[]], []),
+    ],
+)
 def test_flatten(input_list, expected):
     """Test flatten function with various inputs."""
     results = utility.flatten(input_list)
@@ -58,18 +61,25 @@ def test_recursive_delete():
     assert d == expected
 
 
-@pytest.mark.parametrize("d1,d2,expected", [
-    # Basic merge
-    ({"a": 1, "b": 2}, {"b": 3, "c": 4}, {"a": 1, "b": 3, "c": 4}),
-    # Nested merge
-    ({"a": 1, "b": {"x": 10, "y": 20}}, {"b": {"y": 30, "z": 40}, "c": 4}, {"a": 1, "b": {"x": 10, "y": 30, "z": 40}, "c": 4}),
-    # Empty d2
-    ({"a": 1, "b": 2}, {}, {"a": 1, "b": 2}),
-    # Empty d1
-    ({}, {"a": 1, "b": 2}, {"a": 1, "b": 2}),
-    # Overwrite dict with non-dict
-    ({"a": {"x": 10}}, {"a": 1}, {"a": 1}),
-])
+@pytest.mark.parametrize(
+    "d1,d2,expected",
+    [
+        # Basic merge
+        ({"a": 1, "b": 2}, {"b": 3, "c": 4}, {"a": 1, "b": 3, "c": 4}),
+        # Nested merge
+        (
+            {"a": 1, "b": {"x": 10, "y": 20}},
+            {"b": {"y": 30, "z": 40}, "c": 4},
+            {"a": 1, "b": {"x": 10, "y": 30, "z": 40}, "c": 4},
+        ),
+        # Empty d2
+        ({"a": 1, "b": 2}, {}, {"a": 1, "b": 2}),
+        # Empty d1
+        ({}, {"a": 1, "b": 2}, {"a": 1, "b": 2}),
+        # Overwrite dict with non-dict
+        ({"a": {"x": 10}}, {"a": 1}, {"a": 1}),
+    ],
+)
 def test_recursive_update(d1, d2, expected):
     """Test recursive_update merges dictionaries correctly."""
     result = utility.recursive_update(d1, d2)

@@ -2,7 +2,7 @@
 
 import pandas as pd
 
-from importer.metadata import SeadSchema
+from importer.metadata import Column, SeadSchema
 from importer.submission import Submission
 from tests.fixtures import (
     COMPLEX_SCHEMA,
@@ -17,7 +17,6 @@ from tests.fixtures import (
     TWO_TABLE_SCHEMA,
     TWO_TABLE_SUBMISSION,
 )
-
 
 # ============================================================================
 # Schema Fixture Tests
@@ -47,7 +46,8 @@ def test_two_table_schema():
     assert isinstance(schema, SeadSchema)
     assert "tbl_main" in schema
     assert "tbl_lookup" in schema
-    assert schema["tbl_main"]["lookup_id"].is_fk is True
+    column: Column = schema["tbl_main"].columns["lookup_id"]
+    assert column.is_fk is True
 
 
 def test_complex_schema():
