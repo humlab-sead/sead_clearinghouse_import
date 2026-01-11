@@ -345,7 +345,7 @@ class DropIgnoredColumns(PolicyBase):
 @UpdatePolicies.register(key="if_lookup_with_no_new_data_then_keep_only_system_id_public_id")
 class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
     """Rule: if table is a lookup table and no new data then drop all columns except
-    system_id and public_id. The table has new data of any public PK (table.pk_name) is None or NaN
+    system_id and public_id. The table has new data if any public PK (table.pk_name) is None or NaN
     """
 
     def update(self) -> None:
