@@ -35,7 +35,6 @@ def test_csv_processor_creates_four_files(tmp_path):
 
     submission = Submission(data_tables={"tbl_test": data}, schema=schema)  # type: ignore
 
-
     processor = CsvProcessor()
     processor.dispatch(target=tmp_path, schema=schema, submission=submission)
 

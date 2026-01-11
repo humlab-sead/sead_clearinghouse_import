@@ -62,7 +62,7 @@ class TestTableOperations:
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
                 "name": build_column("tbl_test", "name"),
-            }
+            },
         )
         assert "test_id" in table
         assert "name" in table
@@ -75,7 +75,7 @@ class TestTableOperations:
             "test_id",
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
-            }
+            },
         )
         col = table["test_id"]
         assert isinstance(col, Column)
@@ -95,7 +95,7 @@ class TestTableOperations:
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
                 "name": build_column("tbl_test", "name"),
-            }
+            },
         )
         columns = list(table)
         assert len(columns) == 2
@@ -109,7 +109,7 @@ class TestTableOperations:
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
                 "name": build_column("tbl_test", "name"),
-            }
+            },
         )
         assert len(table) == 2
 
@@ -120,7 +120,7 @@ class TestTableOperations:
             "test_id",
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
-            }
+            },
         )
         col = table.get_column("test_id")
         assert col is not None
@@ -137,7 +137,7 @@ class TestTableOperations:
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
                 "nullable_col": build_column("tbl_test", "nullable_col", is_nullable=True),
-            }
+            },
         )
 
         all_names = table.column_names()
@@ -156,7 +156,7 @@ class TestTableOperations:
             columns={
                 "test_id": build_column("tbl_test", "test_id", is_pk=True),
                 "nullable_col": build_column("tbl_test", "nullable_col", is_nullable=True),
-            }
+            },
         )
         nullable = table.nullable_column_names()
         assert "nullable_col" in nullable
@@ -175,20 +175,24 @@ class TestSeadSchemaOperations:
 
     def test_schema_iter(self):
         """Test __iter__ iterates over table names."""
-        schema = build_schema([
-            build_table("tbl_test1", "test1_id"),
-            build_table("tbl_test2", "test2_id"),
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_test1", "test1_id"),
+                build_table("tbl_test2", "test2_id"),
+            ]
+        )
         table_names = list(schema)
         assert "tbl_test1" in table_names
         assert "tbl_test2" in table_names
 
     def test_schema_len(self):
         """Test __len__ returns table count."""
-        schema = build_schema([
-            build_table("tbl_test1", "test1_id"),
-            build_table("tbl_test2", "test2_id"),
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_test1", "test1_id"),
+                build_table("tbl_test2", "test2_id"),
+            ]
+        )
         assert len(schema) == 2
 
     def test_schema_contains(self):
@@ -199,10 +203,12 @@ class TestSeadSchemaOperations:
 
     def test_schema_keys(self):
         """Test keys() method."""
-        schema = build_schema([
-            build_table("tbl_test1", "test1_id"),
-            build_table("tbl_test2", "test2_id"),
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_test1", "test1_id"),
+                build_table("tbl_test2", "test2_id"),
+            ]
+        )
         keys = schema.keys()
         assert "tbl_test1" in keys
         assert "tbl_test2" in keys
@@ -239,9 +245,7 @@ class TestSeadSchemaOperations:
 
     def test_schema_get_table_by_java_class(self):
         """Test get_table() with java_class alias."""
-        schema = build_schema([
-            build_table("tbl_test", "test_id", java_class="TblTest")
-        ])
+        schema = build_schema([build_table("tbl_test", "test_id", java_class="TblTest")])
 
         # Should work with table_name
         table = schema.get_table("tbl_test")
@@ -253,9 +257,7 @@ class TestSeadSchemaOperations:
 
     def test_schema_get_table_by_excel_sheet(self):
         """Test get_table() with excel_sheet alias."""
-        schema = build_schema([
-            build_table("tbl_test", "test_id", excel_sheet="TestSheet")
-        ])
+        schema = build_schema([build_table("tbl_test", "test_id", excel_sheet="TestSheet")])
 
         # Should work with excel_sheet alias
         table = schema.get_table("TestSheet")
@@ -270,15 +272,17 @@ class TestSeadSchemaOperations:
 
     def test_schema_get_column(self):
         """Test get_column() method."""
-        schema = build_schema([
-            build_table(
-                "tbl_test",
-                "test_id",
-                columns={
-                    "test_id": build_column("tbl_test", "test_id", is_pk=True),
-                }
-            )
-        ])
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test",
+                    "test_id",
+                    columns={
+                        "test_id": build_column("tbl_test", "test_id", is_pk=True),
+                    },
+                )
+            ]
+        )
 
         col = schema.get_column("tbl_test", "test_id")
         assert col.column_name == "test_id"
@@ -293,10 +297,12 @@ class TestSeadSchemaOperations:
 
     def test_schema_lookup_tables(self):
         """Test lookup_tables cached property."""
-        schema = build_schema([
-            build_table("tbl_main", "main_id", is_lookup=False),
-            build_table("tbl_lookup", "lookup_id", is_lookup=True),
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_main", "main_id", is_lookup=False),
+                build_table("tbl_lookup", "lookup_id", is_lookup=True),
+            ]
+        )
 
         lookup_tables = schema.lookup_tables
         assert len(lookup_tables) == 1
@@ -304,10 +310,12 @@ class TestSeadSchemaOperations:
 
     def test_schema_aliased_tables(self):
         """Test aliased_tables cached property."""
-        schema = build_schema([
-            build_table("tbl_test1", "test1_id", excel_sheet="tbl_test1"),  # Not aliased
-            build_table("tbl_test2", "test2_id", excel_sheet="TestSheet2"),  # Aliased
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_test1", "test1_id", excel_sheet="tbl_test1"),  # Not aliased
+                build_table("tbl_test2", "test2_id", excel_sheet="TestSheet2"),  # Aliased
+            ]
+        )
 
         aliased = schema.aliased_tables
         assert len(aliased) == 1
@@ -315,9 +323,11 @@ class TestSeadSchemaOperations:
 
     def test_schema_table_name2excel_sheet(self):
         """Test table_name2excel_sheet mapping."""
-        schema = build_schema([
-            build_table("tbl_test", "test_id", excel_sheet="TestSheet"),
-        ])
+        schema = build_schema(
+            [
+                build_table("tbl_test", "test_id", excel_sheet="TestSheet"),
+            ]
+        )
 
         mapping = schema.table_name2excel_sheet
         assert mapping["tbl_test"] == "TestSheet"

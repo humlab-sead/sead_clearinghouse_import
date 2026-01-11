@@ -1,6 +1,5 @@
 """Test edge cases and error handling in CSV dispatcher."""
 
-
 import pandas as pd
 
 from importer.dispatchers.to_csv import CsvProcessor, _format_value, _to_int_or_none, _to_none
@@ -19,7 +18,7 @@ class TestHelperFunctions:
     def test_to_int_or_none_with_none(self):
         assert _to_int_or_none(None) is None
         assert _to_int_or_none(pd.NA) is None
-        assert _to_int_or_none(float('nan')) is None
+        assert _to_int_or_none(float("nan")) is None
 
     def test_to_int_or_none_with_invalid(self):
         # Returns original value if conversion fails
@@ -29,7 +28,7 @@ class TestHelperFunctions:
     def test_to_none_with_none_values(self):
         assert _to_none(None) is None
         assert _to_none(pd.NA) is None
-        assert _to_none(float('nan')) is None
+        assert _to_none(float("nan")) is None
 
     def test_format_value_with_null(self):
         assert _format_value(None, "java.lang.String") == ""
@@ -71,17 +70,19 @@ class TestCsvProcessorEdgeCases:
 
     def test_table_with_no_rows(self, tmp_path):
         """Test processing a table with no rows."""
-        schema = build_schema([
-            build_table(
-                "tbl_test",
-                "test_id",
-                java_class="TblTest",
-                columns={
-                    "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
-                    "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
-                }
-            )
-        ])
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test",
+                    "test_id",
+                    java_class="TblTest",
+                    columns={
+                        "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
+                        "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
+                    },
+                )
+            ]
+        )
 
         data = pd.DataFrame(columns=["system_id", "test_id"])
         submission = Submission(data_tables={"tbl_test": data}, schema=schema)
@@ -95,26 +96,31 @@ class TestCsvProcessorEdgeCases:
 
     def test_null_values_in_columns(self, tmp_path):
         """Test handling of NULL values in various column types."""
-        schema = build_schema([
-            build_table(
-                "tbl_test",
-                "test_id",
-                java_class="TblTest",
-                columns={
-                    "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
-                    "nullable_int": build_column("tbl_test", "nullable_int", is_nullable=True, class_name="java.lang.Integer"),
-                    "nullable_str": build_column("tbl_test", "nullable_str", data_type="varchar", is_nullable=True, class_name="java.lang.String"),
-                    "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
-                }
-            )
-        ])
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test",
+                    "test_id",
+                    java_class="TblTest",
+                    columns={
+                        "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
+                        "nullable_int": build_column(
+                            "tbl_test", "nullable_int", is_nullable=True, class_name="java.lang.Integer"
+                        ),
+                        "nullable_str": build_column(
+                            "tbl_test",
+                            "nullable_str",
+                            data_type="varchar",
+                            is_nullable=True,
+                            class_name="java.lang.String",
+                        ),
+                        "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
+                    },
+                )
+            ]
+        )
 
-        data = pd.DataFrame({
-            "system_id": [1],
-            "test_id": [None],
-            "nullable_int": [None],
-            "nullable_str": [None]
-        })
+        data = pd.DataFrame({"system_id": [1], "test_id": [None], "nullable_int": [None], "nullable_str": [None]})
         submission = Submission(data_tables={"tbl_test": data}, schema=schema)
 
         processor = CsvProcessor()
@@ -129,23 +135,35 @@ class TestCsvProcessorEdgeCases:
 
     def test_table_names_parameter(self, tmp_path):
         """Test filtering by table names."""
-        schema = build_schema([
-            build_table("tbl_test1", "test1_id", java_class="TblTest1", columns={
-                "test1_id": build_column("tbl_test1", "test1_id", is_pk=True, class_name="java.lang.Integer"),
-                "system_id": build_column("tbl_test1", "system_id", class_name="java.lang.Integer"),
-            }),
-            build_table("tbl_test2", "test2_id", java_class="TblTest2", columns={
-                "test2_id": build_column("tbl_test2", "test2_id", is_pk=True, class_name="java.lang.Integer"),
-                "system_id": build_column("tbl_test2", "system_id", class_name="java.lang.Integer"),
-            })
-        ])
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test1",
+                    "test1_id",
+                    java_class="TblTest1",
+                    columns={
+                        "test1_id": build_column("tbl_test1", "test1_id", is_pk=True, class_name="java.lang.Integer"),
+                        "system_id": build_column("tbl_test1", "system_id", class_name="java.lang.Integer"),
+                    },
+                ),
+                build_table(
+                    "tbl_test2",
+                    "test2_id",
+                    java_class="TblTest2",
+                    columns={
+                        "test2_id": build_column("tbl_test2", "test2_id", is_pk=True, class_name="java.lang.Integer"),
+                        "system_id": build_column("tbl_test2", "system_id", class_name="java.lang.Integer"),
+                    },
+                ),
+            ]
+        )
 
         submission = Submission(
             data_tables={
                 "tbl_test1": pd.DataFrame({"system_id": [1], "test1_id": [None]}),
-                "tbl_test2": pd.DataFrame({"system_id": [2], "test2_id": [None]})
+                "tbl_test2": pd.DataFrame({"system_id": [2], "test2_id": [None]}),
             },
-            schema=schema
+            schema=schema,
         )
 
         processor = CsvProcessor()
@@ -160,28 +178,28 @@ class TestCsvProcessorEdgeCases:
 
     def test_special_characters_in_strings(self, tmp_path):
         """Test handling of special characters in string values."""
-        schema = build_schema([
-            build_table(
-                "tbl_test",
-                "test_id",
-                java_class="TblTest",
-                columns={
-                    "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
-                    "name": build_column("tbl_test", "name", data_type="varchar", class_name="java.lang.String"),
-                    "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
-                }
-            )
-        ])
-
-        data = pd.DataFrame({
-            "system_id": [1, 2, 3],
-            "test_id": [None, None, None],
-            "name": [
-                'test "quoted"',
-                'test\ttab',
-                'test\nnewline'
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test",
+                    "test_id",
+                    java_class="TblTest",
+                    columns={
+                        "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
+                        "name": build_column("tbl_test", "name", data_type="varchar", class_name="java.lang.String"),
+                        "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
+                    },
+                )
             ]
-        })
+        )
+
+        data = pd.DataFrame(
+            {
+                "system_id": [1, 2, 3],
+                "test_id": [None, None, None],
+                "name": ['test "quoted"', "test\ttab", "test\nnewline"],
+            }
+        )
         submission = Submission(data_tables={"tbl_test": data}, schema=schema)
 
         processor = CsvProcessor()
@@ -195,24 +213,28 @@ class TestCsvProcessorEdgeCases:
 
     def test_mixed_new_and_existing_records(self, tmp_path):
         """Test processing tables with both new records (NULL pk) and existing records (non-NULL pk)."""
-        schema = build_schema([
-            build_table(
-                "tbl_test",
-                "test_id",
-                java_class="TblTest",
-                columns={
-                    "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
-                    "name": build_column("tbl_test", "name", data_type="varchar", class_name="java.lang.String"),
-                    "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
-                }
-            )
-        ])
+        schema = build_schema(
+            [
+                build_table(
+                    "tbl_test",
+                    "test_id",
+                    java_class="TblTest",
+                    columns={
+                        "test_id": build_column("tbl_test", "test_id", is_pk=True, class_name="java.lang.Integer"),
+                        "name": build_column("tbl_test", "name", data_type="varchar", class_name="java.lang.String"),
+                        "system_id": build_column("tbl_test", "system_id", class_name="java.lang.Integer"),
+                    },
+                )
+            ]
+        )
 
-        data = pd.DataFrame({
-            "system_id": [1, 2, 3],
-            "test_id": [None, 42, None],  # Mix of new and existing
-            "name": ["New A", "Existing B", "New C"]
-        })
+        data = pd.DataFrame(
+            {
+                "system_id": [1, 2, 3],
+                "test_id": [None, 42, None],  # Mix of new and existing
+                "name": ["New A", "Existing B", "New C"],
+            }
+        )
         submission = Submission(data_tables={"tbl_test": data}, schema=schema)
 
         processor = CsvProcessor()

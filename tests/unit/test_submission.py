@@ -35,7 +35,7 @@ class TestSubmission:
     def test_data_tablenames(self, two_table_schema: SeadSchema):
         data_tables = {
             "tbl_main": pd.DataFrame({"system_id": [1], "main_id": [1], "lookup_id": [100]}),
-            "tbl_lookup": pd.DataFrame({"system_id": [100], "lookup_id": [1], "value": ["test"]})
+            "tbl_lookup": pd.DataFrame({"system_id": [100], "lookup_id": [1], "value": ["test"]}),
         }
         submission = Submission(data_tables=data_tables, schema=two_table_schema)
 
@@ -43,9 +43,7 @@ class TestSubmission:
         assert "tbl_lookup" in submission.data_table_names
 
     def test_has_system_id(self, minimal_schema: SeadSchema):
-        data_tables = {
-            "tbl_test": pd.DataFrame({"system_id": [1], "test_id": [1], "name": ["A"]})
-        }
+        data_tables = {"tbl_test": pd.DataFrame({"system_id": [1], "test_id": [1], "name": ["A"]})}
         submission = Submission(data_tables=data_tables, schema=minimal_schema)
 
         assert submission.has_system_id("tbl_test")
@@ -55,7 +53,7 @@ class TestSubmission:
         """Test that FK references are correctly identified."""
         data_tables = {
             "tbl_main": pd.DataFrame({"system_id": [1, 2], "main_id": [1, 2], "lookup_id": [100, 101]}),
-            "tbl_lookup": pd.DataFrame({"system_id": [100, 101], "lookup_id": [1, 2], "value": ["A", "B"]})
+            "tbl_lookup": pd.DataFrame({"system_id": [100, 101], "lookup_id": [1, 2], "value": ["A", "B"]}),
         }
         submission = Submission(data_tables=data_tables, schema=two_table_schema)
 

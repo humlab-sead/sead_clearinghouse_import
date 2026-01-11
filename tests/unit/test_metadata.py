@@ -17,24 +17,28 @@ def test_metadata_load_metadata():
 
 def test_tables_specifications():
     """Test table and column metadata structure."""
-    schema = build_schema([
-        build_table(
-            "tbl_sites",
-            "site_id",
-            columns={
-                "site_id": build_column("tbl_sites", "site_id", is_pk=True),
-                "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
-            }
-        ),
-        build_table(
-            "tbl_locations",
-            "location_id",
-            columns={
-                "location_id": build_column("tbl_locations", "location_id", is_pk=True),
-                "location_type_id": build_column("tbl_locations", "location_type_id", is_fk=True, fk_table_name="tbl_location_types"),
-            }
-        ),
-    ])
+    schema = build_schema(
+        [
+            build_table(
+                "tbl_sites",
+                "site_id",
+                columns={
+                    "site_id": build_column("tbl_sites", "site_id", is_pk=True),
+                    "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
+                },
+            ),
+            build_table(
+                "tbl_locations",
+                "location_id",
+                columns={
+                    "location_id": build_column("tbl_locations", "location_id", is_pk=True),
+                    "location_type_id": build_column(
+                        "tbl_locations", "location_type_id", is_fk=True, fk_table_name="tbl_location_types"
+                    ),
+                },
+            ),
+        ]
+    )
 
     assert isinstance(schema._tables, dict)
     assert len(schema.source_tables) == len(schema)
@@ -54,24 +58,26 @@ def test_tables_specifications():
 
 def test_is_pk():
     """Test primary key identification."""
-    schema = build_schema([
-        build_table(
-            "tbl_sites",
-            "site_id",
-            columns={
-                "site_id": build_column("tbl_sites", "site_id", is_pk=True),
-                "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
-            }
-        ),
-        build_table(
-            "tbl_locations",
-            "location_id",
-            columns={
-                "location_id": build_column("tbl_locations", "location_id", is_pk=True),
-                "location_type_id": build_column("tbl_locations", "location_type_id", is_fk=True),
-            }
-        ),
-    ])
+    schema = build_schema(
+        [
+            build_table(
+                "tbl_sites",
+                "site_id",
+                columns={
+                    "site_id": build_column("tbl_sites", "site_id", is_pk=True),
+                    "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
+                },
+            ),
+            build_table(
+                "tbl_locations",
+                "location_id",
+                columns={
+                    "location_id": build_column("tbl_locations", "location_id", is_pk=True),
+                    "location_type_id": build_column("tbl_locations", "location_type_id", is_fk=True),
+                },
+            ),
+        ]
+    )
 
     assert schema.is_pk("tbl_sites", "site_id") is True
     assert schema.is_pk("tbl_sites", "site_name") is False
@@ -81,24 +87,28 @@ def test_is_pk():
 
 def test_is_fk():
     """Test foreign key identification."""
-    schema = build_schema([
-        build_table(
-            "tbl_sites",
-            "site_id",
-            columns={
-                "site_id": build_column("tbl_sites", "site_id", is_pk=True),
-                "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
-            }
-        ),
-        build_table(
-            "tbl_locations",
-            "location_id",
-            columns={
-                "location_id": build_column("tbl_locations", "location_id", is_pk=True),
-                "location_type_id": build_column("tbl_locations", "location_type_id", is_fk=True, fk_table_name="tbl_location_types"),
-            }
-        ),
-    ])
+    schema = build_schema(
+        [
+            build_table(
+                "tbl_sites",
+                "site_id",
+                columns={
+                    "site_id": build_column("tbl_sites", "site_id", is_pk=True),
+                    "site_name": build_column("tbl_sites", "site_name", data_type="varchar"),
+                },
+            ),
+            build_table(
+                "tbl_locations",
+                "location_id",
+                columns={
+                    "location_id": build_column("tbl_locations", "location_id", is_pk=True),
+                    "location_type_id": build_column(
+                        "tbl_locations", "location_type_id", is_fk=True, fk_table_name="tbl_location_types"
+                    ),
+                },
+            ),
+        ]
+    )
 
     assert schema.is_fk("tbl_sites", "site_id") is False
     assert schema.is_fk("tbl_sites", "site_name") is False
@@ -108,25 +118,27 @@ def test_is_fk():
 
 def test_get_tablenames_referencing():
     """Test finding tables that reference a given table."""
-    schema = build_schema([
-        build_table("tbl_sites", "site_id", columns={"site_id": build_column("tbl_sites", "site_id", is_pk=True)}),
-        build_table(
-            "tbl_sample_groups",
-            "sample_group_id",
-            columns={
-                "sample_group_id": build_column("tbl_sample_groups", "sample_group_id", is_pk=True),
-                "site_id": build_column("tbl_sample_groups", "site_id", is_fk=True, fk_table_name="tbl_sites"),
-            }
-        ),
-        build_table(
-            "tbl_site_images",
-            "site_image_id",
-            columns={
-                "site_image_id": build_column("tbl_site_images", "site_image_id", is_pk=True),
-                "site_id": build_column("tbl_site_images", "site_id", is_fk=True, fk_table_name="tbl_sites"),
-            }
-        ),
-    ])
+    schema = build_schema(
+        [
+            build_table("tbl_sites", "site_id", columns={"site_id": build_column("tbl_sites", "site_id", is_pk=True)}),
+            build_table(
+                "tbl_sample_groups",
+                "sample_group_id",
+                columns={
+                    "sample_group_id": build_column("tbl_sample_groups", "sample_group_id", is_pk=True),
+                    "site_id": build_column("tbl_sample_groups", "site_id", is_fk=True, fk_table_name="tbl_sites"),
+                },
+            ),
+            build_table(
+                "tbl_site_images",
+                "site_image_id",
+                columns={
+                    "site_image_id": build_column("tbl_site_images", "site_image_id", is_pk=True),
+                    "site_id": build_column("tbl_site_images", "site_id", is_fk=True, fk_table_name="tbl_sites"),
+                },
+            ),
+        ]
+    )
 
     referencing_tables = set(schema.get_tablenames_referencing("tbl_sites"))
     assert referencing_tables == {"tbl_sample_groups", "tbl_site_images"}
@@ -143,34 +155,36 @@ def test_get_tablenames_referencing():
 )
 def test_foreign_keys(table_name: str, fk_column: str, fk_table: str, fk_class: str):
     """Test foreign key metadata is correctly stored."""
-    schema = build_schema([
-        build_table(fk_table, f"{fk_table.replace('tbl_', '')}_id", columns={
-            f"{fk_table.replace('tbl_', '')}_id": build_column(
+    schema = build_schema(
+        [
+            build_table(
                 fk_table,
                 f"{fk_table.replace('tbl_', '')}_id",
-                is_pk=True
-            )
-        }),
-        build_table(
-            table_name,
-            f"{table_name.replace('tbl_', '')}_id",
-            columns={
-                f"{table_name.replace('tbl_', '')}_id": build_column(
-                    table_name,
-                    f"{table_name.replace('tbl_', '')}_id",
-                    is_pk=True
-                ),
-                fk_column: build_column(
-                    table_name,
-                    fk_column,
-                    is_fk=True,
-                    fk_table_name=fk_table,
-                    fk_column_name=fk_column,
-                    class_name=fk_class
-                ),
-            }
-        ),
-    ])
+                columns={
+                    f"{fk_table.replace('tbl_', '')}_id": build_column(
+                        fk_table, f"{fk_table.replace('tbl_', '')}_id", is_pk=True
+                    )
+                },
+            ),
+            build_table(
+                table_name,
+                f"{table_name.replace('tbl_', '')}_id",
+                columns={
+                    f"{table_name.replace('tbl_', '')}_id": build_column(
+                        table_name, f"{table_name.replace('tbl_', '')}_id", is_pk=True
+                    ),
+                    fk_column: build_column(
+                        table_name,
+                        fk_column,
+                        is_fk=True,
+                        fk_table_name=fk_table,
+                        fk_column_name=fk_column,
+                        class_name=fk_class,
+                    ),
+                },
+            ),
+        ]
+    )
 
     # Verify FK metadata exists
     assert schema._foreign_keys is not None
@@ -178,8 +192,7 @@ def test_foreign_keys(table_name: str, fk_column: str, fk_table: str, fk_class: 
 
     # Verify this specific FK relationship exists
     fk_row = schema._foreign_keys[
-        (schema._foreign_keys["table_name"] == table_name) &
-        (schema._foreign_keys["column_name"] == fk_column)
+        (schema._foreign_keys["table_name"] == table_name) & (schema._foreign_keys["column_name"] == fk_column)
     ]
     assert len(fk_row) > 0
     assert fk_row.iloc[0]["fk_table_name"] == fk_table

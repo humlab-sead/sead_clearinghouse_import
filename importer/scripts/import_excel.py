@@ -40,7 +40,13 @@ dotenv.load_dotenv(dotenv.find_dotenv())
 @click.option("--log-folder", type=str, default="./logs", help="Where log files are stored.")
 @click.option("--check-only", type=bool, is_flag=True, default=False, help="Only check if file seems OK.")
 @click.option("--register/--no-register", type=bool, is_flag=True, default=False, help="Register file in the database.")
-@click.option("--explode/--no-explode", type=bool, is_flag=True, default=False, help="Explode submission into public clearinghouse tables.")
+@click.option(
+    "--explode/--no-explode",
+    type=bool,
+    is_flag=True,
+    default=False,
+    help="Explode submission into public clearinghouse tables.",
+)
 @click.option(
     "--timestamp/--no-timestamp", type=bool, is_flag=True, default=True, help="Add timestamp to target file(s)/folder."
 )
