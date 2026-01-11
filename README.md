@@ -1,13 +1,8 @@
 
 ##  SEAD Clearinghouse Import
-This folder contains `python` scripts that creates, uploads and processes an "CH complient" XML import file. The file must be a complete data submission prepared as an Excel file i.e. a file such as previously imported `Dendro archeologhy/buildning` and `Ceramics` submissions.
+This folder contains `python` scripts that create, upload and process CSV import files for the SEAD ClearingHouse database. The source data must be a complete data submission prepared as an Excel file (e.g., previously imported `Dendro archaeology/building` and `Ceramics` submissions).
 
 ### Install
-This program uses `tidlib` to cleanup the resulting XML which you can install using apt:
-
-```bash
-sudo apt-get install tidy
-```
 
 You will need Python ^3.13 (install with uv) and uv on your local machine.
 
@@ -30,15 +25,14 @@ uv sync
 Usage: import_excel.py [OPTIONS] CONFIG_FILENAME FILENAME
 
   Imports a new SEAD data submission to the SEAD ClearingHouse database. The
-  source data is either an Excel file or an XML file that has previously been
-  generated with this program.
+  source data is an Excel file that is processed and converted to CSV format.
 
-  The content of the Excel file is processed and stored in an XML file that
-  conforms to the clearinghouse data import schema.
+  The content of the Excel file is processed and stored in CSV files that
+  conform to the clearinghouse data import schema.
 
   The Excel file must satisfy the following requirements:
     - The file must be in the Excel 2007+ format (xlsx)
-    - The file must contain a sheet named as in SEAD' for each table in the submission.
+    - The file must contain a sheet named as in SEAD for each table in the submission.
 
 Options:
   --options-filename TEXT         Name of options file to use (alternative to
@@ -54,15 +48,11 @@ Options:
   --skip                          Skip the import (do nothing)
   --id INTEGER                    Replace existing submission.
   --table-names TEXT              Only load specified tables.
-  --xml-filename TEXT             Name of existing XML file to use.
-  --log-folder TEXT               Name of existing XML file to use.
+  --log-folder TEXT               Where log files are stored.
   --check-only                    Only check if file seems OK.
   --register / --no-register      Register file in the database.
-  --explode / --no-explode        Explode XML into public tables.
-  --tidy-xml / --no-tidy-xml      Run XML formatting tool on document.
-  --timestamp / --no-timestamp    Add timestamp to target XML filename.
-  --transfer-format TEXT          Specify format to use in upload (XML or
-                                  CSV).
+  --explode / --no-explode        Explode CSV into public tables.
+  --timestamp / --no-timestamp    Add timestamp to target CSV filename.
   --dump-to-csv / --no-dump-to-csv
                                   Store (policy-updated) submission data as
                                   CSV files in output folder.
@@ -86,18 +76,21 @@ The test suite is organized into **unit tests** (fast, no database required) and
 
 ```
 tests/
-├── unit/              # Pure unit tests (40+ tests, ~0.2s)
+├── unit/              # Pure unit tests (100+ tests, ~0.3s)
 │   ├── test_config.py
+│   ├── test_csv_dispatcher.py
+│   ├── test_csv_dispatcher_edge_cases.py
 │   ├── test_fixtures.py
+│   ├── test_metadata_edge_cases.py
 │   ├── test_policy.py
+│   ├── test_specification_edge_cases.py
 │   ├── test_to_csv.py
-│   ├── test_utility.py
-│   └── test_xml.py
+│   └── test_utility.py
 ├── integration/       # Integration tests (require DB)
 │   ├── test_metadata.py
 │   ├── test_process.py
 │   └── test_submission.py
-├── fixtures.py        # Reusable test fixtures
+├── conftest.py        # Pytest configuration and fixtures
 └── builders.py        # Factory functions for test data
 ```
 
@@ -137,11 +130,11 @@ open htmlcov/index.html
 
 **Integration Tests** (tests/integration/):
 - Mark with `@pytest.mark.integration` decorator
-- Use full CSV fixtures from `tests/test_data/`
-- Require live database connection
+- Use minimal fixtures from `tests/builders.py` for fast execution
+- Require live database connection only when needed
 - Test complete workflows
 
-See [tests/unit/README.md](tests/unit/README.md) and [tests/integration/README.md](tests/integration/README.md) for detailed guidelines.
+See test files for detailed examples and patterns.
 
 ## Development
 
@@ -179,14 +172,14 @@ uv sync --upgrade
 
 ### Examples
 
-Check for errors in file (don't create XML):
+Check for errors in file (don't create CSV):
 
 ```bash
-λ PYTHONPATH=. python importer/scripts/import-excel.py data/input/building_dendro_2023-12_import.xlsx --check-only --data-types dendrochronology
+λ PYTHONPATH=. python importer/scripts/import_excel.py config.yml data/input/building_dendro_2023-12_import.xlsx --check-only --data-types dendrochronology --name "dendro_2023_12" --output-folder output/
 ```
 
-Generate XML and submit to clearinghouse:
+Generate CSV and submit to clearinghouse:
 
 ```bash
-λ PYTHONPATH=. python importer/scripts/import-excel.py data/input/building_dendro_2023-12_import.xlsx --data-types dendrochronology
+λ PYTHONPATH=. python importer/scripts/import_excel.py config.yml data/input/building_dendro_2023-12_import.xlsx --data-types dendrochronology --name "dendro_2023_12" --output-folder output/ --register --explode
 ```
