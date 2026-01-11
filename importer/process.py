@@ -101,7 +101,9 @@ class ImportService:
         """
 
         with io.open(self.opts.target, "w", encoding="utf8") as outstream:
-            self.dispatcher_cls(outstream).dispatch(schema=self.schema, submission=submission, table_names=self.opts.table_names)
+            self.dispatcher_cls(outstream).dispatch(
+                schema=self.schema, submission=submission, table_names=self.opts.table_names
+            )
 
         if format_document:
             self.opts.target = utility.tidy_xml(self.opts.target, remove_source=True)
@@ -138,7 +140,9 @@ class ImportService:
                     submission.to_csv(self.opts.output_folder)
 
             if opts.use_existing_submission:
-                assert isinstance(opts.submission_id, int), "Submission id required when use_existing_submission is True"
+                assert isinstance(
+                    opts.submission_id, int
+                ), "Submission id required when use_existing_submission is True"
                 self.repository.remove(opts.submission_id, clear_header=False, clear_exploded=False)
 
             if not opts.use_existing_submission:

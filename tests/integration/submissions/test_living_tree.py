@@ -142,7 +142,10 @@ class TestLivingTreeSubmission:
     @pytest.fixture(scope="module")
     def unprocessed_submission(self, cfg: Config, schema: SeadSchema, service: SchemaService) -> Submission:
         return Submission.load(
-            schema=schema, source=cfg.get("test:dendrochronology:living_tree:source:filename"), apply_policies=False, service=service
+            schema=schema,
+            source=cfg.get("test:dendrochronology:living_tree:source:filename"),
+            apply_policies=False,
+            service=service,
         )
 
     def test_add_primary_key_column_if_missing_policy(self, unprocessed_submission: Submission):

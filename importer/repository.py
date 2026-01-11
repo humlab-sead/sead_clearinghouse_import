@@ -86,7 +86,7 @@ class SubmissionRepository:
         with self as connection:
             with connection.cursor() as cursor:
                 cursor.execute(sql, (name,))
-                submission_id: int = cursor.fetchone()[0]   # type: ignore
+                submission_id: int = cursor.fetchone()[0]  # type: ignore
         return submission_id
 
     @log_decorator(

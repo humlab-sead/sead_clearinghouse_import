@@ -92,7 +92,9 @@ class Submission:
 
     @log_decorator(enter_message=" --> loading excel...", exit_message=" --> done loading excel", level="DEBUG")
     @staticmethod
-    def load(*, schema: SeadSchema, service: SchemaService, source: str | pd.ExcelFile, apply_policies: bool = True) -> "Submission":
+    def load(
+        *, schema: SeadSchema, service: SchemaService, source: str | pd.ExcelFile, apply_policies: bool = True
+    ) -> "Submission":
         """Loads the submission file into a SubmissionData object"""
 
         data_tables: dict[str, pd.DataFrame] = Submission.load_data_tables(source, schema)

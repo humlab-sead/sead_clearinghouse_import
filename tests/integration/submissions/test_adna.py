@@ -50,10 +50,8 @@ class TestAdnaSubmission:
 
         with pd.ExcelFile(source) as reader:
             # Verify that all excel sheet names are in the submission data tables
-            excel_sheet_names: set[int|str] = set(reader.sheet_names)
-            excel_table_names: set[str] = {
-                n for n, t in adna.schema.items() if t.excel_sheet in excel_sheet_names
-            }
+            excel_sheet_names: set[int | str] = set(reader.sheet_names)
+            excel_table_names: set[str] = {n for n, t in adna.schema.items() if t.excel_sheet in excel_sheet_names}
 
             assert all(table_name in adna.data_tables for table_name in excel_table_names)
 

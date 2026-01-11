@@ -11,6 +11,7 @@ from . import BaseUploader, Uploaders
 
 # NFIXME: Deprecate XML uploader in favor of CSV uploader.
 
+
 @Uploaders.register(key="xml")
 class XmlUploader(BaseUploader):
     """Upload submission file to database using legacy XML files."""

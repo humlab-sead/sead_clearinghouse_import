@@ -43,7 +43,7 @@ def configure_logging(opts: dict[str, dict]) -> None:
 
             elif isinstance(handler["sink"], str) and handler["sink"].endswith(".log"):
                 handler["sink"] = join(
-                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}" # type: ignore[arg-type]
+                    opts.get("folder", "logs"), f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{handler['sink']}"  # type: ignore[arg-type]
                 )
 
         logger.configure(handlers=opts["handlers"])  # type: ignore[arg-type]

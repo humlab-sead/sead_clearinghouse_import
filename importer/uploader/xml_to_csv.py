@@ -55,10 +55,12 @@ class BaseParser:
 
     def parse(self, source: str) -> Iterable[DbType]:
         raise NotImplementedError("Subclasses must implement parse method")
-    
+
+
 @Parsers.register(key="table", fn_type=Table)
 class TableParser(BaseParser):
     """Parses table elements from XML."""
+
     def parse(self, source: str) -> Iterable[DbType]:
         root: ET.Element = load_xml(source)  # type: ignore
         for table in root.iterfind("./*"):
@@ -68,6 +70,7 @@ class TableParser(BaseParser):
 @Parsers.register(key="record_value", fn_type=RecordValue)
 class RecordValueParser(BaseParser):
     """Parses record value elements from XML."""
+
     def parse(self, source: str) -> Iterable[DbType]:
         root: ET.Element = load_xml(source)  # type: ignore
         for table in root.iterfind("./*"):
@@ -93,6 +96,7 @@ class RecordValueParser(BaseParser):
 @Parsers.register(key="column", fn_type=Column)
 class ColumnParser(BaseParser):
     """Parses column elements from XML."""
+
     def parse(self, source: str) -> Iterable[DbType]:
         root: ET.Element = load_xml(source)  # type: ignore
         for table in root.iterfind("./*"):
@@ -120,6 +124,7 @@ class ColumnParser(BaseParser):
 @Parsers.register(key="record", fn_type=Record)
 class RecordParser(BaseParser):
     """Parses record elements from XML."""
+
     def parse(self, source: str) -> Iterable[DbType]:
         root: ET.Element | Any = load_xml(source)
         for table in root.iterfind("./*"):

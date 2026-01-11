@@ -265,7 +265,7 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
         for column_name in data_table.columns:
             if data_table[column_name].isnull().all():
                 if sead_column_dtypes.get(column_name, None):
-                    data_table[column_name] = data_table[column_name].astype(sead_column_dtypes[column_name]) # type: ignore
+                    data_table[column_name] = data_table[column_name].astype(sead_column_dtypes[column_name])  # type: ignore
         return data_table
 
     def update(self) -> None:
@@ -292,7 +292,7 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
                 continue
 
             template: dict[str, int | None] = {c: None for c in data_table.columns}
-            rows_to_add: list[dict[str, int|None]] = [
+            rows_to_add: list[dict[str, int | None]] = [
                 template | {"system_id": system_id, pk_name: system_id} for system_id in missing_keys
             ]
 

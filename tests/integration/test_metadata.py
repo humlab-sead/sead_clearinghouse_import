@@ -25,9 +25,10 @@ def test_tables_specifications(schema: SeadSchema):
     assert isinstance(schema._tables, dict)
 
     assert len(schema.source_tables) == len(schema)
-    assert set(schema.source_tables.columns) - {"columns", "is_new"} == set(
-        schema["tbl_sites"].keys()
-    ) - {"columns", "is_new"}
+    assert set(schema.source_tables.columns) - {"columns", "is_new"} == set(schema["tbl_sites"].keys()) - {
+        "columns",
+        "is_new",
+    }
 
     assert "columns" in schema["tbl_sites"].keys()
     assert "site_id" in schema["tbl_sites"].columns.keys()
@@ -39,6 +40,7 @@ def test_tables_specifications(schema: SeadSchema):
     assert schema["tbl_locations"].columns["location_type_id"].is_fk is True
     assert schema["tbl_locations"].columns["location_id"].is_fk is False
     assert schema["tbl_locations"].columns["location_id"].is_pk is True
+
 
 def test_is_pk(schema: SeadSchema):
     assert schema.is_pk("tbl_sites", "site_id") is True

@@ -9,7 +9,7 @@ class IDispatcher(abc.ABC):
 
     def __init__(self, outstream: io.TextIOBase) -> None:
         self.outstream = outstream
-        
+
     def dispatch(
         self,
         schema: SeadSchema,

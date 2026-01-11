@@ -49,9 +49,11 @@ class SpecificationMessages:
 
 
 class SpecificationError(Exception):
-    def __init__(self, messages: SpecificationMessages| str) -> None:
+    def __init__(self, messages: SpecificationMessages | str) -> None:
         super().__init__("Submission specification failed")
-        self.messages: SpecificationMessages = messages if isinstance(messages, SpecificationMessages) else SpecificationMessages(errors=[messages])
+        self.messages: SpecificationMessages = (
+            messages if isinstance(messages, SpecificationMessages) else SpecificationMessages(errors=[messages])
+        )
 
 
 class SpecificationBase(abc.ABC):
@@ -121,9 +123,7 @@ class SubmissionSpecification(SpecificationBase):
         self.raise_errors: bool = raise_errors
 
     @log_decorator(enter_message=" ---> checking submission...", exit_message=" ---> submission checked", level="DEBUG")
-    def is_satisfied_by(
-        self, submission: Submission, **kwargs
-    ) -> bool:  # pylint: disable=unused-argument
+    def is_satisfied_by(self, submission: Submission, **kwargs) -> bool:  # pylint: disable=unused-argument
         """
         Check if the given submission satisfies all the specifications defined in the SpecificationRegistry.
 

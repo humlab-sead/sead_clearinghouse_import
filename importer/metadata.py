@@ -1,8 +1,8 @@
+from collections.abc import ItemsView, Iterator, KeysView, ValuesView
 from dataclasses import asdict, dataclass, field
 from fnmatch import fnmatch
 from functools import cached_property
-from typing import Any, Iterator
-from collections.abc import ItemsView, Iterator, KeysView, ValuesView
+from typing import Any
 
 # pylint: disable=no-member
 import pandas as pd
@@ -127,8 +127,6 @@ class Table:
 
     def nullable_column_names(self) -> list[str]:
         return sorted(c.column_name for c in self.columns.values() if c.is_nullable)
-
-
 
 
 class SeadSchema:
@@ -317,8 +315,8 @@ class SchemaService:
         index = index if isinstance(index, list) else [index]
         sortby = sortby if isinstance(sortby, list) else [sortby] if sortby else None
         data: pd.DataFrame = self._resolve_source(source)
-        data = (data
-            .set_index(index, drop=False)
+        data = (
+            data.set_index(index, drop=False)
             .rename_axis([f"index_{x}" for x in index])
             .sort_values(by=sortby if sortby else index)
         )

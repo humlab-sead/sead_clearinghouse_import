@@ -105,7 +105,7 @@ def setup_configuration(ctx, opts: dict[str, Any]) -> None:
     specified_keys: set[str] = _get_specified_cli_opts(ctx)
     config_filename: str = opts.pop("config_filename")
     log_folder: str = opts.pop("log_folder", "")
-    filename: str = str(opts.get("filename"))  if opts.get("filename") else ""
+    filename: str = str(opts.get("filename")) if opts.get("filename") else ""
 
     if not log_folder and filename:
         log_folder = join(dirname(abspath(filename)), "logs")

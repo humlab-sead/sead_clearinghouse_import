@@ -173,4 +173,3 @@ def test_pascal_to_snake_case():
     assert utility.pascal_to_snake_case("PascalCase123") == "pascal_case123"
     assert utility.pascal_to_snake_case("PascalCaseWithNumbers123") == "pascal_case_with_numbers123"
     assert utility.pascal_to_snake_case("PascalCaseWith123Numbers") == "pascal_case_with123_numbers"
-

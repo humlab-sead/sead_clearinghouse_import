@@ -64,4 +64,3 @@ class TestImportService:
         service.process(submission=submission)
         assert len(service.specification.errors) == 0
         assert filecmp.cmp(target_filename, expected_filename, shallow=False)
-

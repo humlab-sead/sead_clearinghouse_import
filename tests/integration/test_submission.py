@@ -29,7 +29,6 @@ def test_generate_test_excel(cfg: Config):
 @pytest.mark.skip(reason="Requires live database connection")
 class TestSubmission:
 
-
     @pytest.fixture
     def service(self, cfg: Config) -> SchemaService:
         service: SchemaService = SchemaService(create_db_uri(**cfg.get("options:database")))
@@ -72,8 +71,6 @@ class TestSubmission:
 
     def test_tables_specifications(self, cfg: Config, submission: Submission, schema: SeadSchema):
         ignore_columns: list[str] = cfg.get("options:ignore_columns")
-        specification: SubmissionSpecification = SubmissionSpecification(
-            schema=schema, ignore_columns=ignore_columns
-        )
+        specification: SubmissionSpecification = SubmissionSpecification(schema=schema, ignore_columns=ignore_columns)
         specification.is_satisfied_by(submission)
         assert specification.messages.errors == []
