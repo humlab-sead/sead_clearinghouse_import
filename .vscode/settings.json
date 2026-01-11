@@ -3,6 +3,8 @@
     "python.linting.pylint": true,
     "python.linting.enabled": true,
     "python.analysis.exclude": [
+        ".venv",
+        ".github",
         "tmp",
         "**/__pycache__"
     ],
