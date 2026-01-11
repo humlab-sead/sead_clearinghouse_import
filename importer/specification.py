@@ -14,8 +14,8 @@ from .submission import Submission
 from .utility import Registry, log_decorator
 
 
-class SpecificationRegistry(Registry):
-    items: dict = {}
+class SpecificationRegistry(Registry[type["SpecificationBase"]]):
+    items: dict[str, type["SpecificationBase"]] = {}
 
 
 # pylint: disable=unused-argument
@@ -160,7 +160,7 @@ class SubmissionSpecification(SpecificationBase):
             logger.info(message)
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="table_exists")
 class SubmissionTableExistsSpecification(SpecificationBase):
     """Specification class that tests if table exists in submission"""
 
@@ -170,7 +170,7 @@ class SubmissionTableExistsSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="column_types")
 class ColumnTypesSpecification(SpecificationBase):
     TYPE_COMPATIBILITY_MATRIX: set[tuple[str, str]] = {
         ("bigint", "int64"),
@@ -211,7 +211,7 @@ class ColumnTypesSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="table_types")
 class SubmissionTableTypesSpecification(SpecificationBase):
     NUMERIC_TYPES: list[str] = ["numeric", "integer", "smallint"]
 
@@ -237,7 +237,7 @@ class SubmissionTableTypesSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="has_primary_key")
 class HasPrimaryKeySpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         data_table: pd.DataFrame = submission.data_tables[table_name]
@@ -253,7 +253,7 @@ class HasPrimaryKeySpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="has_system_id")
 class HasSystemIdSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         # Must have a system identity
@@ -280,7 +280,7 @@ class HasSystemIdSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="id_column_has_constraint")
 class IdColumnHasConstraintSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         for column in self.get_columns(table_name):
@@ -290,7 +290,7 @@ class IdColumnHasConstraintSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="foreign_key_columns_has_values")
 class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         """Foreign key columns must have values"""
@@ -332,7 +332,7 @@ class ForeignKeyColumnsHasValuesSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="foreign_key_exists_as_primary_key")
 class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         """All submission tables MUST have a non null "system_id" """
@@ -389,7 +389,7 @@ class ForeignKeyExistsAsPrimaryKeySpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="no_missing_column")
 class NoMissingColumnSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         """All fields in metadata.Table.Fields MUST exist in DataTable.columns"""
@@ -435,7 +435,7 @@ class NoMissingColumnSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="non_nullable_column_has_value")
 class NonNullableColumnHasValueSpecification(SpecificationBase):
     def is_satisfied_by(self, submission: Submission, *, table_name: str, **kwargs) -> bool:
         """
@@ -470,7 +470,7 @@ class NonNullableColumnHasValueSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-# DISABLED: @SpecificationRegistry.register()
+# DISABLED: @SpecificationRegistry.register(key="new_lookup_data_not_allowed")
 class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
     DISABLED: bool = True
 
@@ -499,7 +499,7 @@ class NewLookupDataIsNotAllowedSpecification(SpecificationBase):
         return not self.has_errors()
 
 
-@SpecificationRegistry.register()
+@SpecificationRegistry.register(key="keyed_by_table_name")
 class KeyedByTableNameSpecification(SpecificationBase):
     """Verify that `table_name` is a SEAD table (and not an Excel abbreviated sheet name)"""
 

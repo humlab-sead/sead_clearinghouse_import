@@ -14,8 +14,6 @@ from importer.utility import create_db_uri
 
 
 @pytest.mark.integration
-@pytest.mark.adna
-@pytest.mark.ancient_dna
 @pytest.mark.skip(reason="Requires ancient DNA data and live database connection")
 class TestAdnaSubmission:
 

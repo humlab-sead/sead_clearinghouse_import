@@ -19,8 +19,6 @@ from importer.utility import create_db_uri
 
 
 @pytest.mark.integration
-@pytest.mark.dendrochronology
-@pytest.mark.living_tree
 @pytest.mark.skip(reason="Requires living tree data and live database connection")
 class TestLivingTreeSubmission:
 

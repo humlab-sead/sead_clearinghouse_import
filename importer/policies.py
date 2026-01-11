@@ -191,7 +191,7 @@ class UpdateTypesBasedOnSeadSchema(PolicyBase):
                     data_table[column_name] = data_table[column_name].astype("Int64")
 
 
-# @UpdatePolicies.register()
+# @UpdatePolicies.register(key="set_public_id_to_negative_system_id_for_new_lookups")
 # class SetPublicIdToNegativeSystemIdForNewLookups(PolicyBase):
 #     """Rule: assign temporary public primary key to new lookup table rows.
 
@@ -315,7 +315,7 @@ class IfForeignKeyValueIsMissingAddIdentityMappingToForeignKeyTable(PolicyBase):
             )
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="drop_ignored_columns")
 class DropIgnoredColumns(PolicyBase):
     """Rule: drop ignored columns from data so that they are excluded from uploaded submission data.
     This rule currently only applies "date_updated" and "*_uuid" columns.
@@ -342,7 +342,7 @@ class DropIgnoredColumns(PolicyBase):
             self.log(table_name, f"Dropped column(s) {', '.join(columns)} from {table_name}")
 
 
-@UpdatePolicies.register()
+@UpdatePolicies.register(key="if_lookup_with_no_new_data_then_keep_only_system_id_public_id")
 class IfLookupWithNoNewDataThenKeepOnlySystemIdPublicId(PolicyBase):
     """Rule: if table is a lookup table and no new data then drop all columns except
     system_id and public_id. The table has new data of any public PK (table.pk_name) is None or NaN
