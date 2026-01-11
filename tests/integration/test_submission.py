@@ -28,7 +28,6 @@ def test_generate_test_excel(cfg: Config):
 @pytest.mark.integration
 class TestSubmission:
 
-
     def test_excel_is_loaded_correctly(self, submission: Submission):
         assert submission is not None
         assert submission.data_tables is not None
