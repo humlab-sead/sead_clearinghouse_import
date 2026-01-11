@@ -235,6 +235,7 @@ class TestSeadSchemaOperations:
         assert table is None
 
         table = schema.get("tbl_nonexistent", default=build_table("default", "id"))
+        assert table is not None
         assert table.table_name == "default"
 
     def test_schema_get_table_by_java_class(self):
