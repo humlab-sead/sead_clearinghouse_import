@@ -12,10 +12,12 @@ Python system that transforms Excel data submissions into XML/CSV formats confor
 
 ### Key Components
 - **`Submission`** ([submission.py](importer/submission.py)): Wrapper for Excel data tables loaded as pandas DataFrames
-- **`Metadata`** ([metadata.py](importer/metadata.py)): Database schema metadata (tables, columns, FKs, PKs) queried from PostgreSQL `information_schema`
+- **`SeadSchema`** ([metadata.py](importer/metadata.py)): Database schema metadata (tables, columns, FKs, PKs) queried from PostgreSQL `information_schema` or loaded from test fixtures
+- **`SchemaService`** ([metadata.py](importer/metadata.py)): Service for loading schema from database or mock sources
 - **`Policies`** ([policies.py](importer/policies.py)): Auto-registered data transformation rules applied to submissions (see Registry pattern below)
 - **`Specifications`** ([specification.py](importer/specification.py)): Validation rules for data integrity
 - **`ImportService`** ([process.py](importer/process.py)): Orchestrates the full workflow
+- **`SubmissionRepository`** ([repository.py](importer/repository.py)): Manages database connections and submission operations with context manager support
 
 ### Data Model Conventions
 - **`system_id`**: Internal temporary ID used during submission (required on all tables, must be unique per table)
@@ -46,8 +48,14 @@ class Options:
 **Priority order**: CLI args → options file → environment vars (`SEAD_IMPORT_*`) → YAML config
 
 Configuration files: 
-- Project-wide: [config.yml](config.yml)
+- Project-wide: [config.yml](configs/config.yml)
 - Data-specific: [data/config.yml](data/config.yml)
+
+### Database Connectivity
+- Uses **psycopg3** (modern async-capable PostgreSQL adapter)
+- SQLAlchemy configured with `postgresql+psycopg://` URI scheme
+- Connection URIs: `postgresql+psycopg://user@host:port/dbname`
+- Repository uses context manager pattern (`with self as connection`) for automatic transaction management
 
 ## Developer Workflows
 
@@ -59,7 +67,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Clone and setup
 git clone git@github.com:humlab-sead/sead_clearinghouse_import
 cd sead_clearinghouse_import
-uv sync  # or make install
+uv sync --all-extras  # Install all dependencies including dev tools
 ```
 
 Requirements:
@@ -86,16 +94,30 @@ PYTHONPATH=. python importer/scripts/import_excel.py config.yml 123 --name "exis
 
 ### Testing
 ```bash
-make test           # Fast tests (excludes @pytest.mark.long_running)
-make full-test      # All tests including long-running
+make test           # Fast tests (excludes integration tests)
+make full-test      # All tests including integration tests
 make test-coverage  # With HTML coverage report
 ```
+
+**Test Structure:**
+- Unit tests: `tests/test_*.py` (fast, no DB required)
+- Integration tests: `tests/integration/test_*.py` (require database connection)
+- Test fixtures: `tests/test_data/*.csv` (schema metadata for mocking)
+- Use `pytest.mark.integration` for tests requiring external services
 
 ### Code Quality
 ```bash
 make tidy          # black + isort (line-length=120)
 make lint          # pylint across importer/ and tests/
+make ruff          # ruff linter (fast, comprehensive)
 ```
+
+**Important:** Install dev dependencies first: `uv sync --all-extras`
+
+**Linting Configuration:**
+- Pylint: `[tool.pylint]` in pyproject.toml
+- Ruff: `[tool.ruff]` in pyproject.toml (line-length=140)
+- Black: line-length=120, Python 3.13 target
 
 ## Common Gotchas
 
@@ -128,8 +150,10 @@ make lint          # pylint across importer/ and tests/
 ### Key Source Modules
 - Entry point: [importer/scripts/import_excel.py](importer/scripts/import_excel.py)
 - Dispatchers: [importer/dispatchers/](importer/dispatchers/) (XML generation logic)
-- Uploaders: [importer/uploader/](importer/uploader/) (DB interaction)
-- Tests: [tests/](tests/) (includes test submissions in `tests/submissions/`)
+- Uploaders: [importer/uploader/](importer/uploader/) (DB interaction, CSV/XML)
+- Unit Tests: [tests/test_*.py](tests/) (fast, no DB required)
+- Integration Tests: [tests/integration/](tests/integration/) (DB-dependent tests)
+- Test Data: [tests/test_data/](tests/test_data/) (CSV fixtures for schema metadata)
 
 ## Code Style Specifics
 - Black formatting: 120 char line length, skip string normalization
@@ -154,9 +178,11 @@ make lint          # pylint across importer/ and tests/
 4. Use `self.error()`, `self.warn()`, or `self.info()` to report issues
 
 ### Modifying Metadata Loading
-- Metadata is loaded from PostgreSQL `information_schema` and cached
-- Schema is defined in `clearing_house.clearinghouse_import_tables` and related views
-- Changes to database schema require corresponding updates to metadata queries
+- Schema loaded via `SchemaService.load()` from PostgreSQL `information_schema`
+- Production schema: `clearing_house.clearinghouse_import_tables` and `clearinghouse_import_columns` views
+- Test fixtures: `tests/test_data/sead_tables.csv` and `sead_columns.csv` for unit testing without DB
+- `MockSchemaService` uses CSV fixtures for fast testing
+- Changes to database schema require updates to both DB views and test CSV files
 
 ## Debugging Tips
 
@@ -187,5 +213,30 @@ This project uses `uv` instead of Poetry:
 - Add dependency: `uv add <package>`
 - Remove dependency: `uv remove <package>`
 - Update all: `uv sync --upgrade`
+- Install with dev tools: `uv sync --all-extras`
 
-See [MIGRATION_UV.md](MIGRATION_UV.md) for details on the Poetry → uv migration.
+See [docs/MIGRATION_UV.md](docs/MIGRATION_UV.md) for details on the Poetry → uv migration.
+
+## Recent Major Refactorings
+
+### Renamed Classes (January 2026)
+- `Metadata` → `SeadSchema` (more descriptive name for the schema object)
+- Test files renamed: `*_test.py` → `test_*.py` (pytest convention)
+- Integration tests moved to `tests/integration/` subfolder
+
+### Database Connectivity Updates
+- Upgraded to **psycopg3** (from psycopg2)
+- SQLAlchemy URI format: `postgresql+psycopg://` (not `postgresql://`)
+- Added `NullConnection` class for safer connection handling
+- Repository uses context manager pattern consistently
+
+### Configuration System
+- Migrated deprecated config module to `importer/configuration/`
+- Removed `.pylintrc` (now in `pyproject.toml`)
+- Added Ruff linter alongside Pylint
+
+### Test Infrastructure
+- Created `tests/test_data/` with CSV fixtures (sead_tables.csv, sead_columns.csv)
+- `MockSchemaService` for unit testing without database
+- Marked integration tests with `@pytest.mark.integration`
+- All tests now compatible with Python 3.13
